@@ -2,7 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
     const chatBox = document.getElementById('chat-box');
-    const themeToggleBtn = document.getElementById('theme-toggle');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const filePreviewContainer = document.getElementById('file-preview');
+
+    let selectedFile = null;
 
     // Menyesuaikan tinggi textarea
     chatInput.addEventListener('input', () => {
@@ -10,23 +14,43 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
 
+    // Menampilkan dialog unggah file saat tombol diklik
+    uploadBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Handle saat file dipilih
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            selectedFile = file;
+            displayFilePreview(file);
+        }
+    });
+
     // Handle form submission
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userMessage = chatInput.value.trim();
-        if (userMessage) {
-            appendMessage('user', userMessage);
+        
+        if (userMessage || selectedFile) {
+            appendMessage('user', userMessage, selectedFile);
             chatInput.value = '';
             chatInput.style.height = 'auto'; // Reset height
+            removeFile();
             showTypingIndicator();
 
             try {
+                // Menggunakan FormData untuk mengirim teks dan file
+                const formData = new FormData();
+                formData.append('message', userMessage);
+                if (selectedFile) {
+                    formData.append('file', selectedFile);
+                }
+
                 const response = await fetch('/api/chat', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: userMessage }),
+                    body: formData, // Mengirim FormData, bukan JSON
                 });
 
                 if (!response.ok) {
@@ -45,18 +69,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Function to append a new message to the chat box
-    function appendMessage(sender, message) {
+    function appendMessage(sender, message, file = null) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
         
-        const avatar = document.createElement('img');
-        avatar.classList.add('message-avatar');
-        avatar.src = sender === 'user' ? 'https://img.icons8.com/color/48/000000/user.png' : 'https://img.icons8.com/color/48/000000/robot-3d.png';
-        
+        if (file) {
+            const filePreview = document.createElement('div');
+            filePreview.classList.add('message-file-preview');
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.style.maxWidth = '150px';
+                img.style.borderRadius = '10px';
+                filePreview.appendChild(img);
+            } else {
+                const fileName = document.createElement('p');
+                fileName.textContent = file.name;
+                filePreview.appendChild(fileName);
+            }
+            messageElement.appendChild(filePreview);
+        }
+
         const content = document.createElement('div');
         content.classList.add('message-content');
         
-        // Split message by code blocks and render appropriately
         const parts = message.split(/```/);
         parts.forEach((part, index) => {
             if (index % 2 === 1) {
@@ -74,10 +110,41 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        messageElement.appendChild(avatar);
         messageElement.appendChild(content);
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Function untuk menampilkan pratinjau file di bawah input
+    function displayFilePreview(file) {
+        filePreviewContainer.style.display = 'flex';
+        filePreviewContainer.innerHTML = '';
+        
+        if (file.type.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.classList.add('file-preview-image');
+            filePreviewContainer.appendChild(img);
+        } else {
+            const fileInfo = document.createElement('div');
+            fileInfo.classList.add('file-preview-info');
+            fileInfo.textContent = `File: ${file.name}`;
+            filePreviewContainer.appendChild(fileInfo);
+        }
+
+        const closeBtn = document.createElement('span');
+        closeBtn.classList.add('file-preview-close');
+        closeBtn.innerHTML = '&#x2716;';
+        closeBtn.onclick = removeFile;
+        filePreviewContainer.appendChild(closeBtn);
+    }
+    
+    // Function untuk menghapus pratinjau file
+    window.removeFile = function() {
+        selectedFile = null;
+        fileInput.value = ''; // Reset input file
+        filePreviewContainer.style.display = 'none';
+        filePreviewContainer.innerHTML = '';
     }
 
     // Function to show/hide typing indicator
@@ -87,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.id = 'typing-indicator';
             typingIndicator.classList.add('typing-indicator', 'ai-message');
             typingIndicator.innerHTML = `
-                <img src="[https://img.icons8.com/color/48/000000/robot-3d.png](https://img.icons8.com/color/48/000000/robot-3d.png)" alt="Noa AI" class="message-avatar">
                 <div class="message-content">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
@@ -105,38 +171,4 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
-    
-    // Theme switching logic with the smooth circular effect
-    themeToggleBtn.addEventListener('click', () => {
-        const effectElement = document.createElement('div');
-        effectElement.classList.add('theme-switch-effect');
-        document.body.appendChild(effectElement);
-        
-        const rect = themeToggleBtn.getBoundingClientRect();
-        effectElement.style.top = `${rect.top + rect.height / 2}px`;
-        effectElement.style.left = `${rect.left + rect.width / 2}px`;
-
-        effectElement.classList.add('active');
-
-        // Wait for the animation to finish before changing the theme
-        setTimeout(() => {
-            document.body.classList.toggle('dark');
-            const isDark = document.body.classList.contains('dark');
-            themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            
-            // Clean up the effect element
-            effectElement.remove();
-        }, 600); // This duration should match the CSS transition duration
-    });
-    
-    // Load saved theme from localStorage
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark');
-        themeToggleBtn.textContent = '☀️';
-    } else {
-        themeToggleBtn.textContent = '🌙';
-    }
-
 });
