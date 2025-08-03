@@ -39,7 +39,6 @@ async function getAllChatSessions(userId) {
   return data || [];
 }
 
-// FUNGSI INI SUDAH DIPERBAIKI
 async function getChatHistory(sessionId) {
   const { data, error } = await supabase
     .from('chat_sessions')
@@ -47,7 +46,6 @@ async function getChatHistory(sessionId) {
     .eq('session_id', sessionId)
     .single();
 
-  // Menangani error PGRST116 (tidak ada baris ditemukan) dengan baik
   if (error && error.code !== 'PGRST116') {
     console.error('Error fetching single chat history:', error);
   }
@@ -77,6 +75,20 @@ async function createNewSession(userId, initialMessage) {
         console.error('Error creating new session:', error);
     }
     return newSessionId;
+}
+
+// FUNGSI BARU UNTUK MENGHAPUS SESI
+async function deleteChatSession(sessionId) {
+    const { error } = await supabase
+        .from('chat_sessions')
+        .delete()
+        .eq('session_id', sessionId);
+    
+    if (error) {
+        console.error('Error deleting chat session:', error);
+        return false;
+    }
+    return true;
 }
 
 async function uploadToGemini(path, mimeType) {
@@ -171,7 +183,7 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
 
     return { text: responseText };
   } catch (error) {
-    console.error(error)
+    console.error('Gemini API Error:', error);
     return { error: 'Failed to get response from AI.' };
   }
 }
@@ -190,6 +202,7 @@ module.exports = async (req, res) => {
     }));
   }
 
+  // Menangani permintaan GET
   if (req.method === 'GET') {
     const { sessionId } = req.query;
     if (sessionId) {
@@ -202,6 +215,23 @@ module.exports = async (req, res) => {
     return;
   }
   
+  // Menangani permintaan DELETE
+  if (req.method === 'DELETE') {
+    const { sessionId } = req.query;
+    if (sessionId) {
+        const success = await deleteChatSession(sessionId);
+        if (success) {
+            res.status(200).json({ message: 'Session deleted successfully.' });
+        } else {
+            res.status(500).json({ message: 'Failed to delete session.' });
+        }
+    } else {
+        res.status(400).json({ message: 'Session ID is required.' });
+    }
+    return;
+  }
+
+  // Menangani permintaan POST
   const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
