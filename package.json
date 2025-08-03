@@ -1,26 +1,24 @@
 {
-  "name": "noa-ai-website",
+  "name": "noa-ai-chatbot",
   "version": "1.0.0",
-  "description": "A modern chat AI website named Noa AI.",
-  "main": "server.js",
+  "description": "A simple, clean chat AI website with a sidebar menu.",
+  "main": "api/chat.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node api/chat.js"
   },
   "keywords": [
     "chat",
     "ai",
     "gemini",
-    "nodejs",
-    "express"
+    "nodejs"
   ],
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
-    "chalk": "^5.3.0",
-    "express": "^4.19.2",
+    "@google/generative-ai": "^0.15.0",
+    "cookie": "^0.6.0",
     "formidable": "^3.5.1",
-    "moment-timezone": "^0.5.45"
+    "moment-timezone": "^0.5.45",
+    "uuid": "^9.0.1"
   }
 }
-
