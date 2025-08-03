@@ -162,11 +162,17 @@ body {
 
 /* Tombol hapus sesi */
 .delete-session-btn {
+    /* PENYESUAIAN UKURAN */
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+    line-height: 1; /* Memastikan 'X' berada di tengah */
+    
     background: none;
     border: none;
     color: var(--primary-text-color);
     cursor: pointer;
-    padding: 4px;
+    padding: 0;
     border-radius: 50%;
     flex-shrink: 0;
     opacity: 0;
