@@ -113,7 +113,6 @@ body {
     transition: background-color 0.2s ease;
     font-family: inherit;
     font-size: 1rem;
-    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-nav ul li a {
@@ -122,7 +121,6 @@ body {
     color: var(--text-color);
     text-decoration: none;
     transition: background-color 0.2s ease;
-    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-nav ul li button:hover,
@@ -135,6 +133,7 @@ body {
     flex-shrink: 0;
 }
 
+/* Style untuk daftar sesi */
 .sessions-list {
     padding: 0;
     list-style: none;
@@ -211,6 +210,7 @@ body {
     opacity: 1;
 }
 
+/* Style untuk pop-up */
 .delete-popup-container {
     position: fixed;
     top: 0;
@@ -277,6 +277,7 @@ body {
     overflow: hidden;
 }
 
+/* HEADER DINAMIS */
 .chat-header {
     display: flex;
     align-items: center;
@@ -287,6 +288,7 @@ body {
     transition: all 0.3s ease-out;
 }
 
+/* Styling untuk container judul & branding */
 .header-title-container {
     display: flex;
     flex-direction: column;
@@ -296,6 +298,7 @@ body {
     transition: all 0.3s ease-out;
 }
 
+/* Style default (sebelum chat dimulai) */
 .header-title-container h1 {
     font-size: 1.5rem;
     font-weight: 500;
@@ -311,6 +314,7 @@ body {
     display: none;
 }
 
+/* Style setelah chat dimulai */
 .chat-active .header-title-container {
     flex-direction: column;
     align-items: flex-start;
@@ -335,6 +339,7 @@ body {
     display: flex;
     flex-shrink: 0;
 }
+
 
 .chat-box {
     flex-grow: 1;
