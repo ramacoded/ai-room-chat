@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
-
+    
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
     const sessionsList = document.getElementById('sessions-list');
@@ -59,12 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
         currentChatTitle.textContent = 'Noa AI';
         chatInput.focus();
     }
-
+    
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
             if (!response.ok) throw new Error('Failed to load sessions list.');
-
+            
             const { sessions } = await response.json();
             sessionsList.innerHTML = '';
             if (sessions && sessions.length > 0) {
@@ -81,13 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
-
+                    
                     const sessionActions = document.createElement('div');
                     sessionActions.classList.add('session-actions');
 
                     const separator = document.createElement('div');
                     separator.classList.add('separator');
-
+                    
                     const deleteButton = document.createElement('button');
                     deleteButton.innerHTML = '✖';
                     deleteButton.classList.add('delete-session-btn');
@@ -96,10 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         e.stopPropagation();
                         showDeletePopup(session.session_id);
                     });
-
+                    
                     sessionActions.appendChild(separator);
                     sessionActions.appendChild(deleteButton);
-
+                    
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
                     sessionsList.appendChild(li);
@@ -118,9 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
             if (!response.ok) throw new Error('Failed to load chat history.');
-
+            
             const { history } = await response.json();
-
+            
             chatBox.innerHTML = '';
             welcomeMessage.classList.add('hide');
             isFirstMessage = false;
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentSessionId = sessionId;
             currentChatTitle.textContent = title;
-
+            
         } catch (error) {
             console.error('Error loading history:', error);
             chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
+    
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userMessage = chatInput.value.trim();
-
+        
         if (userMessage || selectedFile) {
             if (isFirstMessage) {
                 welcomeMessage.classList.add('hide');
@@ -236,12 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 hideTypingIndicator();
                 appendMessage('ai', data.text);
-
+                
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
                     currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
                 }
-
+                
                 loadSessionsList();
 
             } catch (error) {
@@ -255,10 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendMessage(sender, message, file = null) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
-
+        
         const content = document.createElement('div');
         content.classList.add('message-content');
-
+        
         if (file) {
             const filePreview = document.createElement('div');
             filePreview.classList.add('message-file-preview');
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const code = document.createElement('code');
                 code.classList.add(`language-${lang}`);
                 code.textContent = codeContent;
-
+                
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
                 copyBtn.classList.add('copy-btn');
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, 2000);
                     });
                 });
-
+                
                 codeBlock.appendChild(code);
                 codeBlock.appendChild(copyBtn);
                 content.appendChild(codeBlock);
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
-
+        
         if (file.type.startsWith('image/')) {
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeBtn.onclick = removeFile;
         filePreviewContainer.appendChild(closeBtn);
     }
-
+    
     window.removeFile = function() {
         selectedFile = null;
         fileInput.value = '';

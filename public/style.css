@@ -113,7 +113,7 @@ body {
     transition: background-color 0.2s ease;
     font-family: inherit;
     font-size: 1rem;
-    border-bottom: none; /* Garis horizontal Dihapus */
+    border-bottom: none;
 }
 
 .sidebar-nav ul li a {
@@ -122,7 +122,7 @@ body {
     color: var(--text-color);
     text-decoration: none;
     transition: background-color 0.2s ease;
-    border-bottom: none; /* Garis horizontal Dihapus */
+    border-bottom: none;
 }
 
 .sidebar-nav ul li button:hover,
@@ -211,7 +211,6 @@ body {
     opacity: 1;
 }
 
-/* Style untuk pop-up */
 .delete-popup-container {
     position: fixed;
     top: 0;
@@ -278,25 +277,25 @@ body {
     overflow: hidden;
 }
 
-/* HEADER STATIS */
 .chat-header {
     display: flex;
     align-items: center;
     padding: 16px 24px;
     border-bottom: 1px solid var(--border-color);
     position: relative;
-    justify-content: space-between; /* Kembali ke posisi semula */
+    justify-content: space-between;
 }
 
 .header-title {
     flex-grow: 1;
-    text-align: left; /* Kembali ke posisi semula */
+    text-align: left;
 }
 
 .header-title h1 {
     font-size: 1.5rem;
     font-weight: 500;
     margin: 0;
+    /* MENGHAPUS TEXT-ALIGN: CENTER */
 }
 
 .open-sidebar-btn {
