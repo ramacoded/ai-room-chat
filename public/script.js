@@ -24,11 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
-    // Hapus variabel pop-up karena sudah tidak digunakan
-    // const deletePopup = document.getElementById('delete-popup'); 
-    // const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    // const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
@@ -98,28 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const separator = document.createElement('div');
                     separator.classList.add('separator');
                     
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = '✖';
-                    deleteButton.classList.add('delete-session-btn');
-                    deleteButton.dataset.sessionId = session.session_id;
-                    deleteButton.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        // Perbaikan: Langsung panggil API hapus
-                        const response = await fetch(`/api/chat?sessionId=${session.session_id}`, {
-                            method: 'DELETE'
-                        });
-                        if (response.ok) {
-                            loadSessionsList();
-                            if (currentSessionId === session.session_id) {
-                                startNewSession();
-                            }
-                        } else {
-                            console.error('Failed to delete session');
-                        }
-                    });
-                    
+                    // Tombol hapus tidak lagi ditambahkan
+
                     sessionActions.appendChild(separator);
-                    sessionActions.appendChild(deleteButton);
                     
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
@@ -397,17 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
-
-    // Fungsi pop-up hapus telah dihapus
-    
-    // Hapus event listener pop-up karena sudah tidak ada
-    // if (cancelDeleteBtn) {
-    //     cancelDeleteBtn.addEventListener('click', () => {
-    //         if (deletePopup) {
-    //             deletePopup.style.display = 'none';
-    //         }
-    //     });
-    // }
 
     loadSessionsList();
 });

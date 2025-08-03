@@ -201,30 +201,12 @@ body {
     background-color: var(--border-color);
     margin-left: 8px;
     margin-right: 8px;
+    display: none; /* Tombol hapus dihapus, separator juga disembunyikan */
 }
 
-/* Perbaikan: Tombol hapus selalu terlihat */
+/* Tombol hapus tidak ada lagi, jadi styling-nya juga dihapus */
 .delete-session-btn {
-    background: none;
-    border: none;
-    color: var(--primary-text-color);
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    opacity: 1; /* Diubah menjadi 1 agar selalu terlihat */
-    transition: background-color 0.2s ease;
-    width: 24px;
-    height: 24px;
-    font-size: 0.9rem;
-    line-height: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.delete-session-btn:hover {
-    background-color: var(--input-bg);
+    display: none;
 }
 
 /* Hapus semua styling untuk pop-up */
