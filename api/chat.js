@@ -65,38 +65,42 @@ async function saveChatHistory(sessionId, history) {
   }
 }
 
-// Fungsi untuk meminta AI membuat judul yang lebih baik
-async function generateTitleFromMessage(message) {
-    const prompt = `Buatkan judul singkat dan menarik (maksimal 7 kata) untuk percakapan chat ini. Judul harus relevan dengan pesan pertama: "${message}".`;
-    
-    // Menggunakan model gemini-2.5-flash untuk tugas ini
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    
-    try {
-        const result = await model.generateContent(prompt);
-        const title = result.response.text();
-        // Hapus tanda bintang (markdown) yang mungkin ada dan trim spasi
-        return title.replace(/\*\*/g, '').trim(); 
-    } catch (error) {
-        console.error('Error generating title:', error);
-        // Fallback jika terjadi kesalahan, gunakan metode lama
-        return message.split(' ').slice(0, 5).join(' ') + '...';
-    }
-}
-
-// Fungsi createNewSession yang sudah diperbarui
+// Fungsi untuk membuat sesi baru dengan judul sementara
 async function createNewSession(userId, initialMessage) {
     const newSessionId = uuidv4();
-    const title = await generateTitleFromMessage(initialMessage);
+    const temporaryTitle = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
     
     const { data, error } = await supabase
         .from('chat_sessions')
-        .insert({ session_id: newSessionId, user_id: userId, title: title, history: [] });
+        .insert({ session_id: newSessionId, user_id: userId, title: temporaryTitle, history: [] });
 
     if (error) {
         console.error('Error creating new session:', error);
     }
     return newSessionId;
+}
+
+// Fungsi terpisah untuk memperbarui judul dengan AI
+async function updateSessionTitle(sessionId, message) {
+    const prompt = `Buatkan judul singkat dan menarik (maksimal 7 kata) untuk percakapan chat ini. Judul harus relevan dengan pesan pertama: "${message}".`;
+    
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    
+    try {
+        const result = await model.generateContent(prompt);
+        const newTitle = result.response.text().replace(/\*\*/g, '').trim();
+
+        const { error } = await supabase
+            .from('chat_sessions')
+            .update({ title: newTitle })
+            .eq('session_id', sessionId);
+            
+        if (error) {
+            console.error('Error updating session title:', error);
+        }
+    } catch (error) {
+        console.error('Error generating or updating title:', error);
+    }
 }
 
 async function deleteChatSession(sessionId) {
@@ -262,20 +266,21 @@ module.exports = async (req, res) => {
 
     const message = fields.message ? fields.message[0] : '';
     const file = files.file ? files.file[0] : null;
-    const currentSessionId = fields.sessionId ? fields.sessionId[0] : null;
+    let currentSessionId = fields.sessionId ? fields.sessionId[0] : null;
 
     if (!message && !file) {
       return res.status(400).json({ error: 'Message or file is required.' });
     }
 
     let userHistory;
-    let sessionIdToUpdate = currentSessionId;
     
-    if (!sessionIdToUpdate) {
-        sessionIdToUpdate = await createNewSession(userId, message);
+    if (!currentSessionId) {
+        currentSessionId = await createNewSession(userId, message);
         userHistory = [];
+        // Panggil fungsi pembaruan judul di latar belakang, tanpa memblokir
+        updateSessionTitle(currentSessionId, message);
     } else {
-        userHistory = await getChatHistory(sessionIdToUpdate);
+        userHistory = await getChatHistory(currentSessionId);
     }
     
     userHistory.push({ role: 'user', text: message });
@@ -287,9 +292,9 @@ module.exports = async (req, res) => {
       }
       
       userHistory.push({ role: 'model', text: result.text });
-      await saveChatHistory(sessionIdToUpdate, userHistory);
+      await saveChatHistory(currentSessionId, userHistory);
 
-      res.status(200).json({ ...result, sessionId: sessionIdToUpdate });
+      res.status(200).json({ ...result, sessionId: currentSessionId });
     } catch (error) {
       console.error('Error processing chat:', error);
       res.status(500).json({ error: 'Failed to get response from AI' });
