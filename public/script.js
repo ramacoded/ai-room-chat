@@ -1,6 +1,7 @@
 // File: public/script.js
 
 document.addEventListener('DOMContentLoaded', () => {
+    const mainContainer = document.querySelector('.main-container');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
     const chatBox = document.getElementById('chat-box');
@@ -8,7 +9,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadBtn = document.getElementById('upload-btn');
     const filePreviewContainer = document.getElementById('file-preview');
 
+    const sidebar = document.getElementById('sidebar');
+    const openSidebarBtn = document.getElementById('open-sidebar-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const welcomeMessage = document.getElementById('welcome-message');
+
     let selectedFile = null;
+    let isFirstMessage = true;
+
+    // Sidebar functionality
+    openSidebarBtn.addEventListener('click', () => {
+        sidebar.classList.add('open');
+    });
+
+    closeSidebarBtn.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+    });
+
+    // Welcome message functionality
+    function getGreeting() {
+        const hour = new Date().getHours();
+        if (hour < 11) return "Selamat Pagi";
+        if (hour < 15) return "Selamat Siang";
+        if (hour < 18) return "Selamat Sore";
+        return "Selamat Malam";
+    }
+
+    welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
 
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
@@ -32,8 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const userMessage = chatInput.value.trim();
         
         if (userMessage || selectedFile) {
-            // Log untuk debugging: Pastikan selectedFile tidak null
-            console.log('Selected File:', selectedFile);
+            // HILANGKAN WELCOME MESSAGE SECARA INSTAN PADA PESAN PERTAMA
+            if (isFirstMessage) {
+                welcomeMessage.classList.add('hide'); // Menggunakan kelas 'hide'
+                isFirstMessage = false;
+            }
 
             appendMessage('user', userMessage, selectedFile);
             chatInput.value = '';
