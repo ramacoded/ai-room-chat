@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
-    // Perbaikan: Ganti ID pop-up menjadi 'delete-popup'
     const deletePopup = document.getElementById('delete-popup'); 
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
@@ -32,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
-    let isSubmitting = false; // Perbaikan: Flag untuk mencegah pengiriman ganda
+    let isSubmitting = false;
 
     // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
@@ -212,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        if (isSubmitting) return; // Mencegah pengiriman ganda
+        if (isSubmitting) return;
 
         const userMessage = chatInput.value.trim();
         
@@ -255,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
-                    currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
+                    // Hapus baris di bawah ini agar judul tidak berubah
+                    // currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
                 }
                 
                 loadSessionsList();
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideTypingIndicator();
                 appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
             } finally {
-                isSubmitting = false; // Reset flag
+                isSubmitting = false;
             }
         }
     });
@@ -388,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showDeletePopup(sessionIdToDelete) {
-        // Perbaikan: Menargetkan ID yang benar
         if (deletePopup) { 
             deletePopup.style.display = 'flex';
         }

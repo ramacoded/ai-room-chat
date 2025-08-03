@@ -18,10 +18,6 @@
     --code-bg: #1e1e1e;
     --copy-btn-bg: #5f6368;
     --copy-btn-color: #e8eaed;
-    
-    /* Variabel baru untuk gradien */
-    --gradient-start: #3c4043;
-    --gradient-end: #5f6368;
 }
 
 * {
@@ -142,7 +138,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Perbaikan: Mengubah animasi panah agar sesuai permintaan Anda */
+/* Perbaikan: Styling untuk animasi panah sekarang menargetkan `.caret-icon` */
 .caret-icon {
     transition: transform 0.2s ease;
     margin-left: auto;
@@ -237,32 +233,33 @@ body {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 2000;
 }
 
+/* Perbaikan: Menyesuaikan ukuran pop-up */
 .delete-popup-box {
     background-color: var(--card-bg);
-    padding: 24px;
+    padding: 20px;
     border-radius: 12px;
     text-align: center;
-    min-width: 300px;
+    width: 280px; /* Lebar pop-up yang lebih kecil */
     box-shadow: 0 4px 16px var(--shadow-color);
 }
 
 .delete-popup-buttons {
-    margin-top: 20px;
+    margin-top: 16px; /* Margin yang lebih kecil */
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: 12px; /* Jarak antar tombol yang lebih kecil */
 }
 
 .delete-popup-buttons button {
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 1rem;
+    padding: 8px 16px; /* Ukuran tombol yang lebih kecil */
+    border-radius: 6px;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -446,7 +443,7 @@ body {
 .typing-indicator .message-content {
     display: flex;
     align-items: center;
-    background: linear-gradient(270deg, var(--gradient-start), var(--gradient-end), var(--gradient-start));
+    background: linear-gradient(270deg, var(--input-bg), var(--border-color), var(--input-bg));
     background-size: 200% 200%;
     animation: gradient-animation 4s ease infinite;
     padding: 12px 16px;
