@@ -76,6 +76,7 @@ async function createNewSession(userId, initialMessage) {
 
     if (error) {
         console.error('Error creating new session:', error);
+        return null; // Perbaikan: Kembalikan null jika gagal
     }
     return newSessionId;
 }
@@ -276,6 +277,9 @@ module.exports = async (req, res) => {
     
     if (!currentSessionId) {
         currentSessionId = await createNewSession(userId, message);
+        if (!currentSessionId) { // Perbaikan: Cek apakah ID sesi valid
+             return res.status(500).json({ error: 'Failed to create new chat session.' });
+        }
         userHistory = [];
         // Panggil fungsi pembaruan judul di latar belakang, tanpa memblokir
         updateSessionTitle(currentSessionId, message);
