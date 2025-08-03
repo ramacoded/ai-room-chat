@@ -65,43 +65,20 @@ async function saveChatHistory(sessionId, history) {
   }
 }
 
-// Fungsi untuk membuat sesi baru dengan judul sementara
+// Fungsi pembuatan sesi kembali ke cara yang sederhana, tanpa AI
 async function createNewSession(userId, initialMessage) {
     const newSessionId = uuidv4();
-    const temporaryTitle = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
+    const title = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
     
     const { data, error } = await supabase
         .from('chat_sessions')
-        .insert({ session_id: newSessionId, user_id: userId, title: temporaryTitle, history: [] });
+        .insert({ session_id: newSessionId, user_id: userId, title: title, history: [] });
 
     if (error) {
         console.error('Error creating new session:', error);
-        return null; // Perbaikan: Kembalikan null jika gagal
+        return null;
     }
     return newSessionId;
-}
-
-// Fungsi terpisah untuk memperbarui judul dengan AI
-async function updateSessionTitle(sessionId, message) {
-    const prompt = `Buatkan judul singkat dan menarik (maksimal 7 kata) untuk percakapan chat ini. Judul harus relevan dengan pesan pertama: "${message}".`;
-    
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    
-    try {
-        const result = await model.generateContent(prompt);
-        const newTitle = result.response.text().replace(/\*\*/g, '').trim();
-
-        const { error } = await supabase
-            .from('chat_sessions')
-            .update({ title: newTitle })
-            .eq('session_id', sessionId);
-            
-        if (error) {
-            console.error('Error updating session title:', error);
-        }
-    } catch (error) {
-        console.error('Error generating or updating title:', error);
-    }
 }
 
 async function deleteChatSession(sessionId) {
@@ -277,12 +254,10 @@ module.exports = async (req, res) => {
     
     if (!currentSessionId) {
         currentSessionId = await createNewSession(userId, message);
-        if (!currentSessionId) { // Perbaikan: Cek apakah ID sesi valid
+        if (!currentSessionId) {
              return res.status(500).json({ error: 'Failed to create new chat session.' });
         }
         userHistory = [];
-        // Panggil fungsi pembaruan judul di latar belakang, tanpa memblokir
-        updateSessionTitle(currentSessionId, message);
     } else {
         userHistory = await getChatHistory(currentSessionId);
     }
