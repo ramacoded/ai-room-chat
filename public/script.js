@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sidebar = document.getElementById('sidebar');
     const openSidebarBtn = document.getElementById('open-sidebar-btn');
-    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const closeSidebarBtn = document = document.getElementById('close-sidebar-btn');
     const welcomeMessage = document.getElementById('welcome-message');
 
     const uploadMenu = document.getElementById('upload-menu');
@@ -24,13 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
-    const deletePopup = document.getElementById('delete-popup-container');
+    // Perbaikan: Ganti ID pop-up menjadi 'delete-popup'
+    const deletePopup = document.getElementById('delete-popup'); 
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
+    let isSubmitting = false; // Perbaikan: Flag untuk mencegah pengiriman ganda
 
     // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
@@ -209,9 +211,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        if (isSubmitting) return; // Mencegah pengiriman ganda
+
         const userMessage = chatInput.value.trim();
         
         if (userMessage || selectedFile) {
+            isSubmitting = true;
+
             if (isFirstMessage) {
                 welcomeMessage.classList.add('hide');
                 isFirstMessage = false;
@@ -257,6 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error:', error);
                 hideTypingIndicator();
                 appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
+            } finally {
+                isSubmitting = false; // Reset flag
             }
         }
     });
@@ -354,7 +363,6 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.innerHTML = '';
     }
     
-    // Perbaikan: Implementasi baru untuk showTypingIndicator
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
@@ -380,7 +388,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showDeletePopup(sessionIdToDelete) {
-        deletePopup.style.display = 'flex';
+        // Perbaikan: Menargetkan ID yang benar
+        if (deletePopup) { 
+            deletePopup.style.display = 'flex';
+        }
+        
         confirmDeleteBtn.onclick = async () => {
             const response = await fetch(`/api/chat?sessionId=${sessionIdToDelete}`, {
                 method: 'DELETE'
@@ -393,12 +405,16 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error('Failed to delete session');
             }
-            deletePopup.style.display = 'none';
+            if (deletePopup) {
+                deletePopup.style.display = 'none';
+            }
         };
     }
 
     cancelDeleteBtn.addEventListener('click', () => {
-        deletePopup.style.display = 'none';
+        if (deletePopup) {
+            deletePopup.style.display = 'none';
+        }
     });
 
     loadSessionsList();
