@@ -1,3 +1,5 @@
+// File: public/script.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
@@ -8,18 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedFile = null;
 
-    // Menyesuaikan tinggi textarea
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
 
-    // Menampilkan dialog unggah file saat tombol diklik
     uploadBtn.addEventListener('click', () => {
         fileInput.click();
     });
 
-    // Handle saat file dipilih
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -28,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle form submission
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userMessage = chatInput.value.trim();
@@ -36,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userMessage || selectedFile) {
             appendMessage('user', userMessage, selectedFile);
             chatInput.value = '';
-            chatInput.style.height = 'auto'; // Reset height
+            chatInput.style.height = 'auto';
             removeFile();
             showTypingIndicator();
 
@@ -67,10 +65,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to append a new message to the chat box
     function appendMessage(sender, message, file = null) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
+        
+        const content = document.createElement('div');
+        content.classList.add('message-content');
         
         if (file) {
             const filePreview = document.createElement('div');
@@ -78,29 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (file.type.startsWith('image/')) {
                 const img = document.createElement('img');
                 img.src = URL.createObjectURL(file);
-                img.style.maxWidth = '150px';
-                img.style.borderRadius = '10px';
                 filePreview.appendChild(img);
             } else {
                 const fileName = document.createElement('p');
                 fileName.textContent = file.name;
                 filePreview.appendChild(fileName);
             }
-            messageElement.appendChild(filePreview);
+            content.appendChild(filePreview);
         }
 
-        const content = document.createElement('div');
-        content.classList.add('message-content');
-        
         const parts = message.split(/```/);
         parts.forEach((part, index) => {
             if (index % 2 === 1) {
                 const codeBlock = document.createElement('pre');
                 const code = document.createElement('code');
                 code.textContent = part;
-                codeBlock.appendChild(code);
                 
-                // MENAMBAHKAN TOMBOL COPY
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
                 copyBtn.classList.add('copy-btn');
@@ -113,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 
+                codeBlock.appendChild(code);
                 codeBlock.appendChild(copyBtn);
                 content.appendChild(codeBlock);
             } else {
@@ -129,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Function untuk menampilkan pratinjau file di bawah input
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
@@ -153,15 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.appendChild(closeBtn);
     }
     
-    // Function untuk menghapus pratinjau file
     window.removeFile = function() {
         selectedFile = null;
-        fileInput.value = ''; // Reset input file
+        fileInput.value = '';
         filePreviewContainer.style.display = 'none';
         filePreviewContainer.innerHTML = '';
     }
 
-    // Function to show/hide typing indicator
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
