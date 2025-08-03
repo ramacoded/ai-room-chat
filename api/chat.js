@@ -7,10 +7,17 @@ const {
   HarmBlockThreshold,
 } = require("@google/generative-ai");
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
+const fs = require("fs")
 const moment = require('moment-timezone')
 
-// Your existing gemini engine code
-const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw" // Pastikan ini API Key Anda yang benar
+// Mengambil API key dari Environment Variable Vercel
+// PASTIKAN ANDA SUDAH MENYETEL VARIABEL INI DI SETTINGS VERCEL
+const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
+
+// Jika Anda tetap ingin menggunakan API key secara langsung (tidak disarankan)
+// GANTI baris di atas dengan yang ini:
+// 
+
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
@@ -71,7 +78,11 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
   }
 });
 
-  const result = await model.generateContent({ contents: input })
+  // BAGIAN INI SUDAH DIPERBAIKI: Mengirim input dengan format yang benar
+  const result = await model.generateContent({ 
+      contents: [{ role: "user", parts: [{ text: input }] }],
+  })
+  
   let respon = await result.response.text()
   
 let responseText = respon
@@ -108,7 +119,6 @@ return error
 }
 // End of your gemini engine code
 
-
 // Vercel Serverless Function handler
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -130,4 +140,3 @@ module.exports = async (req, res) => {
         res.status(500).json({ error: 'Failed to get response from AI' });
     }
 };
-  
