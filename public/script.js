@@ -92,17 +92,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const { history } = await response.json();
             
             chatBox.innerHTML = '';
+            welcomeMessage.classList.add('hide');
             isFirstMessage = false;
-            
-            history.forEach(msg => {
-                appendMessage(msg.role, msg.text);
-            });
+
+            if (history && history.length > 0) {
+                history.forEach(msg => {
+                    appendMessage(msg.role, msg.text);
+                });
+            } else {
+                appendMessage('ai', 'Riwayat chat ini masih kosong.');
+            }
+
             currentSessionId = sessionId;
             currentChatTitle.textContent = title;
             
         } catch (error) {
             console.error('Error loading history:', error);
-            chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`; // Sembunyikan welcome message jika ada error
+            chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
             appendMessage('ai', 'Maaf, terjadi kesalahan saat memuat riwayat chat.');
             currentChatTitle.textContent = 'Noa AI';
             currentSessionId = null;
@@ -201,13 +207,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 hideTypingIndicator();
                 appendMessage('ai', data.text);
-                if (data.sessionId) {
-                    currentSessionId = data.sessionId;
-                }
                 
-                if (currentChatTitle.textContent === 'Noa AI' || currentChatTitle.textContent === '') {
+                // Logika yang sudah diperbaiki
+                if (data.sessionId && !currentSessionId) {
+                    currentSessionId = data.sessionId;
                     currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
                 }
+                
+                // Pastikan title diperbarui untuk sesi baru di sidebar
+                loadSessionsList();
+
             } catch (error) {
                 console.error('Error:', error);
                 hideTypingIndicator();
@@ -327,4 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
+    
+    loadSessionsList();
+    
 });
