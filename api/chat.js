@@ -113,7 +113,7 @@ const timeOnly = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:m
 async function gemini(history, input, file) {
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
       systemInstruction: `💋 Perkenalkan, aku Noa, asisten virtual manismu 💄
 
 Dibuat penuh cinta oleh developer kece bernama RAMACODE.
