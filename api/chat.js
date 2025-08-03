@@ -11,7 +11,7 @@ const moment = require('moment-timezone')
 const { IncomingForm } = require('formidable');
 
 // Mengambil API key dari Environment Variable Vercel
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
 
 // Jika Anda tetap ingin menggunakan API key secara langsung (tidak disarankan)
 // const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
