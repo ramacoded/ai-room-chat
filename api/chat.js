@@ -65,11 +65,11 @@ async function saveChatHistory(sessionId, history) {
   }
 }
 
-// Fungsi baru untuk meminta AI membuat judul yang lebih baik
+// Fungsi untuk meminta AI membuat judul yang lebih baik
 async function generateTitleFromMessage(message) {
     const prompt = `Buatkan judul singkat dan menarik (maksimal 7 kata) untuk percakapan chat ini. Judul harus relevan dengan pesan pertama: "${message}".`;
     
-    // Menggunakan model gemini-1.5-flash untuk tugas ini
+    // Menggunakan model gemini-2.5-flash untuk tugas ini
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
     try {
