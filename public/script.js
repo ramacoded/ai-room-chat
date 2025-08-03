@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showTypingIndicator();
 
             try {
-                // Menggunakan FormData untuk mengirim teks dan file
                 const formData = new FormData();
                 formData.append('message', userMessage);
                 if (selectedFile) {
@@ -50,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
-                    body: formData, // Mengirim FormData, bukan JSON
+                    body: formData,
                 });
 
                 if (!response.ok) {
@@ -100,6 +99,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const code = document.createElement('code');
                 code.textContent = part;
                 codeBlock.appendChild(code);
+                
+                // MENAMBAHKAN TOMBOL COPY
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.add('copy-btn');
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(part).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy';
+                        }, 2000);
+                    });
+                });
+                
+                codeBlock.appendChild(copyBtn);
                 content.appendChild(codeBlock);
             } else {
                 if (part.trim()) {

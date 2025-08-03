@@ -15,6 +15,9 @@
     --send-btn-bg: #8ab4f8;
     --send-btn-color: #202124;
     --shadow-color: rgba(0, 0, 0, 0.3);
+    --code-bg: #1e1e1e;
+    --copy-btn-bg: #444649;
+    --copy-btn-color: #e8eaed;
 }
 
 * {
@@ -121,6 +124,44 @@ body {
 
 .message-content p {
     margin: 0;
+}
+
+/* Style untuk blok kode */
+.message-content pre {
+    background-color: var(--code-bg);
+    color: var(--text-color);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 10px 0;
+}
+
+/* Style tombol copy */
+.message-content .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--copy-btn-bg);
+    color: var(--copy-btn-color);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    opacity: 0;
+}
+
+.message-content pre:hover .copy-btn {
+    opacity: 1;
+}
+
+.message-content .copy-btn:hover {
+    background-color: #666;
 }
 
 .chat-form {
