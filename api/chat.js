@@ -8,15 +8,19 @@ const {
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const moment = require('moment-timezone')
 const { IncomingForm } = require('formidable');
-const fs = require('fs');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const cookie = require('cookie');
+const { createClient } = require('@supabase/supabase-js');
 
 const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
+
+// Inisialisasi Supabase Client
+const supabaseUrl = "postgresql://postgres.puqbduevlwefdlcmfbuv:noaaidb@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM"
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const config = {
   api: {
@@ -24,28 +28,27 @@ export const config = {
   },
 };
 
-// Fungsi untuk membaca dan menyimpan data riwayat
-const dbPath = path.join(process.cwd(), 'db.json');
+async function getChatHistory(sessionId) {
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .select('history')
+    .eq('session_id', sessionId)
+    .single();
 
-function readDb() {
-  try {
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      console.log('Database file not found, creating a new one.');
-      return {};
-    }
-    console.error('Error reading database file:', err);
-    return {};
+  if (error && error.code !== 'PGRST116') { // PGRST116 means not found
+    console.error('Error fetching chat history:', error);
   }
+
+  return data ? data.history : [];
 }
 
-function writeDb(data) {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Error writing to database file:', err);
+async function saveChatHistory(sessionId, history) {
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .upsert({ session_id: sessionId, history: history });
+  
+  if (error) {
+    console.error('Error saving chat history:', error);
   }
 }
 
@@ -127,7 +130,6 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
       parts.unshift(uploadedFile);
     }
     
-    // BARIS INI SUDAH DIPERBAIKI
     const result = await chat.sendMessage(parts); 
     
     let respon = await result.response.text();
@@ -157,7 +159,7 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
   }
 }
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const form = new IncomingForm();
   
   let sessionId;
@@ -173,10 +175,8 @@ module.exports = (req, res) => {
     }));
   }
 
-  const db = readDb();
-  let userHistory = db[sessionId] || [];
-
   if (req.method === 'GET') {
+      const userHistory = await getChatHistory(sessionId);
       res.status(200).json({ history: userHistory });
       return;
   }
@@ -194,6 +194,8 @@ module.exports = (req, res) => {
       return res.status(400).json({ error: 'Message or file is required.' });
     }
 
+    const userHistory = await getChatHistory(sessionId);
+    
     userHistory.push({ role: 'user', text: message });
     
     try {
@@ -203,7 +205,7 @@ module.exports = (req, res) => {
       }
       
       userHistory.push({ role: 'model', text: result.text });
-      writeDb({ ...db, [sessionId]: userHistory });
+      await saveChatHistory(sessionId, userHistory);
 
       res.status(200).json(result);
     } catch (error) {
