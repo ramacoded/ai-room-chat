@@ -113,6 +113,8 @@ body {
     transition: background-color 0.2s ease;
     font-family: inherit;
     font-size: 1rem;
+    /* Ensure button text doesn't overlap with delete button */
+    justify-content: space-between;
 }
 
 .sidebar-nav ul li a {
@@ -147,8 +149,8 @@ body {
 .sessions-list li {
     display: flex;
     align-items: center;
-    padding: 0 16px 0 0;
-    justify-content: space-between;
+    padding: 8px 16px 8px 0; /* Reduced vertical padding */
+    justify-content: space-between; /* Ensure button and delete button are on opposite ends */
 }
 
 .sessions-list li button {
@@ -158,29 +160,34 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left; /* Align text to the left */
+    flex-grow: 1; /* Allow the button to take up available space */
+    margin-right: 8px; /* Add some space between the text and the delete button */
 }
 
 /* Tombol hapus sesi */
 .delete-session-btn {
-    /* PENYESUAIAN UKURAN */
-    width: 24px;
-    height: 24px;
-    font-size: 0.8rem;
-    line-height: 1; /* Memastikan 'X' berada di tengah */
-    
     background: none;
     border: none;
     color: var(--primary-text-color);
     cursor: pointer;
-    padding: 0;
+    padding: 4px; /* Reduced padding */
     border-radius: 50%;
     flex-shrink: 0;
     opacity: 0;
     transition: opacity 0.2s ease;
+    width: 20px; /* Lebih kecil */
+    height: 20px; /* Lebih kecil */
+    font-size: 0.7rem; /* Lebih kecil */
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .sessions-list li:hover .delete-session-btn {
     opacity: 1;
+    background-color: rgba(255, 255, 255, 0.05); /* Optional hover feedback */
 }
 
 /* Style untuk pop-up */
@@ -311,7 +318,7 @@ body {
 }
 
 .message {
-    display: block; 
+    display: block;
     max-width: 85%;
     line-height: 1.6;
 }
