@@ -1,3 +1,5 @@
+// File: api/chat.js
+
 // Import library yang dibutuhkan
 const {
   GoogleGenerativeAI,
@@ -8,13 +10,18 @@ const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const moment = require('moment-timezone')
 const { IncomingForm } = require('formidable');
 
-// MENGGUNAKAN API KEY SECARA LANGSUNG (TIDAK AMAN)
-const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // <-- Ganti dengan API key Anda yang sebenarnya!
+// Mengambil API key dari Environment Variable Vercel
+const apiKey = process.env.GEMINI_API_KEY;
+
+// Jika Anda tetap ingin menggunakan API key secara langsung (tidak disarankan)
+// const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
-// Pastikan Vercel mengizinkan parsing body
+// PENTING: Konfigurasi ini WAJIB ada di bagian paling atas file
+// Ini memberitahu Vercel untuk tidak memparsing body secara otomatis,
+// sehingga formidable bisa melakukannya
 export const config = {
   api: {
     bodyParser: false,
@@ -22,13 +29,18 @@ export const config = {
 };
 
 async function uploadToGemini(path, mimeType) {
-  const uploadResult = await fileManager.uploadFile(path, {
-    mimeType,
-    displayName: path,
-  });
-  const file = uploadResult.file;
-  console.log(`Uploaded file ${file.displayName} as: ${file.name}`);
-  return file;
+  try {
+    const uploadResult = await fileManager.uploadFile(path, {
+      mimeType,
+      displayName: path,
+    });
+    const file = uploadResult.file;
+    console.log(`Uploaded file ${file.displayName} as: ${file.name}`);
+    return file;
+  } catch (error) {
+    console.error('Error uploading file to Gemini:', error);
+    throw new Error('Failed to upload file to Gemini.');
+  }
 }
 
 function extractCode(input) {
