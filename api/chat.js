@@ -12,7 +12,6 @@ const { v4: uuidv4 } = require('uuid');
 const cookie = require('cookie');
 const { createClient } = require('@supabase/supabase-js');
 
-// Menggunakan hardcode key seperti permintaan Anda
 const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -65,10 +64,10 @@ async function saveChatHistory(sessionId, history) {
   }
 }
 
-// Fungsi pembuatan sesi kembali ke cara yang sederhana, tanpa AI
 async function createNewSession(userId, initialMessage) {
     const newSessionId = uuidv4();
-    const title = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
+    // Perbaikan: Hapus '...' dari judul
+    const title = initialMessage.split(' ').slice(0, 5).join(' ');
     
     const { data, error } = await supabase
         .from('chat_sessions')
