@@ -55,7 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSessionId = null;
         chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
         isFirstMessage = true;
-        welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+        const newWelcomeMessage = document.getElementById('welcome-message');
+        if (newWelcomeMessage) {
+            newWelcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+        }
         currentChatTitle.textContent = 'Noa AI';
         chatInput.focus();
     }
@@ -63,7 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
-            if (!response.ok) throw new Error('Failed to load sessions list.');
+            
+            // Perbaikan: Lebih informatif jika respons gagal
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Failed to load sessions list: ${response.status} - ${errorData.message}`);
+            }
             
             const { sessions } = await response.json();
             sessionsList.innerHTML = '';
@@ -111,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error loading sessions:', error);
+            // Tambahkan pesan error ke UI jika perlu
+            sessionsList.innerHTML = `<li><button style="color:var(--error-color);">Error: Gagal memuat sesi.</button></li>`;
         }
     }
 
@@ -273,7 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             content.appendChild(filePreview);
         }
-
+        
+        // Handle markdown code blocks
         const parts = message.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
         parts.forEach((part, index) => {
             if (index % 4 === 1 && parts.length > index + 1) {
