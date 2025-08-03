@@ -18,19 +18,90 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
-    const historyLink = document.querySelector('a[href="#"]'); // Ambil link Riwayat Chat
+    
+    // Elemen sidebar untuk riwayat chat
+    const newSessionBtn = document.getElementById('new-session-btn');
+    const sessionsList = document.getElementById('sessions-list');
+    const currentChatTitle = document.getElementById('current-chat-title');
 
     let selectedFile = null;
     let isFirstMessage = true;
+    let currentSessionId = null;
 
     // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
         sidebar.classList.add('open');
+        loadSessionsList();
     });
 
     closeSidebarBtn.addEventListener('click', () => {
         sidebar.classList.remove('open');
     });
+
+    newSessionBtn.addEventListener('click', () => {
+        startNewSession();
+        sidebar.classList.remove('open');
+    });
+
+    function startNewSession() {
+        currentSessionId = null;
+        chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
+        isFirstMessage = true;
+        welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+        currentChatTitle.textContent = 'Noa AI';
+        chatInput.focus();
+    }
+    
+    async function loadSessionsList() {
+        try {
+            const response = await fetch('/api/chat', { method: 'GET' });
+            if (!response.ok) throw new Error('Failed to load sessions list.');
+            
+            const { sessions } = await response.json();
+            sessionsList.innerHTML = '';
+            if (sessions && sessions.length > 0) {
+                sessions.forEach(session => {
+                    const li = document.createElement('li');
+                    const button = document.createElement('button');
+                    button.textContent = session.title;
+                    button.dataset.sessionId = session.id;
+                    button.addEventListener('click', () => {
+                        loadChatHistory(session.id);
+                        sidebar.classList.remove('open');
+                    });
+                    li.appendChild(button);
+                    sessionsList.appendChild(li);
+                });
+            } else {
+                sessionsList.innerHTML = '<li><button style="color:var(--primary-text-color);">Tidak ada riwayat</button></li>';
+            }
+        } catch (error) {
+            console.error('Error loading sessions:', error);
+        }
+    }
+
+    async function loadChatHistory(sessionId) {
+        try {
+            const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
+            if (!response.ok) throw new Error('Failed to load chat history.');
+            
+            const { history } = await response.json();
+            
+            chatBox.innerHTML = '';
+            isFirstMessage = false;
+            
+            history.forEach(msg => {
+                appendMessage(msg.role, msg.text);
+            });
+            currentSessionId = sessionId;
+            const sessions = await getAllChatSessions(userId); // Dapatkan daftar sesi lagi untuk mendapatkan judul
+            const currentSession = sessions.find(s => s.id === sessionId);
+            currentChatTitle.textContent = currentSession ? currentSession.title : 'Noa AI';
+            
+        } catch (error) {
+            console.error('Error loading history:', error);
+        }
+    }
     
     // Welcome message functionality
     function getGreeting() {
@@ -41,57 +112,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return "Selamat Malam";
     }
 
-    // Memuat riwayat chat saat halaman dimuat
-    async function loadHistory() {
-        try {
-            const response = await fetch('/api/chat', { method: 'GET' });
-            if (!response.ok) throw new Error('Failed to load chat history.');
-            
-            const { history } = await response.json();
-            if (history && history.length > 0) {
-                // Menghilangkan welcome message jika riwayat sudah ada
-                welcomeMessage.classList.add('hide');
-                isFirstMessage = false;
+    welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
 
-                history.forEach(msg => {
-                    appendMessage(msg.role, msg.text);
-                });
-            } else {
-                welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
-            }
-        } catch (error) {
-            console.error('Error loading history:', error);
-            welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
-        }
-    }
-    loadHistory();
-
-    // Event listener untuk tombol Riwayat Chat
-    historyLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        chatBox.innerHTML = ''; // Hapus chat box
-        loadHistory(); // Muat ulang riwayat chat
-        sidebar.classList.remove('open'); // Tutup sidebar
-    });
-    
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
 
-    // Toggle upload menu
     uploadBtn.addEventListener('click', () => {
         uploadMenu.classList.toggle('show');
     });
 
-    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.upload-area') && uploadMenu.classList.contains('show')) {
             uploadMenu.classList.remove('show');
         }
     });
 
-    // Handle menu button clicks
     cameraBtn.addEventListener('click', () => {
         fileInput.setAttribute('capture', 'camera');
         fileInput.click();
@@ -142,6 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selectedFile) {
                     formData.append('file', selectedFile);
                 }
+                if (currentSessionId) {
+                    formData.append('sessionId', currentSessionId);
+                }
 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
@@ -155,6 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 hideTypingIndicator();
                 appendMessage('ai', data.text);
+                if (data.sessionId) {
+                    currentSessionId = data.sessionId;
+                }
+                
+                // Perbarui judul chat
+                if (currentChatTitle.textContent === 'Noa AI' || currentChatTitle.textContent === '') {
+                    currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
+                }
             } catch (error) {
                 console.error('Error:', error);
                 hideTypingIndicator();
@@ -274,4 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
+    
+    // Muat daftar sesi saat pertama kali dibuka
+    // loadSessionsList();
+    
 });

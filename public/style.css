@@ -11,26 +11,30 @@
     --chat-bubble-color: #e8eaed;
     --send-btn-color: #bdc1c6;
     --shadow-color: rgba(0, 0, 0, 0.3);
+    --sidebar-bg: #28292c;
+    --sidebar-link-hover: #3c4043;
     --code-bg: #1e1e1e;
     --copy-btn-bg: #5f6368;
     --copy-btn-color: #e8eaed;
-    --sidebar-bg: #28292c;
-    --sidebar-link-hover: #3c4043;
 }
 
 * {
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Google Sans', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
-    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
 }
 
 .main-container {
@@ -38,7 +42,7 @@ body {
     position: relative;
     width: 100%;
     max-width: 960px;
-    height: 95vh;
+    height: 100%;
     border-radius: 28px;
     box-shadow: 0 4px 12px var(--shadow-color);
     overflow: hidden;
@@ -84,22 +88,50 @@ body {
     padding: 8px;
 }
 
+.sidebar-nav {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
 .sidebar-nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.sidebar-nav li a {
-    display: block;
+.sidebar-nav ul li button {
+    display: flex;
+    align-items: center;
     padding: 16px;
     color: var(--text-color);
     text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
-.sidebar-nav li a:hover {
+.sidebar-nav ul li button:hover,
+.sidebar-nav ul li a:hover {
     background-color: var(--sidebar-link-hover);
+}
+
+.sidebar-nav ul li button svg {
+    margin-right: 12px;
+}
+
+/* Style untuk daftar sesi */
+.sessions-list {
+    padding-left: 20px;
+    list-style: none;
+}
+
+.sessions-list li button {
+    padding-left: 0;
+    font-size: 0.9em;
+    font-weight: 400;
 }
 
 .chat-container {
@@ -143,7 +175,6 @@ body {
     position: relative;
 }
 
-/* Welcome message styling */
 .welcome-message {
     position: absolute;
     top: 50%;
@@ -158,7 +189,6 @@ body {
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-/* Class untuk menyembunyikan elemen secara instan */
 .welcome-message.hide {
     display: none;
 }
@@ -253,6 +283,7 @@ body {
     border-top: 1px solid var(--border-color);
     background-color: var(--card-bg);
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .upload-area {
@@ -262,17 +293,18 @@ body {
 }
 
 .upload-btn {
+    width: 48px;
+    height: 48px;
     background-color: transparent;
     color: var(--primary-text-color);
     border: none;
-    width: 48px;
-    height: 48px;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    transition: background-color 0.2s ease, transform 0.3s ease;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
 }
 
 .upload-btn:hover {
@@ -342,10 +374,8 @@ body {
 }
 
 .send-btn {
-    /* Memastikan tombol berbentuk kotak sempurna */
     width: 48px;
     height: 48px;
-    
     background-color: transparent;
     color: var(--primary-text-color);
     border: none;
@@ -355,23 +385,12 @@ body {
     align-items: center;
     border-radius: 50%;
     transition: background-color 0.2s ease, transform 0.2s ease;
-    
-    /* Mencegah tombol menyusut jika ada elemen lain */
     flex-shrink: 0;
 }
 
 .send-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
-
-.send-btn svg {
-    /* Mengatur ukuran SVG agar tetap di tengah */
-    width: 24px;
-    height: 24px;
-    fill: none;
-    stroke: currentColor;
-}
-
 
 .file-preview-container {
     display: flex;
@@ -381,6 +400,7 @@ body {
     background-color: var(--card-bg);
     gap: 16px;
     position: relative;
+    flex-shrink: 0;
 }
 
 .file-preview-image {
@@ -412,7 +432,6 @@ body {
     line-height: 1;
 }
 
-/* Media Queries for Responsiveness */
 @media (max-width: 960px) {
     .main-container {
         height: 100vh;
