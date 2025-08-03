@@ -14,6 +14,7 @@ const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API ke
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
+// PENTING: Konfigurasi ini WAJIB ada di bagian paling atas file
 export const config = {
   api: {
     bodyParser: false,
@@ -87,6 +88,7 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
     let contents = [{ role: "user", parts: [{ text: input }] }];
 
     if (file) {
+      console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
       contents[0].parts.unshift(uploadedFile);
     }
@@ -128,17 +130,24 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
 }
 
 module.exports = (req, res) => {
+  console.log('Incoming request...');
   const form = new IncomingForm();
+  
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error('Error parsing form data:', err);
       return res.status(500).json({ error: 'Failed to process file upload.' });
     }
+    
+    console.log('Form data parsed successfully.');
+    console.log('Fields:', fields);
+    console.log('Files:', files);
 
     const message = fields.message ? fields.message[0] : '';
     const file = files.file ? files.file[0] : null;
 
     if (!message && !file) {
+      console.error('400 Bad Request: Message or file is required.');
       return res.status(400).json({ error: 'Message or file is required.' });
     }
 
