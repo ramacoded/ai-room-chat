@@ -144,14 +144,22 @@ body {
     display: block;
 }
 
+/* Perbaikan untuk tata letak tombol X */
 .sessions-list li {
+    display: flex;
+    align-items: center;
     padding: 8px 16px;
-    position: relative;
-    border-radius: 8px;
     margin: 4px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
 }
 
-.sessions-list li button {
+.sessions-list li:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+.session-title-button {
+    flex-grow: 1;
     padding: 0;
     font-size: 0.9em;
     font-weight: 400;
@@ -163,16 +171,42 @@ body {
     border: none;
     color: var(--text-color);
     cursor: pointer;
-    width: 100%;
 }
 
-.sessions-list li button:hover {
-    background-color: transparent;
+.session-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-/* Hapus style untuk tombol delete 'X' */
+.separator {
+    width: 1px;
+    height: 16px;
+    background-color: var(--border-color);
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
 .delete-session-btn {
-    display: none;
+    background: none;
+    border: none;
+    color: var(--primary-text-color);
+    cursor: pointer;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    font-size: 0.7rem;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.session-list-item:hover .delete-session-btn {
+    opacity: 1;
 }
 
 /* Style untuk pop-up */
