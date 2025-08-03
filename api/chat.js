@@ -7,17 +7,11 @@ const {
   HarmBlockThreshold,
 } = require("@google/generative-ai");
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
-const fs = require("fs")
 const moment = require('moment-timezone')
+const { IncomingForm } = require('formidable'); // Library untuk parsing FormData
 
 // Mengambil API key dari Environment Variable Vercel
-// PASTIKAN ANDA SUDAH MENYETEL VARIABEL INI DI SETTINGS VERCEL
-const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
-
-// Jika Anda tetap ingin menggunakan API key secara langsung (tidak disarankan)
-// GANTI baris di atas dengan yang ini:
-// 
-
+const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
@@ -42,7 +36,8 @@ function extractCode(input) {
 }
  const allTime = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm, dddd, DD - MM/MMMM, YYYY');
  const timeOnly = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm');
-async function gemini(input) {
+
+async function gemini(input, file) {
 try {
 const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash",
@@ -77,15 +72,19 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
       responseMimeType: "text/plain"
   }
 });
+  
+  let contents = [{ role: "user", parts: [{ text: input }] }];
 
-  // BAGIAN INI SUDAH DIPERBAIKI: Mengirim input dengan format yang benar
-  const result = await model.generateContent({ 
-      contents: [{ role: "user", parts: [{ text: input }] }],
-  })
+  // MENAMBAHKAN FILE JIKA ADA
+  if (file) {
+    const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
+    contents[0].parts.unshift(uploadedFile); // Memasukkan file ke awal array
+  }
   
-  let respon = await result.response.text()
+  const result = await model.generateContent({ contents });
+  let respon = await result.response.text();
   
-let responseText = respon
+  let responseText = respon
     .replace(/\*\*/g, "*")
     .replace(/"/g, "'")
     .replace(/```javascript\n/g, '\n*JavaScript Snippet* :\n\n```')
@@ -117,26 +116,30 @@ console.error(error)
 return error 
 }
 }
-// End of your gemini engine code
 
 // Vercel Serverless Function handler
-module.exports = async (req, res) => {
-    if (req.method !== 'POST') {
-        res.status(405).json({ error: 'Method Not Allowed' });
-        return;
-    }
+module.exports = (req, res) => {
+    // Memparsing request body sebagai FormData
+    const form = new IncomingForm();
+    form.parse(req, async (err, fields, files) => {
+        if (err) {
+            console.error('Error parsing form data:', err);
+            return res.status(500).json({ error: 'Failed to process file upload.' });
+        }
 
-    const { message } = req.body;
-    if (!message) {
-        res.status(400).json({ error: 'Message is required' });
-        return;
-    }
+        const message = fields.message ? fields.message[0] : '';
+        const file = files.file ? files.file[0] : null;
 
-    try {
-        const result = await gemini(message);
-        res.status(200).json(result);
-    } catch (error) {
-        console.error('Error processing chat:', error);
-        res.status(500).json({ error: 'Failed to get response from AI' });
-    }
+        if (!message && !file) {
+            return res.status(400).json({ error: 'Message or file is required.' });
+        }
+
+        try {
+            const result = await gemini(message, file);
+            res.status(200).json(result);
+        } catch (error) {
+            console.error('Error processing chat:', error);
+            res.status(500).json({ error: 'Failed to get response from AI' });
+        }
+    });
 };
