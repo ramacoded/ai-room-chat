@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chatHistoryBtn.addEventListener('click', () => {
         sessionsList.classList.toggle('show');
+        // Perbaikan: Tambah/hapus kelas 'active' pada tombol
+        chatHistoryBtn.classList.toggle('active'); 
     });
 
     function startNewSession() {
@@ -67,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
             
-            // Perbaikan: Lebih informatif jika respons gagal
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`Failed to load sessions list: ${response.status} - ${errorData.message}`);
@@ -119,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error loading sessions:', error);
-            // Tambahkan pesan error ke UI jika perlu
             sessionsList.innerHTML = `<li><button style="color:var(--error-color);">Error: Gagal memuat sesi.</button></li>`;
         }
     }
@@ -249,7 +249,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
-                    currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
+                    // Perbaikan: Hapus titik tiga (...)
+                    currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
                 }
                 
                 loadSessionsList();
@@ -284,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
             content.appendChild(filePreview);
         }
         
-        // Handle markdown code blocks
         const parts = message.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
         parts.forEach((part, index) => {
             if (index % 4 === 1 && parts.length > index + 1) {
