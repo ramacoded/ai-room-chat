@@ -144,8 +144,7 @@ body {
     display: block;
 }
 
-/* Menggabungkan tombol judul dan tombol hapus dalam satu baris */
-.session-list-item {
+.sessions-list li {
     display: flex;
     align-items: center;
     padding: 8px 16px;
@@ -154,11 +153,11 @@ body {
     transition: background-color 0.2s ease;
 }
 
-.session-list-item:hover {
+.sessions-list li:hover {
     background-color: var(--sidebar-link-hover);
 }
 
-.session-title-button {
+.sessions-list li button:first-of-type {
     flex-grow: 1;
     padding: 0;
     font-size: 0.9em;
@@ -174,20 +173,12 @@ body {
     transition: background-color 0.2s ease;
 }
 
-.session-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+.sessions-list li button:first-of-type:hover {
+    background-color: transparent;
 }
 
-.separator {
-    width: 1px;
-    height: 16px;
-    background-color: var(--border-color);
-    margin-left: 8px;
-    margin-right: 8px;
-}
 
+/* Tombol hapus sesi */
 .delete-session-btn {
     background: none;
     border: none;
@@ -207,7 +198,7 @@ body {
     align-items: center;
 }
 
-.session-list-item:hover .delete-session-btn {
+.sessions-list li:hover .delete-session-btn {
     opacity: 1;
 }
 
