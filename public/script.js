@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
     
-    // Elemen sidebar untuk riwayat chat
     const newSessionBtn = document.getElementById('new-session-btn');
+    const chatHistoryBtn = document.getElementById('chat-history-btn');
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
@@ -41,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
     newSessionBtn.addEventListener('click', () => {
         startNewSession();
         sidebar.classList.remove('open');
+    });
+
+    chatHistoryBtn.addEventListener('click', () => {
+        sessionsList.classList.toggle('show');
     });
 
     function startNewSession() {
@@ -64,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const li = document.createElement('li');
                     const button = document.createElement('button');
                     button.textContent = session.title;
-                    button.dataset.sessionId = session.id;
+                    button.dataset.sessionId = session.session_id;
                     button.addEventListener('click', () => {
-                        loadChatHistory(session.id);
+                        loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
                     li.appendChild(button);
@@ -80,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadChatHistory(sessionId) {
+    async function loadChatHistory(sessionId, title) {
         try {
             const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
             if (!response.ok) throw new Error('Failed to load chat history.');
@@ -94,15 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendMessage(msg.role, msg.text);
             });
             currentSessionId = sessionId;
-            const sessions = await getAllChatSessions(userId); // Dapatkan daftar sesi lagi untuk mendapatkan judul
-            const currentSession = sessions.find(s => s.id === sessionId);
-            currentChatTitle.textContent = currentSession ? currentSession.title : 'Noa AI';
+            currentChatTitle.textContent = title;
             
         } catch (error) {
             console.error('Error loading history:', error);
+            chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`; // Sembunyikan welcome message jika ada error
+            appendMessage('ai', 'Maaf, terjadi kesalahan saat memuat riwayat chat.');
+            currentChatTitle.textContent = 'Noa AI';
+            currentSessionId = null;
         }
     }
-    
+
     // Welcome message functionality
     function getGreeting() {
         const hour = new Date().getHours();
@@ -199,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentSessionId = data.sessionId;
                 }
                 
-                // Perbarui judul chat
                 if (currentChatTitle.textContent === 'Noa AI' || currentChatTitle.textContent === '') {
                     currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
                 }
@@ -322,8 +327,4 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
-    
-    // Muat daftar sesi saat pertama kali dibuka
-    // loadSessionsList();
-    
 });

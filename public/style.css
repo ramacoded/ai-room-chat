@@ -111,6 +111,16 @@ body {
     text-align: left;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.sidebar-nav ul li a {
+    display: block;
+    padding: 16px;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
 }
 
 .sidebar-nav ul li button:hover,
@@ -120,12 +130,18 @@ body {
 
 .sidebar-nav ul li button svg {
     margin-right: 12px;
+    flex-shrink: 0;
 }
 
 /* Style untuk daftar sesi */
 .sessions-list {
     padding-left: 20px;
     list-style: none;
+    display: none;
+}
+
+.sessions-list.show {
+    display: block;
 }
 
 .sessions-list li button {
