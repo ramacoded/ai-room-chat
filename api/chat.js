@@ -113,7 +113,6 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
       }
     });
 
-    // MEMBUAT CHAT SESSION DENGAN RIWAYAT
     const chat = model.startChat({
       history: history.map(msg => ({
         role: msg.role,
@@ -128,7 +127,9 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
       parts.unshift(uploadedFile);
     }
     
-    const result = await chat.sendMessage({ parts });
+    // BARIS INI SUDAH DIPERBAIKI
+    const result = await chat.sendMessage(parts); 
+    
     let respon = await result.response.text();
     
     let responseText = respon
@@ -159,7 +160,6 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
 module.exports = (req, res) => {
   const form = new IncomingForm();
   
-  // Mengelola session ID
   let sessionId;
   const cookies = cookie.parse(req.headers.cookie || '');
   if (cookies.sessionId) {
@@ -168,22 +168,19 @@ module.exports = (req, res) => {
     sessionId = uuidv4();
     res.setHeader('Set-Cookie', cookie.serialize('sessionId', sessionId, {
       httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7, // 1 minggu
+      maxAge: 60 * 60 * 24 * 7,
       path: '/'
     }));
   }
 
-  // Mengelola riwayat chat
   const db = readDb();
   let userHistory = db[sessionId] || [];
 
-  // MENGURUS ENDPOINT GET UNTUK RIWAYAT CHAT
   if (req.method === 'GET') {
       res.status(200).json({ history: userHistory });
       return;
   }
   
-  // MENGURUS ENDPOINT POST UNTUK PESAN BARU
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error('Error parsing form data:', err);
@@ -197,7 +194,6 @@ module.exports = (req, res) => {
       return res.status(400).json({ error: 'Message or file is required.' });
     }
 
-    // Menambahkan pesan pengguna ke riwayat
     userHistory.push({ role: 'user', text: message });
     
     try {
@@ -206,7 +202,6 @@ module.exports = (req, res) => {
         return res.status(500).json(result);
       }
       
-      // Menambahkan respons AI ke riwayat
       userHistory.push({ role: 'model', text: result.text });
       writeDb({ ...db, [sessionId]: userHistory });
 
