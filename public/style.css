@@ -144,22 +144,14 @@ body {
     display: block;
 }
 
-/* Perbaikan untuk tata letak tombol X */
 .sessions-list li {
-    display: flex;
-    align-items: center;
     padding: 8px 16px;
     position: relative;
-    transition: background-color 0.2s ease;
     border-radius: 8px;
     margin: 4px 8px;
 }
 
-.sessions-list li:hover {
-    background-color: var(--sidebar-link-hover);
-}
-
-.sessions-list li button:first-of-type {
+.sessions-list li button {
     padding: 0;
     font-size: 0.9em;
     font-weight: 400;
@@ -167,43 +159,20 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: left;
-    flex-grow: 1;
     background: none;
     border: none;
     color: var(--text-color);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    width: 100%;
 }
 
-.sessions-list li button:first-of-type:hover {
+.sessions-list li button:hover {
     background-color: transparent;
 }
 
-
-/* Tombol hapus sesi */
+/* Hapus style untuk tombol delete 'X' */
 .delete-session-btn {
-    background: none; /* Menghilangkan latar belakang */
-    border: none;
-    color: var(--primary-text-color);
-    cursor: pointer;
-    padding: 0; /* Menghilangkan padding */
-    width: 20px;
-    height: 20px;
-    font-size: 0.7rem;
-    line-height: 1;
-    flex-shrink: 0;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    margin-left: 8px; /* Memberi jarak dari teks judul */
-}
-
-.sessions-list li:hover .delete-session-btn {
-    opacity: 1;
-    background-color: rgba(255, 255, 255, 0.05);
+    display: none;
 }
 
 /* Style untuk pop-up */

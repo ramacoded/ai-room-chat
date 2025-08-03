@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
-    // Elemen pop-up
     const deletePopup = document.getElementById('delete-popup');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
@@ -32,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
+    let longPressTimer = null;
+    let isLongPress = false;
 
     // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
@@ -74,22 +75,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     const button = document.createElement('button');
                     button.textContent = session.title;
                     button.dataset.sessionId = session.session_id;
-                    button.addEventListener('click', () => {
-                        loadChatHistory(session.session_id, session.title);
-                        sidebar.classList.remove('open');
+
+                    // LOGIKA TEKAN LAMA
+                    button.addEventListener('mousedown', (e) => {
+                        longPressTimer = setTimeout(() => {
+                            isLongPress = true;
+                            showDeletePopup(session.session_id);
+                        }, 500); // Tahan selama 500ms
                     });
                     
-                    // TOMBOL HAPUS
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerHTML = '✖';
-                    deleteBtn.classList.add('delete-session-btn');
-                    deleteBtn.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Mencegah klik tombol sesi
-                        showDeletePopup(session.session_id);
+                    button.addEventListener('mouseup', () => {
+                        clearTimeout(longPressTimer);
+                    });
+
+                    button.addEventListener('mouseleave', () => {
+                        clearTimeout(longPressTimer);
+                    });
+
+                    button.addEventListener('click', () => {
+                        if (isLongPress) {
+                            isLongPress = false;
+                        } else {
+                            loadChatHistory(session.session_id, session.title);
+                            sidebar.classList.remove('open');
+                        }
                     });
                     
                     li.appendChild(button);
-                    li.appendChild(deleteBtn);
                     sessionsList.appendChild(li);
                 });
             } else {
@@ -358,9 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'DELETE'
             });
             if (response.ok) {
-                // Sesi berhasil dihapus, perbarui daftar sesi
                 loadSessionsList();
-                // Jika sesi yang dihapus adalah sesi saat ini, mulai sesi baru
                 if (currentSessionId === sessionIdToDelete) {
                     startNewSession();
                 }
