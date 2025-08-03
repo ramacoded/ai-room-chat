@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
+    const historyLink = document.querySelector('a[href="#"]'); // Ambil link Riwayat Chat
 
     let selectedFile = null;
     let isFirstMessage = true;
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSidebarBtn.addEventListener('click', () => {
         sidebar.classList.remove('open');
     });
-
+    
     // Welcome message functionality
     function getGreeting() {
         const hour = new Date().getHours();
@@ -40,8 +41,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return "Selamat Malam";
     }
 
-    welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+    // Memuat riwayat chat saat halaman dimuat
+    async function loadHistory() {
+        try {
+            const response = await fetch('/api/chat', { method: 'GET' });
+            if (!response.ok) throw new Error('Failed to load chat history.');
+            
+            const { history } = await response.json();
+            if (history && history.length > 0) {
+                // Menghilangkan welcome message jika riwayat sudah ada
+                welcomeMessage.classList.add('hide');
+                isFirstMessage = false;
 
+                history.forEach(msg => {
+                    appendMessage(msg.role, msg.text);
+                });
+            } else {
+                welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+            }
+        } catch (error) {
+            console.error('Error loading history:', error);
+            welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+        }
+    }
+    loadHistory();
+
+    // Event listener untuk tombol Riwayat Chat
+    historyLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        chatBox.innerHTML = ''; // Hapus chat box
+        loadHistory(); // Muat ulang riwayat chat
+        sidebar.classList.remove('open'); // Tutup sidebar
+    });
+    
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
