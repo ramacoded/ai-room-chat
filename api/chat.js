@@ -65,9 +65,29 @@ async function saveChatHistory(sessionId, history) {
   }
 }
 
+// Fungsi baru untuk meminta AI membuat judul yang lebih baik
+async function generateTitleFromMessage(message) {
+    const prompt = `Buatkan judul singkat dan menarik (maksimal 7 kata) untuk percakapan chat ini. Judul harus relevan dengan pesan pertama: "${message}".`;
+    
+    // Menggunakan model gemini-1.5-flash untuk tugas ini
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    
+    try {
+        const result = await model.generateContent(prompt);
+        const title = result.response.text();
+        // Hapus tanda bintang (markdown) yang mungkin ada dan trim spasi
+        return title.replace(/\*\*/g, '').trim(); 
+    } catch (error) {
+        console.error('Error generating title:', error);
+        // Fallback jika terjadi kesalahan, gunakan metode lama
+        return message.split(' ').slice(0, 5).join(' ') + '...';
+    }
+}
+
+// Fungsi createNewSession yang sudah diperbarui
 async function createNewSession(userId, initialMessage) {
     const newSessionId = uuidv4();
-    const title = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
+    const title = await generateTitleFromMessage(initialMessage);
     
     const { data, error } = await supabase
         .from('chat_sessions')
@@ -276,4 +296,3 @@ module.exports = async (req, res) => {
     }
   });
 };
-
