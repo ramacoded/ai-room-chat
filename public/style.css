@@ -135,7 +135,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Style untuk daftar sesi */
 .sessions-list {
     padding: 0;
     list-style: none;
@@ -212,7 +211,6 @@ body {
     opacity: 1;
 }
 
-/* Style untuk pop-up */
 .delete-popup-container {
     position: fixed;
     top: 0;
