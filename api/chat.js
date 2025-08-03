@@ -20,18 +20,16 @@ const fileManager = new GoogleAIFileManager(apiKey);
 const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co"
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM"
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-// Fungsi untuk mendapatkan semua sesi chat
 async function getAllChatSessions(userId) {
   const { data, error } = await supabase
     .from('chat_sessions')
-    .select('session_id, title') // MENGGUNAKAN session_id
+    .select('session_id, title')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -41,40 +39,39 @@ async function getAllChatSessions(userId) {
   return data || [];
 }
 
-// Fungsi untuk mendapatkan riwayat chat dari satu sesi
+// FUNGSI INI SUDAH DIPERBAIKI
 async function getChatHistory(sessionId) {
   const { data, error } = await supabase
     .from('chat_sessions')
     .select('history')
-    .eq('session_id', sessionId) // MENGGUNAKAN session_id
+    .eq('session_id', sessionId)
     .single();
 
-  if (error) {
+  // Menangani error PGRST116 (tidak ada baris ditemukan) dengan baik
+  if (error && error.code !== 'PGRST116') {
     console.error('Error fetching single chat history:', error);
   }
 
   return data ? data.history : [];
 }
 
-// Fungsi untuk menyimpan riwayat chat
 async function saveChatHistory(sessionId, history) {
   const { data, error } = await supabase
     .from('chat_sessions')
-    .upsert({ session_id: sessionId, history: history }, { onConflict: 'session_id' }); // MENGGUNAKAN session_id dan onConflict
+    .upsert({ session_id: sessionId, history: history }, { onConflict: 'session_id' });
   
   if (error) {
     console.error('Error saving chat history:', error);
   }
 }
 
-// Fungsi untuk membuat sesi baru
 async function createNewSession(userId, initialMessage) {
     const newSessionId = uuidv4();
     const title = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
     
     const { data, error } = await supabase
         .from('chat_sessions')
-        .insert({ session_id: newSessionId, user_id: userId, title: title, history: [] }); // MENGGUNAKAN session_id
+        .insert({ session_id: newSessionId, user_id: userId, title: title, history: [] });
 
     if (error) {
         console.error('Error creating new session:', error);
