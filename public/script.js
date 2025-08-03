@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatInput.value = '';
             chatInput.style.height = 'auto';
             removeFile();
-            showTypingIndicator();
+            showTypingIndicator(); // Menampilkan typing indicator
 
             try {
                 const formData = new FormData();
@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const data = await response.json();
-                hideTypingIndicator();
+                hideTypingIndicator(); // Menyembunyikan typing indicator
                 appendMessage('ai', data.text);
             } catch (error) {
                 console.error('Error:', error);
-                hideTypingIndicator();
+                hideTypingIndicator(); // Menyembunyikan typing indicator
                 appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
             }
         }
@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.innerHTML = '';
     }
 
+    // Fungsi untuk menampilkan typing indicator
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
@@ -170,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Fungsi untuk menyembunyikan typing indicator
     function hideTypingIndicator() {
         const typingIndicator = document.getElementById('typing-indicator');
         if (typingIndicator) {
