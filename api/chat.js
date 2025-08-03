@@ -8,18 +8,46 @@ const {
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const moment = require('moment-timezone')
 const { IncomingForm } = require('formidable');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const cookie = require('cookie');
 
 const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
-// PENTING: Konfigurasi ini WAJIB ada di bagian paling atas file
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+// Fungsi untuk membaca dan menyimpan data riwayat
+const dbPath = path.join(process.cwd(), 'db.json');
+
+function readDb() {
+  try {
+    const data = fs.readFileSync(dbPath, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log('Database file not found, creating a new one.');
+      return {};
+    }
+    console.error('Error reading database file:', err);
+    return {};
+  }
+}
+
+function writeDb(data) {
+  try {
+    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Error writing to database file:', err);
+  }
+}
 
 async function uploadToGemini(path, mimeType) {
   try {
@@ -49,7 +77,7 @@ function extractCode(input) {
 const allTime = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm, dddd, DD - MM/MMMM, YYYY');
 const timeOnly = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm');
 
-async function gemini(input, file) {
+async function gemini(history, input, file) {
   try {
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
@@ -85,17 +113,24 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
       }
     });
 
-    let contents = [{ role: "user", parts: [{ text: input }] }];
+    // MEMBUAT CHAT SESSION DENGAN RIWAYAT
+    const chat = model.startChat({
+      history: history.map(msg => ({
+        role: msg.role,
+        parts: [{ text: msg.text }]
+      }))
+    });
 
+    let parts = [{ text: input }];
     if (file) {
       console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
-      contents[0].parts.unshift(uploadedFile);
+      parts.unshift(uploadedFile);
     }
-
-    const result = await model.generateContent({ contents });
+    
+    const result = await chat.sendMessage({ parts });
     let respon = await result.response.text();
-
+    
     let responseText = respon
       .replace(/\*\*/g, "*")
       .replace(/"/g, "'")
@@ -113,16 +148,8 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
       .replace(/```sql\n/g, '\n*SQL Snippet* :\n\n```')
       .replace(/```markdown\n/g, '\n*Markdown Data* :\n\n```')
       .replace(/```xml\n/g, '\n*XML Snippet* :\n\n```');
-    let snipset = await extractCode(responseText)
-    let sniplength = snipset.length
-    let isCode = sniplength > 0
-    let results = {
-      isCode: isCode,
-      sniplength: sniplength,
-      snipheet: snipset,
-      text: responseText
-    }
-    return results
+
+    return { text: responseText };
   } catch (error) {
     console.error(error)
     return { error: 'Failed to get response from AI.' };
@@ -130,32 +157,59 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
 }
 
 module.exports = (req, res) => {
-  console.log('Incoming request...');
   const form = new IncomingForm();
   
+  // Mengelola session ID
+  let sessionId;
+  const cookies = cookie.parse(req.headers.cookie || '');
+  if (cookies.sessionId) {
+    sessionId = cookies.sessionId;
+  } else {
+    sessionId = uuidv4();
+    res.setHeader('Set-Cookie', cookie.serialize('sessionId', sessionId, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7, // 1 minggu
+      path: '/'
+    }));
+  }
+
+  // Mengelola riwayat chat
+  const db = readDb();
+  let userHistory = db[sessionId] || [];
+
+  // MENGURUS ENDPOINT GET UNTUK RIWAYAT CHAT
+  if (req.method === 'GET') {
+      res.status(200).json({ history: userHistory });
+      return;
+  }
+  
+  // MENGURUS ENDPOINT POST UNTUK PESAN BARU
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error('Error parsing form data:', err);
       return res.status(500).json({ error: 'Failed to process file upload.' });
     }
-    
-    console.log('Form data parsed successfully.');
-    console.log('Fields:', fields);
-    console.log('Files:', files);
 
     const message = fields.message ? fields.message[0] : '';
     const file = files.file ? files.file[0] : null;
 
     if (!message && !file) {
-      console.error('400 Bad Request: Message or file is required.');
       return res.status(400).json({ error: 'Message or file is required.' });
     }
 
+    // Menambahkan pesan pengguna ke riwayat
+    userHistory.push({ role: 'user', text: message });
+    
     try {
-      const result = await gemini(message, file);
+      const result = await gemini(userHistory, message, file);
       if (result.error) {
         return res.status(500).json(result);
       }
+      
+      // Menambahkan respons AI ke riwayat
+      userHistory.push({ role: 'model', text: result.text });
+      writeDb({ ...db, [sessionId]: userHistory });
+
       res.status(200).json(result);
     } catch (error) {
       console.error('Error processing chat:', error);
