@@ -17,7 +17,6 @@ const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API ke
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
-// Inisialisasi Supabase Client
 const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co"
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM"
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -28,28 +27,59 @@ export const config = {
   },
 };
 
+// Fungsi untuk mendapatkan semua sesi chat
+async function getAllChatSessions(userId) {
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .select('id, title')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching chat sessions:', error);
+  }
+  return data || [];
+}
+
+// Fungsi untuk mendapatkan riwayat chat dari satu sesi
 async function getChatHistory(sessionId) {
   const { data, error } = await supabase
     .from('chat_sessions')
     .select('history')
-    .eq('session_id', sessionId)
+    .eq('id', sessionId)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 means not found
-    console.error('Error fetching chat history:', error);
+  if (error) {
+    console.error('Error fetching single chat history:', error);
   }
 
   return data ? data.history : [];
 }
 
+// Fungsi untuk menyimpan riwayat chat
 async function saveChatHistory(sessionId, history) {
   const { data, error } = await supabase
     .from('chat_sessions')
-    .upsert({ session_id: sessionId, history: history });
+    .upsert({ id: sessionId, history: history });
   
   if (error) {
     console.error('Error saving chat history:', error);
   }
+}
+
+// Fungsi untuk membuat sesi baru
+async function createNewSession(userId, initialMessage) {
+    const newSessionId = uuidv4();
+    const title = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
+    
+    const { data, error } = await supabase
+        .from('chat_sessions')
+        .insert({ id: newSessionId, user_id: userId, title: title, history: [] });
+
+    if (error) {
+        console.error('Error creating new session:', error);
+    }
+    return newSessionId;
 }
 
 async function uploadToGemini(path, mimeType) {
@@ -65,16 +95,6 @@ async function uploadToGemini(path, mimeType) {
     console.error('Error uploading file to Gemini:', error);
     throw new Error('Failed to upload file to Gemini.');
   }
-}
-
-function extractCode(input) {
-  const regex = /```([\s\S]*?)```/g;
-  let matches = [];
-  let match;
-  while ((match = regex.exec(input)) !== null) {
-    matches.push(match[1].trim());
-  }
-  return matches;
 }
 
 const allTime = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm, dddd, DD - MM/MMMM, YYYY');
@@ -160,27 +180,34 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
 }
 
 module.exports = async (req, res) => {
-  const form = new IncomingForm();
-  
-  let sessionId;
+  let userId;
   const cookies = cookie.parse(req.headers.cookie || '');
-  if (cookies.sessionId) {
-    sessionId = cookies.sessionId;
+  if (cookies.userId) {
+    userId = cookies.userId;
   } else {
-    sessionId = uuidv4();
-    res.setHeader('Set-Cookie', cookie.serialize('sessionId', sessionId, {
+    userId = uuidv4();
+    res.setHeader('Set-Cookie', cookie.serialize('userId', userId, {
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 7,
       path: '/'
     }));
   }
 
+  // Endpoint untuk memuat daftar sesi atau riwayat chat
   if (req.method === 'GET') {
-      const userHistory = await getChatHistory(sessionId);
-      res.status(200).json({ history: userHistory });
-      return;
+    const { sessionId } = req.query;
+    if (sessionId) {
+      const history = await getChatHistory(sessionId);
+      res.status(200).json({ history });
+    } else {
+      const sessions = await getAllChatSessions(userId);
+      res.status(200).json({ sessions });
+    }
+    return;
   }
   
+  // Endpoint untuk mengirim pesan
+  const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
       console.error('Error parsing form data:', err);
@@ -189,12 +216,22 @@ module.exports = async (req, res) => {
 
     const message = fields.message ? fields.message[0] : '';
     const file = files.file ? files.file[0] : null;
+    const currentSessionId = fields.sessionId ? fields.sessionId[0] : null;
 
     if (!message && !file) {
       return res.status(400).json({ error: 'Message or file is required.' });
     }
 
-    const userHistory = await getChatHistory(sessionId);
+    let userHistory;
+    let sessionIdToUpdate = currentSessionId;
+    
+    // Jika tidak ada sesi saat ini, buat sesi baru
+    if (!sessionIdToUpdate) {
+        sessionIdToUpdate = await createNewSession(userId, message);
+        userHistory = [];
+    } else {
+        userHistory = await getChatHistory(sessionIdToUpdate);
+    }
     
     userHistory.push({ role: 'user', text: message });
     
@@ -205,9 +242,9 @@ module.exports = async (req, res) => {
       }
       
       userHistory.push({ role: 'model', text: result.text });
-      await saveChatHistory(sessionId, userHistory);
+      await saveChatHistory(sessionIdToUpdate, userHistory);
 
-      res.status(200).json(result);
+      res.status(200).json({ ...result, sessionId: sessionIdToUpdate });
     } catch (error) {
       console.error('Error processing chat:', error);
       res.status(500).json({ error: 'Failed to get response from AI' });
