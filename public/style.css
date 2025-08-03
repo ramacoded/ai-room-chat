@@ -113,6 +113,8 @@ body {
     transition: background-color 0.2s ease;
     font-family: inherit;
     font-size: 1rem;
+    /* GARIS PEMISAH DIBAWAH SETIAP TOMBOL */
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-nav ul li a {
@@ -121,6 +123,8 @@ body {
     color: var(--text-color);
     text-decoration: none;
     transition: background-color 0.2s ease;
+    /* GARIS PEMISAH DIBAWAH SETIAP TOMBOL */
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-nav ul li button:hover,
@@ -580,16 +584,12 @@ body {
 .typing-indicator {
     display: flex;
     justify-content: flex-start;
-    margin-right: auto;
-}
-
-.typing-indicator .message-content {
-    background-color: var(--chat-bubble-bg);
-    color: var(--chat-bubble-color);
-    padding: 8px 12px;
-    border-radius: 20px;
-    display: flex;
     align-items: center;
+    gap: 8px; /* Jarak antar titik */
+    padding: 12px;
+    border-radius: 20px;
+    background-color: var(--chat-bubble-bg);
+    width: fit-content;
 }
 
 .typing-dot {
@@ -597,7 +597,6 @@ body {
     height: 8px;
     background-color: var(--chat-bubble-color);
     border-radius: 50%;
-    margin-right: 5px;
     animation: bounce 1.4s infinite ease-in-out both;
 }
 
