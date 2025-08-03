@@ -18,6 +18,10 @@
     --code-bg: #1e1e1e;
     --copy-btn-bg: #5f6368;
     --copy-btn-color: #e8eaed;
+    
+    /* Variabel baru untuk gradien */
+    --gradient-start: #3c4043;
+    --gradient-end: #5f6368;
 }
 
 * {
@@ -138,7 +142,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Perbaikan: Styling untuk animasi panah sekarang menargetkan `.caret-icon` */
+/* Perbaikan: Mengubah animasi panah agar sesuai permintaan Anda */
 .caret-icon {
     transition: transform 0.2s ease;
     margin-left: auto;
@@ -442,7 +446,7 @@ body {
 .typing-indicator .message-content {
     display: flex;
     align-items: center;
-    background: linear-gradient(270deg, #6c5ce7, #00cec9, #6c5ce7);
+    background: linear-gradient(270deg, var(--gradient-start), var(--gradient-end), var(--gradient-start));
     background-size: 200% 200%;
     animation: gradient-animation 4s ease infinite;
     padding: 12px 16px;
