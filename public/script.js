@@ -31,8 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
-    let longPressTimer = null;
-    let isLongPress = false;
 
     // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
@@ -72,40 +70,44 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sessions && sessions.length > 0) {
                 sessions.forEach(session => {
                     const li = document.createElement('li');
-                    const button = document.createElement('button');
-                    button.textContent = session.title;
-                    button.dataset.sessionId = session.session_id;
+                    li.classList.add('session-list-item');
 
-                    // LOGIKA TEKAN LAMA
-                    button.addEventListener('mousedown', (e) => {
-                        longPressTimer = setTimeout(() => {
-                            isLongPress = true;
-                            showDeletePopup(session.session_id);
-                        }, 500); // Tahan selama 500ms
+                    const titleButton = document.createElement('button');
+                    titleButton.textContent = session.title;
+                    titleButton.classList.add('session-title-button');
+                    titleButton.dataset.sessionId = session.session_id;
+
+                    titleButton.addEventListener('click', () => {
+                        loadChatHistory(session.session_id, session.title);
+                        sidebar.classList.remove('open');
                     });
                     
-                    button.addEventListener('mouseup', () => {
-                        clearTimeout(longPressTimer);
-                    });
+                    const sessionActions = document.createElement('div');
+                    sessionActions.classList.add('session-actions');
 
-                    button.addEventListener('mouseleave', () => {
-                        clearTimeout(longPressTimer);
-                    });
-
-                    button.addEventListener('click', () => {
-                        if (isLongPress) {
-                            isLongPress = false;
-                        } else {
-                            loadChatHistory(session.session_id, session.title);
-                            sidebar.classList.remove('open');
-                        }
+                    const separator = document.createElement('div');
+                    separator.classList.add('separator');
+                    
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerHTML = '✖';
+                    deleteButton.classList.add('delete-session-btn');
+                    deleteButton.dataset.sessionId = session.session_id;
+                    deleteButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showDeletePopup(session.session_id);
                     });
                     
-                    li.appendChild(button);
+                    sessionActions.appendChild(separator);
+                    sessionActions.appendChild(deleteButton);
+                    
+                    li.appendChild(titleButton);
+                    li.appendChild(sessionActions);
                     sessionsList.appendChild(li);
                 });
             } else {
-                sessionsList.innerHTML = '<li><button style="color:var(--primary-text-color);">Tidak ada riwayat</button></li>';
+                const li = document.createElement('li');
+                li.innerHTML = '<button style="color:var(--primary-text-color);">Tidak ada riwayat</button>';
+                sessionsList.appendChild(li);
             }
         } catch (error) {
             console.error('Error loading sessions:', error);
@@ -362,7 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Logika pop-up hapus
     function showDeletePopup(sessionIdToDelete) {
         deletePopup.style.display = 'flex';
         confirmDeleteBtn.onclick = async () => {

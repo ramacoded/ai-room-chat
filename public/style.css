@@ -144,6 +144,7 @@ body {
     display: block;
 }
 
+/* Menggabungkan tombol judul dan tombol hapus dalam satu baris */
 .session-list-item {
     display: flex;
     align-items: center;
