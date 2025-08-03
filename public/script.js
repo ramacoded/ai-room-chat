@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
+    // Elemen pop-up
+    const deletePopup = document.getElementById('delete-popup');
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
@@ -73,7 +78,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
+                    
+                    // TOMBOL HAPUS
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '✖';
+                    deleteBtn.classList.add('delete-session-btn');
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Mencegah klik tombol sesi
+                        showDeletePopup(session.session_id);
+                    });
+                    
                     li.appendChild(button);
+                    li.appendChild(deleteBtn);
                     sessionsList.appendChild(li);
                 });
             } else {
@@ -115,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Welcome message functionality
     function getGreeting() {
         const hour = new Date().getHours();
         if (hour < 11) return "Selamat Pagi";
@@ -208,13 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideTypingIndicator();
                 appendMessage('ai', data.text);
                 
-                // Logika yang sudah diperbaiki
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
                     currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
                 }
                 
-                // Pastikan title diperbarui untuk sesi baru di sidebar
                 loadSessionsList();
 
             } catch (error) {
@@ -337,6 +350,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    loadSessionsList();
+    // Logika pop-up hapus
+    function showDeletePopup(sessionIdToDelete) {
+        deletePopup.style.display = 'flex';
+        confirmDeleteBtn.onclick = async () => {
+            const response = await fetch(`/api/chat?sessionId=${sessionIdToDelete}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                // Sesi berhasil dihapus, perbarui daftar sesi
+                loadSessionsList();
+                // Jika sesi yang dihapus adalah sesi saat ini, mulai sesi baru
+                if (currentSessionId === sessionIdToDelete) {
+                    startNewSession();
+                }
+            } else {
+                console.error('Failed to delete session');
+            }
+            deletePopup.style.display = 'none';
+        };
+    }
     
+    cancelDeleteBtn.addEventListener('click', () => {
+        deletePopup.style.display = 'none';
+    });
+    
+    loadSessionsList();
 });
