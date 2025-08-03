@@ -1,3 +1,5 @@
+/* File: public/style.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
 
 :root {
@@ -136,16 +138,16 @@ body {
     flex-shrink: 0;
 }
 
-/* Style untuk ikon panah */
+/* Perbaikan: Styling untuk animasi panah sekarang menargetkan `.caret-icon` */
 .caret-icon {
     transition: transform 0.2s ease;
     margin-left: auto;
+    transform: rotate(0deg); /* Panah mengarah ke kanan secara default */
 }
 
-.sessions-list.show + .chat-history-btn .caret-icon {
-    transform: rotate(90deg);
+#chat-history-btn.active .caret-icon {
+    transform: rotate(90deg); /* Panah mengarah ke bawah saat daftar riwayat dibuka */
 }
-
 
 /* Style untuk daftar sesi */
 .sessions-list {
@@ -430,6 +432,59 @@ body {
 
 .message-content .copy-btn:hover {
     background-color: #666;
+}
+
+/* Tambahan untuk typing indicator */
+.typing-indicator {
+    width: fit-content;
+}
+
+.typing-indicator .message-content {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(270deg, #6c5ce7, #00cec9, #6c5ce7);
+    background-size: 200% 200%;
+    animation: gradient-animation 4s ease infinite;
+    padding: 12px 16px;
+    border-radius: 20px;
+}
+
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-color);
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: typing-wave 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0s;
+}
+
+@keyframes typing-wave {
+    0%, 80%, 100% {
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+    40% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
 }
 
 .chat-form {

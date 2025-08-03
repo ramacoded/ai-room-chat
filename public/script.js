@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
 
-    const deletePopup = document.getElementById('delete-popup');
+    const deletePopup = document.getElementById('delete-popup-container');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
@@ -49,8 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chatHistoryBtn.addEventListener('click', () => {
         sessionsList.classList.toggle('show');
-        // Perbaikan: Tambah/hapus kelas 'active' pada tombol
-        chatHistoryBtn.classList.toggle('active'); 
+        chatHistoryBtn.classList.toggle('active');
     });
 
     function startNewSession() {
@@ -249,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
-                    // Perbaikan: Hapus titik tiga (...)
                     currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
                 }
                 
@@ -355,16 +353,19 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.style.display = 'none';
         filePreviewContainer.innerHTML = '';
     }
-
+    
+    // Perbaikan: Implementasi baru untuk showTypingIndicator
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
             typingIndicator.id = 'typing-indicator';
-            typingIndicator.classList.add('typing-indicator', 'ai-message');
+            typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
             typingIndicator.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
+                <div class="message-content">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
             `;
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
