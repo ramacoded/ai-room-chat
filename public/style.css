@@ -203,6 +203,7 @@ body {
     margin-right: 8px;
 }
 
+/* Perbaikan: Tombol hapus selalu terlihat */
 .delete-session-btn {
     background: none;
     border: none;
@@ -211,8 +212,8 @@ body {
     padding: 4px;
     border-radius: 50%;
     flex-shrink: 0;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    opacity: 1; /* Diubah menjadi 1 agar selalu terlihat */
+    transition: background-color 0.2s ease;
     width: 24px;
     height: 24px;
     font-size: 0.9rem;
@@ -222,67 +223,15 @@ body {
     align-items: center;
 }
 
-.session-list-item:hover .delete-session-btn {
-    opacity: 1;
-}
-
-.delete-popup-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-/* Perbaikan: Menyesuaikan ukuran pop-up */
-.delete-popup-box {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    width: 280px; /* Lebar pop-up yang lebih kecil */
-    box-shadow: 0 4px 16px var(--shadow-color);
-}
-
-.delete-popup-buttons {
-    margin-top: 16px; /* Margin yang lebih kecil */
-    display: flex;
-    justify-content: center;
-    gap: 12px; /* Jarak antar tombol yang lebih kecil */
-}
-
-.delete-popup-buttons button {
-    padding: 8px 16px; /* Ukuran tombol yang lebih kecil */
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.confirm-delete-btn {
-    background-color: #e53e3e;
-    color: white;
-    border: none;
-}
-
-.confirm-delete-btn:hover {
-    background-color: #c53030;
-}
-
-.cancel-delete-btn {
+.delete-session-btn:hover {
     background-color: var(--input-bg);
-    color: var(--text-color);
-    border: none;
 }
 
-.cancel-delete-btn:hover {
-    background-color: var(--border-color);
+/* Hapus semua styling untuk pop-up */
+.delete-popup-container,
+.delete-popup-box,
+.delete-popup-buttons {
+    display: none !important;
 }
 
 .chat-container {
