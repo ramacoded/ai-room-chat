@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
     const welcomeMessage = document.getElementById('welcome-message');
 
+    const uploadMenu = document.getElementById('upload-menu');
+    const cameraBtn = document.getElementById('camera-btn');
+    const galleryBtn = document.getElementById('gallery-btn');
+    const fileBtn = document.getElementById('file-btn');
+
     let selectedFile = null;
     let isFirstMessage = true;
 
@@ -42,8 +47,37 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
 
+    // Toggle upload menu
     uploadBtn.addEventListener('click', () => {
+        uploadMenu.classList.toggle('show');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.upload-area') && uploadMenu.classList.contains('show')) {
+            uploadMenu.classList.remove('show');
+        }
+    });
+
+    // Handle menu button clicks
+    cameraBtn.addEventListener('click', () => {
+        fileInput.setAttribute('capture', 'camera');
         fileInput.click();
+        uploadMenu.classList.remove('show');
+    });
+    
+    galleryBtn.addEventListener('click', () => {
+        fileInput.removeAttribute('capture');
+        fileInput.setAttribute('accept', 'image/*');
+        fileInput.click();
+        uploadMenu.classList.remove('show');
+    });
+
+    fileBtn.addEventListener('click', () => {
+        fileInput.removeAttribute('capture');
+        fileInput.removeAttribute('accept');
+        fileInput.click();
+        uploadMenu.classList.remove('show');
     });
 
     fileInput.addEventListener('change', (e) => {
@@ -59,9 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const userMessage = chatInput.value.trim();
         
         if (userMessage || selectedFile) {
-            // HILANGKAN WELCOME MESSAGE SECARA INSTAN PADA PESAN PERTAMA
             if (isFirstMessage) {
-                welcomeMessage.classList.add('hide'); // Menggunakan kelas 'hide'
+                welcomeMessage.classList.add('hide');
                 isFirstMessage = false;
             }
 
