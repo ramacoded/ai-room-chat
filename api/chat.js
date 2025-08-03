@@ -1,6 +1,5 @@
 // File: api/chat.js
 
-// Import library yang dibutuhkan
 const {
   GoogleGenerativeAI,
   HarmCategory,
@@ -10,18 +9,11 @@ const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const moment = require('moment-timezone')
 const { IncomingForm } = require('formidable');
 
-// Mengambil API key dari Environment Variable Vercel
 const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
-
-// Jika Anda tetap ingin menggunakan API key secara langsung (tidak disarankan)
-// const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API key Anda
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
-// PENTING: Konfigurasi ini WAJIB ada di bagian paling atas file
-// Ini memberitahu Vercel untuk tidak memparsing body secara otomatis,
-// sehingga formidable bisa melakukannya
 export const config = {
   api: {
     bodyParser: false,
@@ -135,7 +127,6 @@ Tujuan utamaku adalah menjadi asisten serba tahu, serba bisa, dan selalu siap me
   }
 }
 
-// Vercel Serverless Function handler
 module.exports = (req, res) => {
   const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
