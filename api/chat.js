@@ -18,7 +18,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
 // Inisialisasi Supabase Client
-const supabaseUrl = "postgresql://postgres.puqbduevlwefdlcmfbuv:ramacodeai16@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
+const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co"
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM"
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
