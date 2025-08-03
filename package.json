@@ -1,7 +1,7 @@
 {
   "name": "noa-ai-chatbot",
   "version": "1.0.0",
-  "description": "A simple, clean chat AI website with a sidebar menu.",
+  "description": "Simple AI ChatBot Using Gemini API",
   "main": "api/chat.js",
   "scripts": {
     "start": "node api/chat.js"
@@ -12,13 +12,14 @@
     "gemini",
     "nodejs"
   ],
-  "author": "Your Name",
+  "author": "RAMACODE",
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.15.0",
     "cookie": "^0.6.0",
     "formidable": "^3.5.1",
     "moment-timezone": "^0.5.45",
+    "@supabase/supabase-js": "^2.44.2",
     "uuid": "^9.0.1"
   }
 }
