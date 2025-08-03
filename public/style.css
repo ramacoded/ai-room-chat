@@ -144,13 +144,20 @@ body {
     display: block;
 }
 
+/* Perbaikan untuk tata letak tombol X */
 .sessions-list li {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
     justify-content: space-between;
-    position: relative; /* PENTING: Untuk penempatan tombol 'X' */
-    
+    padding: 8px 16px;
+    position: relative;
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+    margin: 4px 8px;
+}
+
+.sessions-list li:hover {
+    background-color: var(--sidebar-link-hover);
 }
 
 .sessions-list li button:first-of-type {
@@ -175,12 +182,7 @@ body {
 
 /* Tombol hapus sesi */
 .delete-session-btn {
-    position: absolute; /* PENTING: Untuk memposisikan di pojok kanan */
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    
-    background: none; /* Menghilangkan latar belakang */
+    background: none;
     border: none;
     color: var(--primary-text-color);
     cursor: pointer;
@@ -330,7 +332,7 @@ body {
 }
 
 .message {
-    display: block; 
+    display: block;
     max-width: 85%;
     line-height: 1.6;
 }
