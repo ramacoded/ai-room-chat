@@ -10,7 +10,7 @@ const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const moment = require('moment-timezone')
 
 // Your existing gemini engine code
-const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw" // Pastikan ini API Key Anda yang benar
+const apiKey = process.env.GEMINI_API_KEY // Pastikan ini API Key Anda yang benar
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
