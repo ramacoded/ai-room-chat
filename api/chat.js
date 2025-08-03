@@ -17,9 +17,11 @@ const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"; // Ganti dengan API ke
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
+
 const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co"
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM"
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 export const config = {
   api: {
     bodyParser: false,
@@ -77,7 +79,6 @@ async function createNewSession(userId, initialMessage) {
     return newSessionId;
 }
 
-// FUNGSI BARU UNTUK MENGHAPUS SESI
 async function deleteChatSession(sessionId) {
     const { error } = await supabase
         .from('chat_sessions')
@@ -202,7 +203,6 @@ module.exports = async (req, res) => {
     }));
   }
 
-  // Menangani permintaan GET
   if (req.method === 'GET') {
     const { sessionId } = req.query;
     if (sessionId) {
@@ -215,7 +215,6 @@ module.exports = async (req, res) => {
     return;
   }
   
-  // Menangani permintaan DELETE
   if (req.method === 'DELETE') {
     const { sessionId } = req.query;
     if (sessionId) {
@@ -231,7 +230,6 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Menangani permintaan POST
   const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
