@@ -31,7 +31,7 @@ export const config = {
 async function getAllChatSessions(userId) {
   const { data, error } = await supabase
     .from('chat_sessions')
-    .select('id, title')
+    .select('session_id, title') // MENGGUNAKAN session_id
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -46,7 +46,7 @@ async function getChatHistory(sessionId) {
   const { data, error } = await supabase
     .from('chat_sessions')
     .select('history')
-    .eq('id', sessionId)
+    .eq('session_id', sessionId) // MENGGUNAKAN session_id
     .single();
 
   if (error) {
@@ -60,7 +60,7 @@ async function getChatHistory(sessionId) {
 async function saveChatHistory(sessionId, history) {
   const { data, error } = await supabase
     .from('chat_sessions')
-    .upsert({ id: sessionId, history: history });
+    .upsert({ session_id: sessionId, history: history }, { onConflict: 'session_id' }); // MENGGUNAKAN session_id dan onConflict
   
   if (error) {
     console.error('Error saving chat history:', error);
@@ -74,7 +74,7 @@ async function createNewSession(userId, initialMessage) {
     
     const { data, error } = await supabase
         .from('chat_sessions')
-        .insert({ id: newSessionId, user_id: userId, title: title, history: [] });
+        .insert({ session_id: newSessionId, user_id: userId, title: title, history: [] }); // MENGGUNAKAN session_id
 
     if (error) {
         console.error('Error creating new session:', error);
@@ -193,7 +193,6 @@ module.exports = async (req, res) => {
     }));
   }
 
-  // Endpoint untuk memuat daftar sesi atau riwayat chat
   if (req.method === 'GET') {
     const { sessionId } = req.query;
     if (sessionId) {
@@ -206,7 +205,6 @@ module.exports = async (req, res) => {
     return;
   }
   
-  // Endpoint untuk mengirim pesan
   const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
@@ -225,7 +223,6 @@ module.exports = async (req, res) => {
     let userHistory;
     let sessionIdToUpdate = currentSessionId;
     
-    // Jika tidak ada sesi saat ini, buat sesi baru
     if (!sessionIdToUpdate) {
         sessionIdToUpdate = await createNewSession(userId, message);
         userHistory = [];
