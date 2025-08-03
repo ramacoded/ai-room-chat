@@ -99,6 +99,7 @@ body {
     margin: 0;
 }
 
+/* Style untuk semua tombol di menu utama */
 .sidebar-nav ul li button {
     display: flex;
     align-items: center;
@@ -113,7 +114,7 @@ body {
     transition: background-color 0.2s ease;
     font-family: inherit;
     font-size: 1rem;
-    border-bottom: none;
+    border-bottom: none; /* Menghilangkan garis horizontal */
 }
 
 .sidebar-nav ul li a {
@@ -122,7 +123,7 @@ body {
     color: var(--text-color);
     text-decoration: none;
     transition: background-color 0.2s ease;
-    border-bottom: none;
+    border-bottom: none; /* Menghilangkan garis horizontal */
 }
 
 .sidebar-nav ul li button:hover,
@@ -130,11 +131,23 @@ body {
     background-color: var(--sidebar-link-hover);
 }
 
-.sidebar-nav ul li button svg {
+.sidebar-nav ul li button svg:first-of-type {
     margin-right: 12px;
     flex-shrink: 0;
 }
 
+/* Style untuk ikon panah */
+.caret-icon {
+    transition: transform 0.2s ease;
+    margin-left: auto;
+}
+
+.sessions-list.show + .chat-history-btn .caret-icon {
+    transform: rotate(90deg);
+}
+
+
+/* Style untuk daftar sesi */
 .sessions-list {
     padding: 0;
     list-style: none;
@@ -295,7 +308,7 @@ body {
     font-size: 1.5rem;
     font-weight: 500;
     margin: 0;
-    /* MENGHAPUS TEXT-ALIGN: CENTER */
+    text-align: left;
 }
 
 .open-sidebar-btn {

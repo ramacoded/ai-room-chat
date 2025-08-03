@@ -1,393 +1,334 @@
-// File: public/script.js
+// public/script.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const mainContainer = document.querySelector('.main-container');
+    const chatBox = document.getElementById('chat-box');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
-    const chatBox = document.getElementById('chat-box');
     const fileInput = document.getElementById('file-input');
-    const uploadBtn = document.getElementById('upload-btn');
-    const filePreviewContainer = document.getElementById('file-preview');
-
-    const sidebar = document.getElementById('sidebar');
+    const filePreview = document.getElementById('file-preview');
+    const welcomeMessage = document.getElementById('welcome-message');
     const openSidebarBtn = document.getElementById('open-sidebar-btn');
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-    const welcomeMessage = document.getElementById('welcome-message');
-
+    const sidebar = document.getElementById('sidebar');
+    const newSessionBtn = document.getElementById('new-session-btn');
+    const sessionsList = document.getElementById('sessions-list');
+    const currentChatTitle = document.getElementById('current-chat-title');
+    const chatHistoryBtn = document.getElementById('chat-history-btn');
+    const uploadBtn = document.getElementById('upload-btn');
     const uploadMenu = document.getElementById('upload-menu');
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
-    
-    const newSessionBtn = document.getElementById('new-session-btn');
-    const chatHistoryBtn = document.getElementById('chat-history-btn');
-    const sessionsList = document.getElementById('sessions-list');
-    const currentChatTitle = document.getElementById('current-chat-title');
-
     const deletePopup = document.getElementById('delete-popup');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
-    let selectedFile = null;
-    let isFirstMessage = true;
-    let currentSessionId = null;
+    let currentSessionId = localStorage.getItem('currentSessionId') || null;
+    let fileToUpload = null;
+    let sessionToDelete = null;
 
-    // Sidebar functionality
-    openSidebarBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        loadSessionsList();
-    });
-
-    closeSidebarBtn.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-    });
-
-    newSessionBtn.addEventListener('click', () => {
-        startNewSession();
-        sidebar.classList.remove('open');
-    });
-
-    chatHistoryBtn.addEventListener('click', () => {
-        sessionsList.classList.toggle('show');
-    });
-
-    function startNewSession() {
-        currentSessionId = null;
-        chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
-        isFirstMessage = true;
-        welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
-        currentChatTitle.textContent = 'Noa AI';
-        chatInput.focus();
-    }
-    
-    async function loadSessionsList() {
-        try {
-            const response = await fetch('/api/chat', { method: 'GET' });
-            if (!response.ok) throw new Error('Failed to load sessions list.');
-            
-            const { sessions } = await response.json();
-            sessionsList.innerHTML = '';
-            if (sessions && sessions.length > 0) {
-                sessions.forEach(session => {
-                    const li = document.createElement('li');
-                    li.classList.add('session-list-item');
-
-                    const titleButton = document.createElement('button');
-                    titleButton.textContent = session.title;
-                    titleButton.classList.add('session-title-button');
-                    titleButton.dataset.sessionId = session.session_id;
-
-                    titleButton.addEventListener('click', () => {
-                        loadChatHistory(session.session_id, session.title);
-                        sidebar.classList.remove('open');
-                    });
-                    
-                    const sessionActions = document.createElement('div');
-                    sessionActions.classList.add('session-actions');
-
-                    const separator = document.createElement('div');
-                    separator.classList.add('separator');
-                    
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = '✖';
-                    deleteButton.classList.add('delete-session-btn');
-                    deleteButton.dataset.sessionId = session.session_id;
-                    deleteButton.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        showDeletePopup(session.session_id);
-                    });
-                    
-                    sessionActions.appendChild(separator);
-                    sessionActions.appendChild(deleteButton);
-                    
-                    li.appendChild(titleButton);
-                    li.appendChild(sessionActions);
-                    sessionsList.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<button style="color:var(--primary-text-color);">Tidak ada riwayat</button>';
-                sessionsList.appendChild(li);
-            }
-        } catch (error) {
-            console.error('Error loading sessions:', error);
+    // Inisialisasi
+    const init = async () => {
+        setupEventListeners();
+        await loadSessions();
+        if (currentSessionId) {
+            await loadSession(currentSessionId);
+        } else {
+            welcomeMessage.innerHTML = `<p>Halo! Saya Noa, asisten AI Anda.</p>`;
+            currentChatTitle.textContent = "Noa AI";
         }
-    }
+    };
 
-    async function loadChatHistory(sessionId, title) {
-        try {
-            const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
-            if (!response.ok) throw new Error('Failed to load chat history.');
-            
-            const { history } = await response.json();
-            
-            chatBox.innerHTML = '';
-            welcomeMessage.classList.add('hide');
-            isFirstMessage = false;
+    const setupEventListeners = () => {
+        chatInput.addEventListener('input', autoResizeTextarea);
+        chatForm.addEventListener('submit', handleFormSubmit);
+        openSidebarBtn.addEventListener('click', () => sidebar.classList.add('open'));
+        closeSidebarBtn.addEventListener('click', () => sidebar.classList.remove('open'));
+        newSessionBtn.addEventListener('click', startNewSession);
+        chatHistoryBtn.addEventListener('click', toggleChatHistory);
+        uploadBtn.addEventListener('click', toggleUploadMenu);
+        fileInput.addEventListener('change', handleFileSelect);
 
-            if (history && history.length > 0) {
-                history.forEach(msg => {
-                    appendMessage(msg.role, msg.text);
-                });
-            } else {
-                appendMessage('ai', 'Riwayat chat ini masih kosong.');
-            }
+        // Upload menu button listeners
+        cameraBtn.addEventListener('click', () => fileInput.click()); // Placeholder, kamera tidak diimplementasikan
+        galleryBtn.addEventListener('click', () => fileInput.click());
+        fileBtn.addEventListener('click', () => fileInput.click());
 
-            currentSessionId = sessionId;
-            currentChatTitle.textContent = title;
-            
-        } catch (error) {
-            console.error('Error loading history:', error);
-            chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
-            appendMessage('ai', 'Maaf, terjadi kesalahan saat memuat riwayat chat.');
-            currentChatTitle.textContent = 'Noa AI';
-            currentSessionId = null;
-        }
-    }
+        // Delete popup listeners
+        cancelDeleteBtn.addEventListener('click', () => {
+            deletePopup.style.display = 'none';
+            sessionToDelete = null;
+        });
 
-    function getGreeting() {
-        const hour = new Date().getHours();
-        if (hour < 11) return "Selamat Pagi";
-        if (hour < 15) return "Selamat Siang";
-        if (hour < 18) return "Selamat Sore";
-        return "Selamat Malam";
-    }
-
-    welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
-
-    chatInput.addEventListener('input', () => {
-        chatInput.style.height = 'auto';
-        chatInput.style.height = chatInput.scrollHeight + 'px';
-    });
-
-    uploadBtn.addEventListener('click', () => {
-        uploadMenu.classList.toggle('show');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.upload-area') && uploadMenu.classList.contains('show')) {
-            uploadMenu.classList.remove('show');
-        }
-    });
-
-    cameraBtn.addEventListener('click', () => {
-        fileInput.setAttribute('capture', 'camera');
-        fileInput.click();
-        uploadMenu.classList.remove('show');
-    });
-    
-    galleryBtn.addEventListener('click', () => {
-        fileInput.removeAttribute('capture');
-        fileInput.setAttribute('accept', 'image/*');
-        fileInput.click();
-        uploadMenu.classList.remove('show');
-    });
-
-    fileBtn.addEventListener('click', () => {
-        fileInput.removeAttribute('capture');
-        fileInput.removeAttribute('accept');
-        fileInput.click();
-        uploadMenu.classList.remove('show');
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files.length > 0 ? e.target.files.item(0) : null;
-        if (file) {
-            selectedFile = file;
-            displayFilePreview(file);
-        }
-    });
-
-    chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const userMessage = chatInput.value.trim();
-        
-        if (userMessage || selectedFile) {
-            if (isFirstMessage) {
-                welcomeMessage.classList.add('hide');
-                isFirstMessage = false;
-            }
-
-            appendMessage('user', userMessage, selectedFile);
-            chatInput.value = '';
-            chatInput.style.height = 'auto';
-            removeFile();
-            showTypingIndicator();
-
-            try {
-                const formData = new FormData();
-                formData.append('message', userMessage);
-                if (selectedFile) {
-                    formData.append('file', selectedFile);
-                }
-                if (currentSessionId) {
-                    formData.append('sessionId', currentSessionId);
-                }
-
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                hideTypingIndicator();
-                appendMessage('ai', data.text);
-                
-                if (data.sessionId && !currentSessionId) {
-                    currentSessionId = data.sessionId;
-                    currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ') + '...';
-                }
-                
-                loadSessionsList();
-
-            } catch (error) {
-                console.error('Error:', error);
-                hideTypingIndicator();
-                appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
-            }
-        }
-    });
-
-    function appendMessage(sender, message, file = null) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
-        
-        const content = document.createElement('div');
-        content.classList.add('message-content');
-        
-        if (file) {
-            const filePreview = document.createElement('div');
-            filePreview.classList.add('message-file-preview');
-            if (file.type.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                filePreview.appendChild(img);
-            } else {
-                const fileName = document.createElement('p');
-                fileName.textContent = file.name;
-                filePreview.appendChild(fileName);
-            }
-            content.appendChild(filePreview);
-        }
-
-        const parts = message.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
-        parts.forEach((part, index) => {
-            if (index % 4 === 1 && parts.length > index + 1) {
-                const lang = part || 'text';
-                const codeContent = parts[(index + 1)];
-                const codeBlock = document.createElement('pre');
-                const code = document.createElement('code');
-                code.classList.add(`language-${lang}`);
-                code.textContent = codeContent;
-                
-                const copyBtn = document.createElement('button');
-                copyBtn.textContent = 'Copy';
-                copyBtn.classList.add('copy-btn');
-                copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(codeContent).then(() => {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => {
-                            copyBtn.textContent = 'Copy';
-                        }, 2000);
-                    });
-                });
-                
-                codeBlock.appendChild(code);
-                codeBlock.appendChild(copyBtn);
-                content.appendChild(codeBlock);
-            } else if (part.trim()) {
-                const textContent = document.createElement('p');
-                textContent.textContent = part;
-                content.appendChild(textContent);
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (sessionToDelete) {
+                await deleteSession(sessionToDelete);
+                deletePopup.style.display = 'none';
+                sessionToDelete = null;
             }
         });
 
-        messageElement.appendChild(content);
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        if (typeof Prism !== 'undefined') {
-            const codeElements = content.querySelectorAll('pre code');
-            codeElements.forEach(Prism.highlightElement);
-        }
-    }
+        // Event listener untuk menutup sidebar saat area lain diklik
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !openSidebarBtn.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+            if (uploadMenu.classList.contains('show') && !uploadBtn.contains(e.target) && !uploadMenu.contains(e.target)) {
+                uploadMenu.classList.remove('show');
+            }
+        });
+    };
 
-    function displayFilePreview(file) {
-        filePreviewContainer.style.display = 'flex';
-        filePreviewContainer.innerHTML = '';
+    const autoResizeTextarea = () => {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = chatInput.scrollHeight + 'px';
+    };
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (message === '' && !fileToUpload) return;
+
+        displayMessage(message, 'user');
+        chatInput.value = '';
+        autoResizeTextarea();
+        welcomeMessage.classList.add('hide');
+
+        try {
+            const formData = new FormData();
+            formData.append('message', message);
+            if (fileToUpload) {
+                formData.append('file', fileToUpload);
+                removeFile();
+            }
+            if (currentSessionId) {
+                formData.append('sessionId', currentSessionId);
+            }
+
+            const typingIndicator = displayTypingIndicator();
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            removeTypingIndicator(typingIndicator);
+
+            if (data.sessionId) {
+                currentSessionId = data.sessionId;
+                localStorage.setItem('currentSessionId', currentSessionId);
+                await loadSessions();
+                
+                // Perbarui judul chat jika ada
+                if (data.title) {
+                    currentChatTitle.textContent = data.title;
+                    const sessionItem = document.querySelector(`.session-list-item[data-session-id="${currentSessionId}"] .session-title-button`);
+                    if (sessionItem) {
+                        sessionItem.textContent = data.title;
+                    }
+                }
+            }
+            displayMessage(data.response, 'ai');
+
+        } catch (error) {
+            console.error('Error:', error);
+            removeTypingIndicator();
+            displayMessage('Maaf, terjadi kesalahan. Silakan coba lagi.', 'ai');
+        }
+    };
+
+    const handleFileSelect = (e) => {
+        fileToUpload = e.target.files[0];
+        if (fileToUpload) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                filePreview.innerHTML = `
+                    <span class="file-preview-close" onclick="removeFile()">✖</span>
+                    <img src="${e.target.result}" alt="Preview" class="file-preview-image">
+                    <p class="file-preview-info">${fileToUpload.name}</p>
+                `;
+                filePreview.style.display = 'flex';
+            };
+            reader.readAsDataURL(fileToUpload);
+        }
+        uploadMenu.classList.remove('show');
+    };
+
+    const removeFile = () => {
+        fileToUpload = null;
+        fileInput.value = null;
+        filePreview.style.display = 'none';
+        filePreview.innerHTML = '';
+    };
+
+    const displayMessage = (message, sender) => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', `${sender}-message`);
+        const contentElement = document.createElement('div');
+        contentElement.classList.add('message-content');
         
-        if (file.type.startsWith('image/')) {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.classList.add('file-preview-image');
-            filePreviewContainer.appendChild(img);
+        // Handle code blocks
+        if (message.includes('```')) {
+            const parts = message.split('```');
+            contentElement.innerHTML = '';
+            parts.forEach((part, index) => {
+                if (index % 2 === 1) {
+                    const codeBlock = document.createElement('pre');
+                    const codeLang = part.substring(0, part.indexOf('\n')).trim();
+                    const codeContent = part.substring(part.indexOf('\n') + 1);
+                    codeBlock.classList.add(`language-${codeLang}`);
+                    codeBlock.innerHTML = `<code>${codeContent}</code>`;
+                    contentElement.appendChild(codeBlock);
+                } else {
+                    const textContent = document.createElement('p');
+                    textContent.textContent = part.trim();
+                    if (textContent.textContent) {
+                        contentElement.appendChild(textContent);
+                    }
+                }
+            });
         } else {
-            const fileInfo = document.createElement('div');
-            fileInfo.classList.add('file-preview-info');
-            fileInfo.textContent = `File: ${file.name}`;
-            filePreviewContainer.appendChild(fileInfo);
+            contentElement.textContent = message;
         }
 
-        const closeBtn = document.createElement('span');
-        closeBtn.classList.add('file-preview-close');
-        closeBtn.innerHTML = '&#x2716;';
-        closeBtn.onclick = removeFile;
-        filePreviewContainer.appendChild(closeBtn);
-    }
-    
-    window.removeFile = function() {
-        selectedFile = null;
-        fileInput.value = '';
-        filePreviewContainer.style.display = 'none';
-        filePreviewContainer.innerHTML = '';
-    }
+        messageElement.appendChild(contentElement);
+        chatBox.appendChild(messageElement);
+        Prism.highlightAll();
+        chatBox.scrollTop = chatBox.scrollHeight;
+    };
 
-    function showTypingIndicator() {
-        if (!document.getElementById('typing-indicator')) {
-            const typingIndicator = document.createElement('div');
-            typingIndicator.id = 'typing-indicator';
-            typingIndicator.classList.add('typing-indicator', 'ai-message');
-            typingIndicator.innerHTML = `
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-            `;
-            chatBox.appendChild(typingIndicator);
-            chatBox.scrollTop = chatBox.scrollHeight;
+    const displayTypingIndicator = () => {
+        const typingIndicatorElement = document.createElement('div');
+        typingIndicatorElement.classList.add('message', 'ai-message', 'typing-indicator');
+        typingIndicatorElement.innerHTML = `
+            <div class="message-content">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        `;
+        chatBox.appendChild(typingIndicatorElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return typingIndicatorElement;
+    };
+
+    const removeTypingIndicator = (indicatorElement) => {
+        if (indicatorElement) {
+            indicatorElement.remove();
+        } else {
+            const currentIndicator = document.querySelector('.typing-indicator');
+            if (currentIndicator) {
+                currentIndicator.remove();
+            }
         }
-    }
+    };
 
-    function hideTypingIndicator() {
-        const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) {
-            typingIndicator.remove();
+    const loadSessions = async () => {
+        try {
+            const response = await fetch('/api/sessions');
+            const sessions = await response.json();
+            sessionsList.innerHTML = ''; // Kosongkan daftar sesi sebelumnya
+
+            if (sessions.length === 0) {
+                sessionsList.innerHTML = `<li class="no-sessions">Belum ada riwayat chat.</li>`;
+                return;
+            }
+
+            sessions.forEach(session => {
+                const li = document.createElement('li');
+                li.classList.add('session-list-item');
+                li.setAttribute('data-session-id', session.id);
+                li.innerHTML = `
+                    <button class="session-title-button">${session.title}</button>
+                    <div class="session-actions">
+                        <span class="separator"></span>
+                        <button class="delete-session-btn">✖</button>
+                    </div>
+                `;
+                sessionsList.appendChild(li);
+
+                li.querySelector('.session-title-button').addEventListener('click', async () => {
+                    currentSessionId = session.id;
+                    localStorage.setItem('currentSessionId', currentSessionId);
+                    await loadSession(currentSessionId);
+                    sidebar.classList.remove('open');
+                });
+
+                li.querySelector('.delete-session-btn').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Mencegah klik menyebar ke tombol judul
+                    sessionToDelete = session.id;
+                    deletePopup.style.display = 'flex';
+                });
+            });
+        } catch (error) {
+            console.error('Error loading sessions:', error);
         }
-    }
+    };
 
-    function showDeletePopup(sessionIdToDelete) {
-        deletePopup.style.display = 'flex';
-        confirmDeleteBtn.onclick = async () => {
-            const response = await fetch(`/api/chat?sessionId=${sessionIdToDelete}`, {
+    const loadSession = async (sessionId) => {
+        try {
+            chatBox.innerHTML = '';
+            welcomeMessage.classList.add('hide');
+
+            const response = await fetch(`/api/sessions/${sessionId}`);
+            const data = await response.json();
+            
+            if (data.history) {
+                data.history.forEach(item => {
+                    displayMessage(item.parts, item.role);
+                });
+            }
+            if (data.title) {
+                currentChatTitle.textContent = data.title;
+            }
+        } catch (error) {
+            console.error('Error loading session:', error);
+            chatBox.innerHTML = '<p>Gagal memuat sesi.</p>';
+        }
+    };
+
+    const startNewSession = () => {
+        currentSessionId = null;
+        localStorage.removeItem('currentSessionId');
+        chatBox.innerHTML = '';
+        welcomeMessage.classList.remove('hide');
+        welcomeMessage.innerHTML = `<p>Halo! Saya Noa, asisten AI Anda.</p>`;
+        currentChatTitle.textContent = "Noa AI";
+        sidebar.classList.remove('open');
+        removeFile();
+    };
+
+    const deleteSession = async (sessionId) => {
+        try {
+            await fetch(`/api/chat?sessionId=${sessionId}`, {
                 method: 'DELETE'
             });
-            if (response.ok) {
-                loadSessionsList();
-                if (currentSessionId === sessionIdToDelete) {
-                    startNewSession();
-                }
-            } else {
-                console.error('Failed to delete session');
+            
+            // Jika sesi yang dihapus adalah sesi aktif
+            if (currentSessionId === sessionId) {
+                startNewSession();
             }
-            deletePopup.style.display = 'none';
-        };
-    }
+            await loadSessions();
+        } catch (error) {
+            console.error('Error deleting session:', error);
+        }
+    };
 
-    cancelDeleteBtn.addEventListener('click', () => {
-        deletePopup.style.display = 'none';
-    });
+    const toggleChatHistory = () => {
+        sessionsList.classList.toggle('show');
+        const caretIcon = chatHistoryBtn.querySelector('.caret-icon');
+        if (sessionsList.classList.contains('show')) {
+            caretIcon.style.transform = 'rotate(90deg)';
+        } else {
+            caretIcon.style.transform = 'rotate(0deg)';
+        }
+    };
 
-    loadSessionsList();
+    const toggleUploadMenu = () => {
+        uploadMenu.classList.toggle('show');
+    };
+
+    window.removeFile = removeFile; // Jadikan fungsi bisa diakses secara global
+
+    init();
 });
