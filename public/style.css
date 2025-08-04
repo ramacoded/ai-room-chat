@@ -425,7 +425,8 @@ body {
 
 .code-block-container {
     max-width: 100%;
-    background-color: var(--code-bg);
+    /* Perbaikan: Menggunakan warna yang lebih cocok dengan tema */
+    background-color: #2b2b2b;
     border-radius: 12px;
     overflow: hidden;
     position: relative;
@@ -436,6 +437,8 @@ body {
     padding: 16px;
     overflow-x: auto;
     margin: 0;
+    /* Perbaikan: Pastikan warna background tetap gelap */
+    background-color: #2b2b2b;
 }
 
 .code-block-header {
@@ -443,7 +446,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    background-color: #2b2b2b;
+    background-color: #1e1e1e;
     border-bottom: 1px solid var(--border-color);
     color: var(--primary-text-color);
     font-size: 0.9em;
