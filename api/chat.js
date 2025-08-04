@@ -147,7 +147,6 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     if (file) {
       console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
-      // Perbaikan: Mengganti 'uri' menjadi 'fileUri'
       parts.unshift({ fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } });
     }
     
@@ -155,23 +154,12 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     
     let respon = await result.response.text();
     
+    // Perbaikan: Menyederhanakan proses replace
     let responseText = respon
-      .replace(/\*\*/g, "*")
       .replace(/"/g, "'")
-      .replace(/```javascript\n/g, '\n*JavaScript Snippet* :\n\n```')
-      .replace(/```bash\n/g, '\n*Bash Command* :\n\n```')
-      .replace(/```python\n/g, '\n*Python Snippet* :\n\n```')
-      .replace(/```html\n/g, '\n*HTML Snippet* :\n\n```')
-      .replace(/```css\n/g, '\n*CSS Snippet* :\n\n```')
-      .replace(/```json\n/g, '\n*JSON Snippet* :\n\n```')
-      .replace(/```shell\n/g, '\n*Shell Snippet* :\n\n```')
-      .replace(/```ruby\n/g, '\n*Ruby Snippet* :\n\n```')
-      .replace(/```java\n/g, '\n*Java Snippet* :\n\n```')
-      .replace(/```c\n/g, '\n*C Snippet* :\n\n```')
-      .replace(/```cpp\n/g, '\n*CPP Snippet* :\n\n```')
-      .replace(/```sql\n/g, '\n*SQL Snippet* :\n\n```')
-      .replace(/```markdown\n/g, '\n*Markdown Data* :\n\n```')
-      .replace(/```xml\n/g, '\n*XML Snippet* :\n\n```');
+      .replace(/```(javascript|bash|python|html|css|json|shell|ruby|java|c|cpp|sql|markdown|xml)\n/g, (match, lang) => {
+        return `\n*${lang.toUpperCase()} Snippet* :\n\n\`\`\`${lang}\n`;
+      });
 
     return { text: responseText };
   } catch (error) {
