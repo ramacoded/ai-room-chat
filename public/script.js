@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error:', error);
                 hideTypingIndicator();
-                // Perbaikan: Mereset sesi saat error
+                // Perbaikan: Mereset sesi saat error dan memberikan pesan yang lebih informatif
                 currentSessionId = null;
                 isFirstMessage = true;
                 appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya. Mungkin permintaan terlalu panjang atau kompleks.');
@@ -368,8 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
-
+        
         // Perbaikan: Logika pemformatan teks yang lebih andal
+        // Split berdasarkan blok kode dan teks biasa
         const parts = message.split(/```(\S+)?\n([\s\S]*?)```/g);
         
         parts.forEach((part, index) => {
