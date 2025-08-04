@@ -441,19 +441,20 @@ body {
     max-width: 100%;
     overflow-x: auto;
     margin-top: 10px;
+    background-color: var(--code-bg);
     border-radius: 12px;
+    padding: 16px;
 }
 
 .code-wrapper pre {
-    background-color: var(--code-bg);
-    color: var(--code-text-color);
-    padding: 16px;
     margin: 0;
+    padding: 0;
+    background: none;
+    color: var(--code-text-color);
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 0.9em;
     white-space: pre-wrap;
     word-break: break-all;
-    border-radius: 12px;
 }
 
 .copy-btn-simple {
@@ -473,6 +474,19 @@ body {
 
 .copy-btn-simple:hover {
     background-color: var(--sidebar-link-hover);
+}
+
+.message-content pre {
+    background: none;
+    color: var(--text-color);
+    padding: 16px;
+    position: relative;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+    border-radius: 0;
 }
 
 .typing-indicator {

@@ -377,11 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
 
-                const codeBlock = document.createElement('pre');
-                const code = document.createElement('code');
-                code.textContent = codeContent;
-                code.classList.add(`language-${lang.trim()}`);
-                
+                const codeWrapper = document.createElement('div');
+                codeWrapper.classList.add('code-wrapper');
+
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
                 copyBtn.classList.add('copy-btn-simple');
@@ -394,11 +392,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 
-                const codeWrapper = document.createElement('div');
-                codeWrapper.classList.add('code-wrapper');
+                const codeBlock = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = codeContent;
+                code.classList.add(`language-${lang.trim()}`);
+                
                 codeWrapper.appendChild(codeBlock);
                 codeWrapper.appendChild(copyBtn);
-                
                 content.appendChild(codeWrapper);
 
             } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
