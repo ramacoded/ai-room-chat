@@ -147,7 +147,8 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     if (file) {
       console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
-      parts.unshift({ fileData: uploadedFile });
+      // Perbaikan: Bungkus file yang diunggah dengan format yang benar
+      parts.unshift({ fileData: { mimeType: uploadedFile.mimeType, uri: uploadedFile.uri } });
     }
     
     const result = await chat.sendMessage(parts); 
@@ -217,7 +218,6 @@ module.exports = async (req, res) => {
     }
 
     const message = fields.message ? fields.message[0] : '';
-    // Perbaikan: Cek files.file yang mungkin tidak ada
     const file = files.file && files.file.length > 0 ? files.file[0] : null;
     let currentSessionId = fields.sessionId ? fields.sessionId[0] : null;
 
