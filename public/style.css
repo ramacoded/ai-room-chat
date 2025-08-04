@@ -424,20 +424,18 @@ body {
 }
 
 .code-block-container {
-    background-color: var(--code-bg);
+    max-width: 100%;
+    background-color: #2b2b2b; /* Warna gelap yang Anda inginkan */
     border-radius: 12px;
     overflow: hidden;
     position: relative;
     margin: 10px 0;
-    /* Perbaikan: Atur ulang warna background menjadi gelap */
-    background-color: #2b2b2b;
 }
 
 .code-block-container pre {
     padding: 16px;
     overflow-x: auto;
     margin: 0;
-    /* Perbaikan: Pastikan warna background tetap gelap */
     background-color: #2b2b2b;
     color: var(--text-color);
     font-family: 'Consolas', 'Courier New', monospace;
