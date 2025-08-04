@@ -327,26 +327,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 hideTypingIndicator();
 
-                currentAiMessageElement = document.createElement('div');
-                currentAiMessageElement.classList.add('message', 'ai-message');
-                const content = document.createElement('div');
-                content.classList.add('message-content');
-                currentAiMessageElement.appendChild(content);
-                chatBox.appendChild(currentAiMessageElement);
-
-                const reader = response.body.getReader();
-                let decoder = new TextDecoder();
-                let accumulatedText = '';
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    accumulatedText += chunk;
-                    updateAiMessage(accumulatedText);
+                const data = await response.json(); // Perbaikan: baca seluruh respons JSON
+                appendMessage('ai', data.text);
+                
+                if (data.sessionId && !currentSessionId) {
+                    currentSessionId = data.sessionId;
                 }
-
+                
                 loadSessionsList();
 
             } catch (error) {
@@ -354,10 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideTypingIndicator();
                 currentSessionId = null;
                 isFirstMessage = true;
-                appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya. Mungkin permintaan terlalu panjang atau kompleks.');
+                appendMessage('ai', `Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya. Error: ${error.message}`);
             } finally {
                 isSubmitting = false;
-                currentAiMessageElement = null;
             }
         }
     });
