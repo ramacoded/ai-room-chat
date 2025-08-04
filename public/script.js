@@ -370,16 +370,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = document.createElement('div');
         content.classList.add('message-content');
         
-        const parts = message.split(/```/g);
+        const parts = message.split('```');
         
         for (let i = 0; i < parts.length; i++) {
             if (i % 2 === 1) { // Kode block
                 const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
 
-                const codeHeader = document.createElement('div');
-                codeHeader.classList.add('code-header-simple');
-
+                const codeBlock = document.createElement('pre');
+                const code = document.createElement('code');
+                code.textContent = codeContent;
+                code.classList.add(`language-${lang.trim()}`);
+                
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
                 copyBtn.classList.add('copy-btn-simple');
@@ -392,16 +394,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 
-                codeHeader.appendChild(copyBtn);
-                content.appendChild(codeHeader);
-
-                const codeBlock = document.createElement('pre');
-                const code = document.createElement('code');
-                code.textContent = codeContent;
-                code.classList.add(`language-${lang.trim()}`);
+                const codeWrapper = document.createElement('div');
+                codeWrapper.classList.add('code-wrapper');
+                codeWrapper.appendChild(codeBlock);
+                codeWrapper.appendChild(copyBtn);
                 
-                codeBlock.appendChild(code);
-                content.appendChild(codeBlock);
+                content.appendChild(codeWrapper);
+
             } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
                 const textContent = document.createElement('p');
                 textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");

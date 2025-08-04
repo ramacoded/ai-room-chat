@@ -418,27 +418,42 @@ body {
     object-fit: contain;
 }
 
-/* Gaya untuk code block yang sederhana */
-.code-block-container {
-    max-width: 100%;
-    position: relative;
-    margin: 10px 0;
-    border-radius: 12px;
-    background-color: #2b2b2b;
-    overflow-x: auto;
-    padding: 16px;
-    display: block;
+/* Animasi gradient pada pesan pengguna saat AI mengetik */
+.user-message.user-typing .message-content {
+    background: linear-gradient(270deg, var(--card-bg), var(--sidebar-link-hover), var(--card-bg));
+    background-size: 200% 200%;
+    animation: gradient-animation 4s ease infinite;
 }
 
-.code-block-container pre {
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.message-content p {
     margin: 0;
-    padding: 0;
-    background: none;
-    color: var(--text-color);
+}
+
+/* Gaya untuk code snippet (teks biasa) */
+.code-wrapper {
+    position: relative;
+    max-width: 100%;
+    overflow-x: auto;
+    margin-top: 10px;
+    border-radius: 12px;
+}
+
+.code-wrapper pre {
+    background-color: var(--code-bg);
+    color: var(--code-text-color);
+    padding: 16px;
+    margin: 0;
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 0.9em;
     white-space: pre-wrap;
     word-break: break-all;
+    border-radius: 12px;
 }
 
 .copy-btn-simple {
@@ -452,17 +467,12 @@ body {
     padding: 6px 12px;
     cursor: pointer;
     font-size: 0.8em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.3s ease;
+    z-index: 10;
 }
 
 .copy-btn-simple:hover {
     background-color: var(--sidebar-link-hover);
-}
-
-
-/* Teks biasa */
-.message-content p {
-    margin: 0;
 }
 
 .typing-indicator {
