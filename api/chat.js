@@ -147,7 +147,6 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     if (file) {
       console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
-      // Perbaikan: Bungkus file yang diunggah dalam objek fileData
       parts.unshift({ fileData: uploadedFile });
     }
     
@@ -212,6 +211,13 @@ module.exports = async (req, res) => {
 
   const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
+    // Perbaikan: Tambahkan logging untuk debugging
+    console.log('--- Debugging Form Parsing ---');
+    console.log('Error:', err);
+    console.log('Fields:', fields);
+    console.log('Files:', files);
+    console.log('------------------------------');
+
     if (err) {
       console.error('Error parsing form data:', err);
       return res.status(500).json({ error: 'Failed to process file upload.' });
