@@ -28,26 +28,28 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-}
-
-body {
     font-family: 'Google Sans', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
+}
+
+body {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden; /* Mencegah overflow pada body */
 }
 
 .main-container {
     display: flex;
     position: relative;
     width: 100%;
-    max-width: 960px;
-    height: 100%;
+    height: 100vh; /* Pastikan tinggi container 100% dari viewport height */
+    max-width: 960px; /* Batas lebar maksimum untuk desktop */
     border-radius: 28px;
     box-shadow: 0 4px 12px var(--shadow-color);
     overflow: hidden;
+    background-color: var(--card-bg); /* Beri warna latar belakang ke container utama */
 }
 
 /* Sidebar Styling */
@@ -101,7 +103,6 @@ body {
     margin: 0;
 }
 
-/* Style untuk semua tombol di menu utama */
 .sidebar-nav ul li button {
     display: flex;
     align-items: center;
@@ -116,7 +117,7 @@ body {
     transition: background-color 0.2s ease;
     font-family: inherit;
     font-size: 1rem;
-    border-bottom: none; /* Menghilangkan garis horizontal */
+    border-bottom: none;
 }
 
 .sidebar-nav ul li a {
@@ -125,7 +126,7 @@ body {
     color: var(--text-color);
     text-decoration: none;
     transition: background-color 0.2s ease;
-    border-bottom: none; /* Menghilangkan garis horizontal */
+    border-bottom: none;
 }
 
 .sidebar-nav ul li button:hover,
@@ -138,18 +139,16 @@ body {
     flex-shrink: 0;
 }
 
-/* Perbaikan: Styling untuk animasi panah sekarang menargetkan `.caret-icon` */
 .caret-icon {
     transition: transform 0.2s ease;
     margin-left: auto;
-    transform: rotate(0deg); /* Panah mengarah ke kanan secara default */
+    transform: rotate(0deg);
 }
 
 #chat-history-btn.active .caret-icon {
-    transform: rotate(90deg); /* Panah mengarah ke bawah saat daftar riwayat dibuka */
+    transform: rotate(90deg);
 }
 
-/* Style untuk daftar sesi */
 .sessions-list {
     padding: 0;
     list-style: none;
@@ -196,20 +195,13 @@ body {
 }
 
 .separator {
-    width: 1px;
-    height: 16px;
-    background-color: var(--border-color);
-    margin-left: 8px;
-    margin-right: 8px;
     display: none; /* Tombol hapus dihapus, separator juga disembunyikan */
 }
 
-/* Tombol hapus tidak ada lagi, jadi styling-nya juga dihapus */
 .delete-session-btn {
     display: none;
 }
 
-/* Hapus semua styling untuk pop-up */
 .delete-popup-container,
 .delete-popup-box,
 .delete-popup-buttons {
@@ -222,6 +214,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    height: 100%; /* Pastikan tinggi chat-container 100% */
 }
 
 .chat-header {
@@ -231,6 +224,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     position: relative;
     justify-content: space-between;
+    flex-shrink: 0;
 }
 
 .header-title {
@@ -366,7 +360,6 @@ body {
     background-color: #666;
 }
 
-/* Tambahan untuk typing indicator */
 .typing-indicator {
     width: fit-content;
 }
@@ -576,11 +569,16 @@ body {
     line-height: 1;
 }
 
-@media (max-width: 960px) {
+/* Media Query untuk membuat desain responsif pada layar kecil */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start; /* Elemen di atas pada layar mobile */
+    }
+
     .main-container {
-        height: 100vh;
-        width: 100%;
+        height: 100%; /* Lebar penuh */
+        width: 100%; /* Tinggi penuh */
         max-width: 100%;
-        border-radius: 0;
+        border-radius: 0; /* Menghilangkan border radius */
     }
 }

@@ -132,7 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = sessionId;
-            currentChatTitle.textContent = title;
+            // Baris ini telah dihapus agar judul tidak berubah
+            // currentChatTitle.textContent = title;
             
         } catch (error) {
             console.error('Error loading history:', error);
