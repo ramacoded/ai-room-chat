@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
-    
+
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
     const sessionsList = document.getElementById('sessions-list');
@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isFirstMessage = true;
     let currentSessionId = null;
     let isSubmitting = false;
-    let currentAiMessageElement = null;
 
     let typingTimeout;
     let deletionTimeout;
@@ -36,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startTypingAnimation = (message) => {
         let i = 0;
         let isTyping = true;
-        
+
         const cursor = welcomeMessage.querySelector('.blinking-cursor');
         if (cursor) cursor.remove();
 
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newCursor.className = 'blinking-cursor';
         newCursor.textContent = '|';
         welcomeMessage.appendChild(newCursor);
-        
+
         welcomeMessage.textContent = '';
         welcomeMessage.appendChild(newCursor);
 
@@ -116,16 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         currentChatTitle.textContent = 'Noa AI';
         chatInput.focus();
     }
-    
+
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`Failed to load sessions list: ${response.status} - ${errorData.message}`);
             }
-            
+
             const { sessions } = await response.json();
             sessionsList.innerHTML = '';
             if (sessions && sessions.length > 0) {
@@ -142,15 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
-                    
+
                     const sessionActions = document.createElement('div');
                     sessionActions.classList.add('session-actions');
 
                     const separator = document.createElement('div');
                     separator.classList.add('separator');
-                    
+
                     sessionActions.appendChild(separator);
-                    
+
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
                     sessionsList.appendChild(li);
@@ -170,9 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
             if (!response.ok) throw new Error('Failed to load chat history.');
-            
+
             const { history } = await response.json();
-            
+
             chatBox.innerHTML = '';
             welcomeMessage.classList.add('hide');
             isFirstMessage = false;
@@ -188,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = sessionId;
-            
+
         } catch (error) {
             console.error('Error loading history:', error);
             chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
@@ -226,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-    
+
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
@@ -251,11 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (isSubmitting) return;
 
         const userMessage = chatInput.value.trim();
-        const fileToSend = fileInput.files.length > 0 ? fileInput.files[0] : null;
+        const fileToSend = fileInput.files.length > 0 ? fileInput.files.item(0) : null;
 
         if (userMessage || fileToSend) {
             isSubmitting = true;
@@ -271,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imageCard = document.createElement('div');
                     imageCard.classList.add('message', 'user-message', 'image-card');
                     imageCard.addEventListener('click', () => showImagePreview(fileToSend));
-                    
+
                     const image = document.createElement('img');
                     image.src = URL.createObjectURL(fileToSend);
                     imageCard.appendChild(image);
@@ -279,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const fileCard = document.createElement('div');
                     fileCard.classList.add('message', 'user-message', 'document-card');
-                    
+
                     const fileExtension = fileToSend.name.split('.').pop().toLowerCase();
                     fileCard.classList.add(`file-type-${fileExtension}`);
 
@@ -288,16 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fileName = document.createElement('p');
                     fileName.textContent = `${fileToSend.name}`;
                     fileContent.appendChild(fileName);
-                    
+
                     fileCard.appendChild(fileContent);
                     chatBox.appendChild(fileCard);
                 }
             }
-            
+
             if (userMessage) {
                 appendMessage('user', userMessage);
             }
-            
+
             chatBox.scrollTop = chatBox.scrollHeight;
 
             chatInput.value = '';
@@ -324,16 +323,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errorText = await response.text();
                     throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
                 }
-                
+
                 hideTypingIndicator();
 
                 const data = await response.json();
                 appendMessage('ai', data.text);
-                
+
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
                 }
-                
+
                 loadSessionsList();
 
             } catch (error) {
@@ -353,10 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
         previewOverlay.classList.add('image-preview-overlay');
         const previewImage = document.createElement('img');
         previewImage.src = URL.createObjectURL(file);
-        
+
         previewOverlay.appendChild(previewImage);
         document.body.appendChild(previewOverlay);
-        
+
         previewOverlay.addEventListener('click', () => {
             previewOverlay.remove();
         });
@@ -367,57 +366,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
-        
+
         const content = document.createElement('div');
         content.classList.add('message-content');
-        
-        const parts = message.split('```');
-        
-        for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 1) { // Kode block
-                const [lang, ...codeLines] = parts[i].split('\n');
-                const codeContent = codeLines.join('\n').trim();
 
-                const codeBlockContainer = document.createElement('div');
-                codeBlockContainer.classList.add('code-block-container');
+        const parts = message.split('`');
+        let isCodeBlock = false;
 
-                const codeBlockHeader = document.createElement('div');
-                codeBlockHeader.classList.add('code-block-header');
+        for (const part of parts) {
+            if (part === '``') {
+                isCodeBlock = !isCodeBlock;
+                if (isCodeBlock) {
+                    const codeBlock = document.createElement('pre');
+                    const code = document.createElement('code');
+                    codeBlock.appendChild(code);
+                    content.appendChild(codeBlock);
 
-                const langLabel = document.createElement('span');
-                langLabel.classList.add('code-language');
-                langLabel.textContent = lang.toUpperCase().trim() || 'TEXT';
-
-                const copyBtn = document.createElement('button');
-                copyBtn.textContent = 'Copy';
-                copyBtn.classList.add('copy-btn');
-                copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(codeContent).then(() => {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => {
-                            copyBtn.textContent = 'Copy';
-                        }, 2000);
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = 'Copy';
+                    copyButton.classList.add('copy-btn');
+                    copyButton.addEventListener('click', () => {
+                        navigator.clipboard.writeText(code.textContent).then(() => {
+                            copyButton.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyButton.textContent = 'Copy';
+                            }, 2000);
+                        });
                     });
-                });
-                
-                codeBlockHeader.appendChild(langLabel);
-                codeBlockHeader.appendChild(copyBtn);
-                
-                const codeBlock = document.createElement('pre');
-                const code = document.createElement('code');
-                code.classList.add(`language-${lang.trim()}`);
-                code.textContent = codeContent;
-                
-                codeBlock.appendChild(code);
-                codeBlockContainer.appendChild(codeBlockHeader);
-                codeBlockContainer.appendChild(codeBlock);
-                content.appendChild(codeBlockContainer);
-            } else { // Teks biasa
-                if (parts[i].trim()) {
-                    const textContent = document.createElement('p');
-                    textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
-                    content.appendChild(textContent);
+                    codeBlock.appendChild(copyButton);
                 }
+                continue;
+            }
+
+            if (isCodeBlock) {
+                const codeElement = content.querySelector('pre code');
+                if (codeElement) {
+                    codeElement.textContent += part;
+                }
+            } else if (part.trim()) {
+                const textContent = document.createElement('p');
+                textContent.innerHTML = part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                content.appendChild(textContent);
             }
         }
 
@@ -429,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
             codeElements.forEach(Prism.highlightElement);
         }
     }
-    
+
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
@@ -457,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
-        
+
         if (file.type.startsWith('image/')) {
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
@@ -476,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeBtn.onclick = removeFile;
         filePreviewContainer.appendChild(closeBtn);
     }
-    
+
     window.removeFile = function() {
         selectedFile = null;
         fileInput.value = '';
