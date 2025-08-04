@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadMenu = document.getElementById('upload-menu');
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
-    const fileBtn = document = document.getElementById('file-btn');
+    const fileBtn = document.getElementById('file-btn');
     
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
@@ -263,17 +263,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const userMessage = chatInput.value.trim();
         
-        if (userMessage || selectedFile) {
+        if (userMessage || fileInput.files.length > 0) {
             isSubmitting = true;
 
             if (isFirstMessage) {
                 welcomeMessage.classList.add('hide');
                 isFirstMessage = false;
-                // Hentikan animasi saat pesan pertama dikirim
                 stopTypingAnimation();
             }
 
-            appendMessage('user', userMessage, selectedFile);
+            // Perbaikan: Ambil file dari input secara langsung
+            const fileToSend = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+            appendMessage('user', userMessage, fileToSend);
             chatInput.value = '';
             chatInput.style.height = 'auto';
             removeFile();
@@ -282,20 +284,12 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData();
                 formData.append('message', userMessage);
-                if (selectedFile) {
-                    formData.append('file', selectedFile);
+                if (fileToSend) {
+                    formData.append('file', fileToSend);
                 }
                 if (currentSessionId) {
                     formData.append('sessionId', currentSessionId);
                 }
-                
-                // Tambahkan ini untuk debugging di browser
-                console.log('--- Debugging FormData ---');
-                for (let pair of formData.entries()) {
-                    console.log(pair[0], pair[1]);
-                }
-                console.log('--------------------------');
-
 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
