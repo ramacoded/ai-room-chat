@@ -1,6 +1,6 @@
 /* File: public/style.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
+@import url('[https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap](https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap)');
 
 :root {
     --bg-color: #202124;
@@ -424,14 +424,20 @@ body {
 }
 
 .code-block-container {
+    /* Perbaikan: Menggunakan max-width */
+    max-width: 100%;
     background-color: var(--code-bg);
     border-radius: 12px;
     overflow: hidden;
     position: relative;
     margin: 10px 0;
-    /* Tambahkan ini untuk menyesuaikan lebar dengan konten */
-    width: fit-content;
-    max-width: 100%;
+}
+
+.code-block-container pre {
+    /* Perbaikan: Menghilangkan padding dari pre dan memindahkannya ke container */
+    padding: 16px;
+    overflow-x: auto;
+    margin: 0;
 }
 
 .code-block-header {
@@ -439,7 +445,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 8px 16px;
-    /* Ubah background color menjadi abu-abu gelap */
+    /* Perbaikan: Menggunakan warna yang lebih gelap */
     background-color: #2b2b2b;
     border-bottom: 1px solid var(--border-color);
     color: var(--primary-text-color);

@@ -336,7 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error:', error);
                 hideTypingIndicator();
-                appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
+                // Perbaikan: Tampilkan pesan error yang lebih informatif
+                appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya. Mungkin permintaan terlalu panjang atau kompleks.');
             } finally {
                 isSubmitting = false;
             }
@@ -365,15 +366,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
-
-        // Perbaikan: Mengganti logika pemformatan teks
-        let formattedMessage = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
-        const parts = formattedMessage.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
-        parts.forEach((part, index) => {
-            if (index % 4 === 1 && parts.length > index + 1) {
-                const lang = part || 'text';
-                const codeContent = parts[(index + 1)];
+        const parts = message.split(/```/g);
+        let currentText = '';
+
+        for (let i = 0; i < parts.length; i++) {
+            if (i % 2 === 0) { // Teks biasa
+                let formattedText = parts[i]
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                    .replace(/\n/g, '<br>');
+                
+                const textNode = document.createElement('p');
+                textNode.innerHTML = formattedText;
+                content.appendChild(textNode);
+            } else { // Code block
+                const [lang, ...codeLines] = parts[i].split('\n');
+                const codeContent = codeLines.join('\n').trim();
 
                 const codeBlockContainer = document.createElement('div');
                 codeBlockContainer.classList.add('code-block-container');
@@ -383,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const langLabel = document.createElement('span');
                 langLabel.classList.add('code-language');
-                langLabel.textContent = lang.toUpperCase();
+                langLabel.textContent = lang.toUpperCase().trim();
 
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
@@ -409,13 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 codeBlockContainer.appendChild(codeBlockHeader);
                 codeBlockContainer.appendChild(codeBlock);
                 content.appendChild(codeBlockContainer);
-                
-            } else if (part.trim()) {
-                const textContent = document.createElement('p');
-                textContent.innerHTML = part; // Menggunakan innerHTML agar tag <strong> terbaca
-                content.appendChild(textContent);
             }
-        });
+        }
 
         messageElement.appendChild(content);
         chatBox.appendChild(messageElement);
