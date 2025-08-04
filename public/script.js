@@ -1,5 +1,3 @@
-// File: public/script.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const mainContainer = document.querySelector('.main-container');
     const chatForm = document.getElementById('chat-form');
@@ -8,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file-input');
     const uploadBtn = document.getElementById('upload-btn');
     const filePreviewContainer = document.getElementById('file-preview');
-
     const sidebar = document.getElementById('sidebar');
     const openSidebarBtn = document.getElementById('open-sidebar-btn');
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
@@ -119,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
-            
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`Failed to load sessions list: ${response.status} - ${errorData.message}`);
@@ -147,7 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const separator = document.createElement('div');
                     separator.classList.add('separator');
-                    
                     sessionActions.appendChild(separator);
                     
                     li.appendChild(titleButton);
@@ -187,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = sessionId;
-            
         } catch (error) {
             console.error('Error loading history:', error);
             chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
@@ -225,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-    
+
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
@@ -298,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             chatBox.scrollTop = chatBox.scrollHeight;
-
             chatInput.value = '';
             chatInput.style.height = 'auto';
             removeFile();
@@ -325,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 hideTypingIndicator();
-
                 const data = await response.json();
                 appendMessage('ai', data.text);
                 
@@ -334,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 loadSessionsList();
-
             } catch (error) {
                 console.error('Error:', error);
                 hideTypingIndicator();
@@ -363,30 +354,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function appendMessage(sender, message) {
         if (!message) return;
-
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
         
         const content = document.createElement('div');
         content.classList.add('message-content');
-        
         const parts = message.split('```');
         
         for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 1) {
+            if (i % 2 === 1) { // Logika jika ini adalah blok kode
                 const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
-
+    
                 const codeBlockContainer = document.createElement('div');
                 codeBlockContainer.classList.add('code-block-container');
-
+    
                 const codeBlockHeader = document.createElement('div');
                 codeBlockHeader.classList.add('code-block-header');
-
+    
                 const langLabel = document.createElement('span');
                 langLabel.classList.add('code-language');
                 langLabel.textContent = lang.toUpperCase().trim() || 'TEXT';
-
+    
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
                 copyBtn.classList.add('copy-btn');
@@ -398,29 +387,35 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, 2000);
                     });
                 });
-                
+    
                 codeBlockHeader.appendChild(langLabel);
                 codeBlockHeader.appendChild(copyBtn);
                 
-                const codeBlock = document.createElement('pre');
-                const code = document.createElement('code');
-                code.classList.add(`language-${lang.trim()}`);
-                code.textContent = codeContent;
-                
-                codeBlock.appendChild(code);
+                // --- PERUBAHAN UTAMA ADA DI SINI ---
+                // Kita tidak lagi membuat <pre> dan <code>, tapi sebuah <p>
+                const codeAsText = document.createElement('p');
+                codeAsText.classList.add('code-as-plain-text');
+                // Menggunakan innerText agar line break (baris baru) tetap muncul
+                codeAsText.innerText = codeContent;
+                // --- AKHIR DARI PERUBAHAN ---
+    
                 codeBlockContainer.appendChild(codeBlockHeader);
-                codeBlockContainer.appendChild(codeBlock);
+                codeBlockContainer.appendChild(codeAsText); // Menambahkan elemen <p> yang baru
                 content.appendChild(codeBlockContainer);
-            } else if (i % 2 === 0 && parts[i].trim()) {
+    
+            } else if (i % 2 === 0 && parts[i].trim()) { // Logika jika ini teks biasa
                 const textContent = document.createElement('p');
                 textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
                 content.appendChild(textContent);
             }
         }
-
+    
         messageElement.appendChild(content);
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
+    
+        // Panggilan ke Prism.highlightElement tidak akan berpengaruh lagi
+        // karena kita tidak menggunakan elemen <pre><code> untuk blok kode ini.
         if (typeof Prism !== 'undefined') {
             const codeElements = content.querySelectorAll('pre code');
             codeElements.forEach(Prism.highlightElement);
