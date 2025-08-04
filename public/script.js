@@ -288,6 +288,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentSessionId) {
                     formData.append('sessionId', currentSessionId);
                 }
+                
+                // Tambahkan ini untuk debugging di browser
+                console.log('--- Debugging FormData ---');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0], pair[1]);
+                }
+                console.log('--------------------------');
+
 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
