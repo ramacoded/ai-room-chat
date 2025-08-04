@@ -1,6 +1,6 @@
 /* File: public/style.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
+@import url('[https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap](https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap)');
 
 :root {
     --bg-color: #202124;
@@ -418,53 +418,51 @@ body {
     object-fit: contain;
 }
 
-/* Gaya untuk code block */
+/* Gaya untuk code block yang sederhana */
 .code-block-container {
-    background-color: var(--code-bg);
-    color: var(--code-text-color);
-    border-radius: 8px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    overflow: hidden;
-}
-
-.code-header-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px;
-    background-color: #333; /* Warna header code block */
-}
-
-.code-language-custom {
-    font-size: 0.9em;
-    font-weight: bold;
-    color: #eee;
-}
-
-.copy-btn-custom {
-    background-color: var(--copy-btn-bg);
-    color: var(--copy-btn-color);
-    border: none;
-    border-radius: 5px;
-    padding: 6px 10px;
-    cursor: pointer;
-    font-size: 0.8em;
-    transition: background-color 0.3s ease;
-}
-
-.copy-btn-custom:hover {
-    background-color: var(--sidebar-link-hover);
+    max-width: 100%;
+    position: relative;
+    margin: 10px 0;
+    border-radius: 12px;
+    background-color: #2b2b2b;
+    overflow-x: auto;
+    padding: 16px;
+    display: block;
 }
 
 .code-block-container pre {
-    padding: 12px;
     margin: 0;
-    overflow-x: auto;
+    padding: 0;
+    background: none;
+    color: var(--text-color);
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 0.9em;
     white-space: pre-wrap;
     word-break: break-all;
+}
+
+.copy-btn-simple {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--copy-btn-bg);
+    color: var(--copy-btn-color);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.copy-btn-simple:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+
+/* Teks biasa */
+.message-content p {
+    margin: 0;
 }
 
 .typing-indicator {
