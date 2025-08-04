@@ -1,6 +1,6 @@
 /* File: public/style.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
+@import url('[https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap](https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap)');
 
 :root {
     --bg-color: #202124;
@@ -425,6 +425,7 @@ body {
 
 .code-block-container {
     max-width: 100%;
+    /* Perbaikan: Atur ulang warna background menjadi gelap */
     background-color: #2b2b2b;
     border-radius: 12px;
     overflow: hidden;
@@ -436,6 +437,7 @@ body {
     padding: 16px;
     overflow-x: auto;
     margin: 0;
+    /* Perbaikan: Pastikan warna background tetap gelap */
     background-color: #2b2b2b;
     color: var(--text-color);
     font-family: 'Consolas', 'Courier New', monospace;
