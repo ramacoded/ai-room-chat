@@ -327,13 +327,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 hideTypingIndicator();
 
-                const data = await response.json(); // Perbaikan: baca seluruh respons JSON
-                appendMessage('ai', data.text);
+                const reader = response.body.getReader();
+                let decoder = new TextDecoder();
+                let accumulatedText = '';
                 
-                if (data.sessionId && !currentSessionId) {
-                    currentSessionId = data.sessionId;
+                currentAiMessageElement = document.createElement('div');
+                currentAiMessageElement.classList.add('message', 'ai-message');
+                const content = document.createElement('div');
+                content.classList.add('message-content');
+                currentAiMessageElement.appendChild(content);
+                chatBox.appendChild(currentAiMessageElement);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    accumulatedText += chunk;
+                    updateAiMessage(accumulatedText);
                 }
-                
+
                 loadSessionsList();
 
             } catch (error) {
@@ -344,23 +357,90 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendMessage('ai', `Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya. Error: ${error.message}`);
             } finally {
                 isSubmitting = false;
+                currentAiMessageElement = null;
             }
         }
     });
 
-    function showImagePreview(file) {
-        const previewOverlay = document.createElement('div');
-        previewOverlay.classList.add('image-preview-overlay');
-        const previewImage = document.createElement('img');
-        previewImage.src = URL.createObjectURL(file);
+    function updateAiMessage(text) {
+        if (!currentAiMessageElement) return;
+
+        const contentElement = currentAiMessageElement.querySelector('.message-content');
+        if (!contentElement) return;
+
+        contentElement.innerHTML = '';
         
-        previewOverlay.appendChild(previewImage);
-        document.body.appendChild(previewOverlay);
+        const parts = text.split(/```(\S+)?\n([\s\S]*?)```/g);
         
-        previewOverlay.addEventListener('click', () => {
-            previewOverlay.remove();
+        parts.forEach((part, index) => {
+            if (index % 3 === 1) {
+                const lang = part || 'text';
+                const codeContent = parts[index + 1];
+                
+                const codeBlockContainer = document.createElement('div');
+                codeBlockContainer.classList.add('code-block-container');
+
+                const codeBlockHeader = document.createElement('div');
+                codeBlockHeader.classList.add('code-block-header');
+
+                const langLabel = document.createElement('span');
+                langLabel.classList.add('code-language');
+                langLabel.textContent = lang.toUpperCase().trim();
+
+                const copyBtn = document.createElement('button');
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.add('copy-btn');
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(codeContent).then(() => {
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            btn.textContent = 'Copy';
+                        }, 2000);
+                    });
+                });
+                
+                codeBlockHeader.appendChild(langLabel);
+                codeBlockHeader.appendChild(copyBtn);
+                
+                const codeBlock = document.createElement('pre');
+                const code = document.createElement('code');
+                code.classList.add(`language-${lang.trim()}`);
+                code.textContent = codeContent;
+                
+                codeBlock.appendChild(code);
+                codeBlockContainer.appendChild(codeBlockHeader);
+                codeBlockContainer.appendChild(codeBlock);
+                contentElement.appendChild(codeBlockContainer);
+            } else if (index % 3 === 0 && part.trim()) {
+                const textContent = document.createElement('p');
+                textContent.innerHTML = part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                contentElement.appendChild(textContent);
+            }
         });
+        
+        if (typeof Prism !== 'undefined') {
+            const codeElements = contentElement.querySelectorAll('pre code');
+            codeElements.forEach(Prism.highlightElement);
+        }
+        
+        const copyButtons = contentElement.querySelectorAll('.copy-btn');
+        copyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const codeBlock = btn.closest('.code-block-container').querySelector('code');
+                if (codeBlock) {
+                    navigator.clipboard.writeText(codeBlock.textContent).then(() => {
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            btn.textContent = 'Copy';
+                        }, 2000);
+                    });
+                }
+            });
+        });
+
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
+
 
     function appendMessage(sender, message) {
         if (!message) return;
