@@ -211,20 +211,14 @@ module.exports = async (req, res) => {
 
   const form = new IncomingForm();
   form.parse(req, async (err, fields, files) => {
-    // Perbaikan: Tambahkan logging untuk debugging
-    console.log('--- Debugging Form Parsing ---');
-    console.log('Error:', err);
-    console.log('Fields:', fields);
-    console.log('Files:', files);
-    console.log('------------------------------');
-
     if (err) {
       console.error('Error parsing form data:', err);
       return res.status(500).json({ error: 'Failed to process file upload.' });
     }
 
     const message = fields.message ? fields.message[0] : '';
-    const file = files.file ? files.file[0] : null;
+    // Perbaikan: Cek files.file yang mungkin tidak ada
+    const file = files.file && files.file.length > 0 ? files.file[0] : null;
     let currentSessionId = fields.sessionId ? fields.sessionId[0] : null;
 
     if (!message && !file) {
