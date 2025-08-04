@@ -371,11 +371,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = document.createElement('div');
         content.classList.add('message-content');
         
-        const parts = message.split(/```/g);
+        const parts = message.split('```');
         
-        parts.forEach((part, index) => {
-            if (index % 2 === 1) { // Kode block
-                const [lang, ...codeLines] = part.split('\n');
+        for (let i = 0; i < parts.length; i++) {
+            if (i % 2 === 1) { // Kode block
+                const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
 
                 const codeBlockContainer = document.createElement('div');
@@ -412,12 +412,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 codeBlockContainer.appendChild(codeBlockHeader);
                 codeBlockContainer.appendChild(codeBlock);
                 content.appendChild(codeBlockContainer);
-            } else if (part.trim()) { // Teks biasa
-                const textContent = document.createElement('p');
-                textContent.innerHTML = part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
-                content.appendChild(textContent);
+            } else { // Teks biasa
+                if (parts[i].trim()) {
+                    const textContent = document.createElement('p');
+                    textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
+                    content.appendChild(textContent);
+                }
             }
-        });
+        }
 
         messageElement.appendChild(content);
         chatBox.appendChild(messageElement);

@@ -425,8 +425,7 @@ body {
 
 .code-block-container {
     max-width: 100%;
-    /* Perbaikan: Atur ulang warna background menjadi gelap */
-    background-color: #2b2b2b;
+    background-color: #1e1e1e; /* Warna gelap yang Anda inginkan */
     border-radius: 12px;
     overflow: hidden;
     position: relative;
@@ -437,8 +436,7 @@ body {
     padding: 16px;
     overflow-x: auto;
     margin: 0;
-    /* Perbaikan: Pastikan warna background tetap gelap */
-    background-color: #2b2b2b;
+    background-color: #1e1e1e; /* Pastikan warna background sama */
 }
 
 .code-block-header {
