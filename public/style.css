@@ -15,10 +15,11 @@
     --shadow-color: rgba(0, 0, 0, 0.3);
     --sidebar-bg: #28292c;
     --sidebar-link-hover: #3c4043;
-    --code-bg: #1e1e1e;
+    --code-bg: #272822; /* Warna latar belakang code block */
+    --code-text-color: #f8f8f2; /* Warna teks code */
     --copy-btn-bg: #5f6368;
     --copy-btn-color: #e8eaed;
-    --link-color: #55aaff; /* Warna baru untuk link */
+    --link-color: #55aaff; /* Warna untuk link */
 }
 
 * {
@@ -326,7 +327,6 @@ body {
     transition: background-color 0.3s ease;
 }
 
-/* Gaya untuk link di dalam bubble chat */
 .message-content a {
     color: var(--link-color);
     text-decoration: none;
@@ -418,78 +418,53 @@ body {
     object-fit: contain;
 }
 
-/* Animasi gradient pada pesan pengguna saat AI mengetik */
-.user-message.user-typing .message-content {
-    background: linear-gradient(270deg, var(--card-bg), var(--sidebar-link-hover), var(--card-bg));
-    background-size: 200% 200%;
-    animation: gradient-animation 4s ease infinite;
+/* Gaya untuk code block */
+.code-block-container {
+    background-color: var(--code-bg);
+    color: var(--code-text-color);
+    border-radius: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
 }
 
-@keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.message-content p {
-    margin: 0;
-}
-
-.code-snippet-container {
-    background-color: var(--chat-bubble-bg);
-    color: var(--chat-bubble-color);
-    padding: 16px;
-    border-radius: 20px;
-    position: relative;
-    margin: 10px 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.code-header {
+.code-header-custom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px;
-    background-color: var(--card-bg);
-    border-bottom: 1px solid var(--border-color);
-    color: var(--primary-text-color);
+    padding: 8px;
+    background-color: #333; /* Warna header code block */
+}
+
+.code-language-custom {
     font-size: 0.9em;
-    border-radius: 10px 10px 0 0;
-    margin: -16px -16px 16px -16px;
+    font-weight: bold;
+    color: #eee;
 }
 
-.code-header span {
-    font-weight: 500;
-    color: var(--primary-text-color);
-}
-
-.copy-btn {
+.copy-btn-custom {
     background-color: var(--copy-btn-bg);
     color: var(--copy-btn-color);
     border: none;
-    padding: 4px 10px;
-    border-radius: 6px;
+    border-radius: 5px;
+    padding: 6px 10px;
     cursor: pointer;
     font-size: 0.8em;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s ease;
 }
 
-.copy-btn:hover {
+.copy-btn-custom:hover {
     background-color: var(--sidebar-link-hover);
 }
 
-.message-content pre {
-    background: none;
-    color: var(--text-color);
-    padding: 0;
-    position: relative;
+.code-block-container pre {
+    padding: 12px;
+    margin: 0;
+    overflow-x: auto;
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 0.9em;
     white-space: pre-wrap;
     word-break: break-all;
-    margin: 0;
-    border-radius: 0;
 }
 
 .typing-indicator {

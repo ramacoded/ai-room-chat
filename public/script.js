@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
-    
+
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
     const sessionsList = document.getElementById('sessions-list');
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startTypingAnimation = (message) => {
         let i = 0;
         let isTyping = true;
-        
+
         const cursor = welcomeMessage.querySelector('.blinking-cursor');
         if (cursor) cursor.remove();
 
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newCursor.className = 'blinking-cursor';
         newCursor.textContent = '|';
         welcomeMessage.appendChild(newCursor);
-        
+
         welcomeMessage.textContent = '';
         welcomeMessage.appendChild(newCursor);
 
@@ -115,16 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         currentChatTitle.textContent = 'Noa AI';
         chatInput.focus();
     }
-    
+
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`Failed to load sessions list: ${response.status} - ${errorData.message}`);
             }
-            
+
             const { sessions } = await response.json();
             sessionsList.innerHTML = '';
             if (sessions && sessions.length > 0) {
@@ -141,15 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
-                    
+
                     const sessionActions = document.createElement('div');
                     sessionActions.classList.add('session-actions');
 
                     const separator = document.createElement('div');
                     separator.classList.add('separator');
-                    
+
                     sessionActions.appendChild(separator);
-                    
+
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
                     sessionsList.appendChild(li);
@@ -169,9 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
             if (!response.ok) throw new Error('Failed to load chat history.');
-            
+
             const { history } = await response.json();
-            
+
             chatBox.innerHTML = '';
             welcomeMessage.classList.add('hide');
             isFirstMessage = false;
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = sessionId;
-            
+
         } catch (error) {
             console.error('Error loading history:', error);
             chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-    
+
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         if (isSubmitting) return;
 
         const userMessage = chatInput.value.trim();
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const imageCard = document.createElement('div');
                     imageCard.classList.add('message', 'user-message', 'image-card');
                     imageCard.addEventListener('click', () => showImagePreview(fileToSend));
-                    
+
                     const image = document.createElement('img');
                     image.src = URL.createObjectURL(fileToSend);
                     imageCard.appendChild(image);
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const fileCard = document.createElement('div');
                     fileCard.classList.add('message', 'user-message', 'document-card');
-                    
+
                     const fileExtension = fileToSend.name.split('.').pop().toLowerCase();
                     fileCard.classList.add(`file-type-${fileExtension}`);
 
@@ -287,16 +287,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fileName = document.createElement('p');
                     fileName.textContent = `${fileToSend.name}`;
                     fileContent.appendChild(fileName);
-                    
+
                     fileCard.appendChild(fileContent);
                     chatBox.appendChild(fileCard);
                 }
             }
-            
+
             if (userMessage) {
                 appendMessage('user', userMessage);
             }
-            
+
             chatBox.scrollTop = chatBox.scrollHeight;
 
             chatInput.value = '';
@@ -323,16 +323,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errorText = await response.text();
                     throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
                 }
-                
+
                 hideTypingIndicator();
 
                 const data = await response.json();
                 appendMessage('ai', data.text);
-                
+
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
                 }
-                
+
                 loadSessionsList();
 
             } catch (error) {
@@ -352,10 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
         previewOverlay.classList.add('image-preview-overlay');
         const previewImage = document.createElement('img');
         previewImage.src = URL.createObjectURL(file);
-        
+
         previewOverlay.appendChild(previewImage);
         document.body.appendChild(previewOverlay);
-        
+
         previewOverlay.addEventListener('click', () => {
             previewOverlay.remove();
         });
@@ -366,23 +366,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
-        
+
         const content = document.createElement('div');
         content.classList.add('message-content');
-        
-        const parts = message.split('```');
-        
+
+        const parts = message.split('`');
+
         for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 1) { // Kode block
-                const [lang, ...codeLines] = parts[i].split('\n');
-                const codeContent = codeLines.join('\n').trim();
+            if (i % 2 === 1) { // Kode block (single backtick)
+                const codeContent = parts [i].trim();
+
+                const codeBlockContainer = document.createElement('div');
+                codeBlockContainer.classList.add('code-block-container');
 
                 const codeHeader = document.createElement('div');
-                codeHeader.classList.add('code-header-simple');
+                codeHeader.classList.add('code-header-custom');
+
+                const langLabel = document.createElement('span');
+                langLabel.classList.add('code-language-custom');
+                langLabel.textContent = 'TEXT'; // Default language
 
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
-                copyBtn.classList.add('copy-btn-simple');
+                copyBtn.classList.add('copy-btn-custom');
                 copyBtn.addEventListener('click', () => {
                     navigator.clipboard.writeText(codeContent).then(() => {
                         copyBtn.textContent = 'Copied!';
@@ -391,33 +397,32 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, 2000);
                     });
                 });
-                
+
+                codeHeader.appendChild(langLabel);
                 codeHeader.appendChild(copyBtn);
-                content.appendChild(codeHeader);
+                codeBlockContainer.appendChild(codeHeader);
 
                 const codeBlock = document.createElement('pre');
                 const code = document.createElement('code');
-                code.classList.add(`language-${lang.trim()}`);
                 code.textContent = codeContent;
-                
+
                 codeBlock.appendChild(code);
-                content.appendChild(codeBlock);
-            } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
+                codeBlockContainer.appendChild(codeBlock);
+                content.appendChild(codeBlockContainer);
+
+            } else if (i % 2 === 0 && parts [i].trim()) { // Teks biasa
                 const textContent = document.createElement('p');
-                textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
+                textContent.innerHTML = parts [i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
                 content.appendChild(textContent);
             }
         }
 
+
         messageElement.appendChild(content);
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
-        if (typeof Prism !== 'undefined') {
-            const codeElements = content.querySelectorAll('pre code');
-            codeElements.forEach(Prism.highlightElement);
-        }
     }
-    
+
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
@@ -445,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
-        
+
         if (file.type.startsWith('image/')) {
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
@@ -464,7 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeBtn.onclick = removeFile;
         filePreviewContainer.appendChild(closeBtn);
     }
-    
+
     window.removeFile = function() {
         selectedFile = null;
         fileInput.value = '';
