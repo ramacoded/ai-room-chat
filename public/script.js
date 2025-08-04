@@ -366,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = document.createElement('div');
         content.classList.add('message-content');
 
+        // Perbaikan: Mengganti logika pemformatan teks
         let formattedMessage = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
         const parts = formattedMessage.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
@@ -410,9 +411,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 content.appendChild(codeBlockContainer);
                 
             } else if (part.trim()) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = `<p>${part}</p>`;
-                content.appendChild(tempDiv);
+                const textContent = document.createElement('p');
+                textContent.innerHTML = part; // Menggunakan innerHTML agar tag <strong> terbaca
+                content.appendChild(textContent);
             }
         });
 
