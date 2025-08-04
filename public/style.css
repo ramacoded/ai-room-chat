@@ -272,10 +272,24 @@ body {
     pointer-events: none;
     width: 80%;
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    white-space: nowrap; /* Penting untuk efek mengetik */
+    overflow: hidden; /* Penting untuk efek mengetik */
+    border-right: 2px solid transparent; /* Menyembunyikan kursor asli */
 }
 
 .welcome-message.hide {
     display: none;
+}
+
+.welcome-message .blinking-cursor {
+    font-size: 1em;
+    color: var(--text-color);
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    from, to { opacity: 0; }
+    50% { opacity: 1; }
 }
 
 .chat-box::-webkit-scrollbar {
@@ -312,7 +326,6 @@ body {
     transition: background-color 0.3s ease;
 }
 
-/* Animasi gradient pada pesan pengguna saat AI mengetik */
 .user-message.user-typing .message-content {
     background: linear-gradient(270deg, var(--card-bg), var(--sidebar-link-hover), var(--card-bg));
     background-size: 200% 200%;

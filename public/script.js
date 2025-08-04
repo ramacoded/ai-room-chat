@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadMenu = document.getElementById('upload-menu');
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
-    const fileBtn = document.getElementById('file-btn');
+    const fileBtn = document = document.getElementById('file-btn');
     
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
@@ -28,6 +28,67 @@ document.addEventListener('DOMContentLoaded', () => {
     let isFirstMessage = true;
     let currentSessionId = null;
     let isSubmitting = false;
+
+    // Perbaikan: Kumpulan fungsi untuk animasi mengetik di welcome message
+    let typingTimeout;
+    let deletionTimeout;
+
+    const startTypingAnimation = (message) => {
+        let i = 0;
+        let isTyping = true;
+        
+        // Hapus kursor yang mungkin ada
+        const cursor = welcomeMessage.querySelector('.blinking-cursor');
+        if (cursor) cursor.remove();
+
+        // Tambahkan kursor baru
+        const newCursor = document.createElement('span');
+        newCursor.className = 'blinking-cursor';
+        newCursor.textContent = '|';
+        welcomeMessage.appendChild(newCursor);
+        
+        welcomeMessage.textContent = '';
+        welcomeMessage.appendChild(newCursor);
+
+        const animateLoop = () => {
+            if (isTyping) {
+                if (i < message.length) {
+                    welcomeMessage.textContent = message.substring(0, i + 1);
+                    welcomeMessage.appendChild(newCursor);
+                    i++;
+                    typingTimeout = setTimeout(animateLoop, 50);
+                } else {
+                    isTyping = false;
+                    deletionTimeout = setTimeout(animateLoop, 7000);
+                }
+            } else { // Proses menghapus
+                if (i >= 0) {
+                    welcomeMessage.textContent = message.substring(0, i);
+                    welcomeMessage.appendChild(newCursor);
+                    i--;
+                    deletionTimeout = setTimeout(animateLoop, 25);
+                } else {
+                    isTyping = true;
+                    typingTimeout = setTimeout(animateLoop, 1000);
+                }
+            }
+        };
+
+        animateLoop();
+    };
+
+    // Hentikan animasi welcome message
+    const stopTypingAnimation = () => {
+        clearTimeout(typingTimeout);
+        clearTimeout(deletionTimeout);
+        const cursor = welcomeMessage.querySelector('.blinking-cursor');
+        if (cursor) cursor.remove();
+        welcomeMessage.textContent = '';
+    };
+
+    // Panggil animasi saat pertama kali halaman dimuat
+    const initialMessage = `${getGreeting()}, aku Noa AI`;
+    startTypingAnimation(initialMessage);
 
     // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
@@ -55,7 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isFirstMessage = true;
         welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage) {
-            welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+            const greetingMessage = `${getGreeting()}, aku Noa AI`;
+            startTypingAnimation(greetingMessage);
         }
         currentChatTitle.textContent = 'Noa AI';
         chatInput.focus();
@@ -121,6 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeMessage.classList.add('hide');
             isFirstMessage = false;
 
+            // Hentikan animasi saat memuat riwayat
+            stopTypingAnimation();
+
             if (history && history.length > 0) {
                 history.forEach(msg => {
                     appendMessage(msg.role, msg.text);
@@ -147,8 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hour < 18) return "Selamat Sore";
         return "Selamat Malam";
     }
-
-    welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
 
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
@@ -206,6 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isFirstMessage) {
                 welcomeMessage.classList.add('hide');
                 isFirstMessage = false;
+                // Hentikan animasi saat pesan pertama dikirim
+                stopTypingAnimation();
             }
 
             appendMessage('user', userMessage, selectedFile);
@@ -315,6 +380,30 @@ document.addEventListener('DOMContentLoaded', () => {
             codeElements.forEach(Prism.highlightElement);
         }
     }
+    
+    function showTypingIndicator() {
+        if (!document.getElementById('typing-indicator')) {
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
+            typingIndicator.innerHTML = `
+                <div class="message-content">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    function hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
 
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
@@ -344,30 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.value = '';
         filePreviewContainer.style.display = 'none';
         filePreviewContainer.innerHTML = '';
-    }
-    
-    function showTypingIndicator() {
-        if (!document.getElementById('typing-indicator')) {
-            const typingIndicator = document.createElement('div');
-            typingIndicator.id = 'typing-indicator';
-            typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
-            typingIndicator.innerHTML = `
-                <div class="message-content">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            `;
-            chatBox.appendChild(typingIndicator);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    }
-
-    function hideTypingIndicator() {
-        const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) {
-            typingIndicator.remove();
-        }
     }
 
     loadSessionsList();
