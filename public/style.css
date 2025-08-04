@@ -37,19 +37,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; /* Mencegah overflow pada body */
+    overflow: hidden;
 }
 
 .main-container {
     display: flex;
     position: relative;
     width: 100%;
-    height: 100vh; /* Pastikan tinggi container 100% dari viewport height */
-    max-width: 960px; /* Batas lebar maksimum untuk desktop */
+    height: 100vh;
+    max-width: 960px;
     border-radius: 28px;
     box-shadow: 0 4px 12px var(--shadow-color);
     overflow: hidden;
-    background-color: var(--card-bg); /* Beri warna latar belakang ke container utama */
+    background-color: var(--card-bg);
 }
 
 /* Sidebar Styling */
@@ -195,7 +195,7 @@ body {
 }
 
 .separator {
-    display: none; /* Tombol hapus dihapus, separator juga disembunyikan */
+    display: none;
 }
 
 .delete-session-btn {
@@ -214,7 +214,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    height: 100%; /* Pastikan tinggi chat-container 100% */
+    height: 100%;
 }
 
 .chat-header {
@@ -309,6 +309,20 @@ body {
     border-radius: 20px;
     word-wrap: break-word;
     white-space: pre-wrap;
+    transition: background-color 0.3s ease;
+}
+
+/* Animasi gradient untuk pesan pengguna */
+.user-typing .message-content {
+    background: linear-gradient(135deg, #1f4068, #162447, #1f4068);
+    background-size: 200% 200%;
+    animation: gradient-animation 4s ease infinite;
+}
+
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .message-content p {
@@ -372,12 +386,6 @@ body {
     animation: gradient-animation 4s ease infinite;
     padding: 12px 16px;
     border-radius: 20px;
-}
-
-@keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 .typing-dot {
@@ -572,13 +580,13 @@ body {
 /* Media Query untuk membuat desain responsif pada layar kecil */
 @media (max-width: 768px) {
     body {
-        align-items: flex-start; /* Elemen di atas pada layar mobile */
+        align-items: flex-start;
     }
 
     .main-container {
-        height: 100%; /* Lebar penuh */
-        width: 100%; /* Tinggi penuh */
+        height: 100%;
+        width: 100%;
         max-width: 100%;
-        border-radius: 0; /* Menghilangkan border radius */
+        border-radius: 0;
     }
 }

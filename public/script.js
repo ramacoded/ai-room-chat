@@ -12,12 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const openSidebarBtn = document.getElementById('open-sidebar-btn');
     const closeSidebarBtn = document = document.getElementById('close-sidebar-btn');
-    const welcomeMessage = document.getElementById('welcome-message');
+    let welcomeMessage = document.getElementById('welcome-message');
 
     const uploadMenu = document.getElementById('upload-menu');
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
-    const fileBtn = document.getElementById('file-btn');
+    const fileBtn = document = document.getElementById('file-btn');
     
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
@@ -53,9 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSessionId = null;
         chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
         isFirstMessage = true;
-        const newWelcomeMessage = document.getElementById('welcome-message');
-        if (newWelcomeMessage) {
-            newWelcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
+        welcomeMessage = document.getElementById('welcome-message');
+        if (welcomeMessage) {
+            welcomeMessage.textContent = `${getGreeting()}, aku Noa AI`;
         }
         currentChatTitle.textContent = 'Noa AI';
         chatInput.focus();
@@ -93,8 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const separator = document.createElement('div');
                     separator.classList.add('separator');
                     
-                    // Tombol hapus tidak lagi ditambahkan
-
                     sessionActions.appendChild(separator);
                     
                     li.appendChild(titleButton);
@@ -132,8 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = sessionId;
-            // Baris ini telah dihapus agar judul tidak berubah
-            // currentChatTitle.textContent = title;
             
         } catch (error) {
             console.error('Error loading history:', error);
@@ -212,7 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 isFirstMessage = false;
             }
 
-            appendMessage('user', userMessage, selectedFile);
+            const userMessageElement = appendMessage('user', userMessage, selectedFile);
+            showUserTypingIndicator(userMessageElement);
+
             chatInput.value = '';
             chatInput.style.height = 'auto';
             removeFile();
@@ -243,8 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
-                    // Baris ini telah dihapus agar judul tetap "Noa AI"
-                    // currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
                 }
                 
                 loadSessionsList();
@@ -254,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideTypingIndicator();
                 appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
             } finally {
+                hideUserTypingIndicator(userMessageElement);
                 isSubmitting = false;
             }
         }
@@ -320,6 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const codeElements = content.querySelectorAll('pre code');
             codeElements.forEach(Prism.highlightElement);
         }
+        return messageElement; // Mengembalikan elemen yang baru dibuat
+    }
+
+    function showUserTypingIndicator(messageElement) {
+        messageElement.classList.add('user-typing');
+    }
+
+    function hideUserTypingIndicator(messageElement) {
+        messageElement.classList.remove('user-typing');
     }
 
     function displayFilePreview(file) {
