@@ -369,12 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const content = document.createElement('div');
         content.classList.add('message-content');
         
-        // Perbaikan: Logika pemformatan teks yang lebih andal
-        // Split berdasarkan blok kode dan teks biasa
         const parts = message.split(/```(\S+)?\n([\s\S]*?)```/g);
         
         parts.forEach((part, index) => {
-            if (index % 3 === 1) { // Ini adalah label bahasa
+            if (index % 3 === 1) {
                 const lang = part || 'text';
                 const codeContent = parts[index + 1];
                 
@@ -412,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 codeBlockContainer.appendChild(codeBlockHeader);
                 codeBlockContainer.appendChild(codeBlock);
                 content.appendChild(codeBlockContainer);
-            } else if (index % 3 === 0 && part.trim()) { // Ini adalah teks biasa
+            } else if (index % 3 === 0 && part.trim()) {
                 const textContent = document.createElement('p');
                 textContent.innerHTML = part.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
                 content.appendChild(textContent);
