@@ -424,13 +424,13 @@ body {
 }
 
 .code-block-container {
-    max-width: 100%;
-    /* Perbaikan: Atur ulang warna background menjadi gelap */
-    background-color: #2b2b2b;
+    background-color: var(--code-bg);
     border-radius: 12px;
     overflow: hidden;
     position: relative;
     margin: 10px 0;
+    /* Perbaikan: Atur ulang warna background menjadi gelap */
+    background-color: #2b2b2b;
 }
 
 .code-block-container pre {
