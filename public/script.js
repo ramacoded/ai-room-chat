@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let isSubmitting = false;
 
-    // Fungsi untuk animasi mengetik di welcome message
     let typingTimeout;
     let deletionTimeout;
 
@@ -266,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 stopTypingAnimation();
             }
 
-            // PERBAIKAN: Pisahkan file dan teks ke dalam elemen terpisah
             if (fileToSend) {
                 if (fileToSend.type.startsWith('image/')) {
                     const imageCard = document.createElement('div');
@@ -281,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const fileCard = document.createElement('div');
                     fileCard.classList.add('message', 'user-message', 'document-card');
                     
-                    // Ambil ekstensi file dan tambahkan sebagai kelas
                     const fileExtension = fileToSend.name.split('.').pop().toLowerCase();
                     fileCard.classList.add(`file-type-${fileExtension}`);
 
@@ -368,17 +365,25 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
+
+        let formattedMessage = message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         
-        const parts = message.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
+        const parts = formattedMessage.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
         parts.forEach((part, index) => {
             if (index % 4 === 1 && parts.length > index + 1) {
                 const lang = part || 'text';
                 const codeContent = parts[(index + 1)];
-                const codeBlock = document.createElement('pre');
-                const code = document.createElement('code');
-                code.classList.add(`language-${lang}`);
-                code.textContent = codeContent;
-                
+
+                const codeBlockContainer = document.createElement('div');
+                codeBlockContainer.classList.add('code-block-container');
+
+                const codeBlockHeader = document.createElement('div');
+                codeBlockHeader.classList.add('code-block-header');
+
+                const langLabel = document.createElement('span');
+                langLabel.classList.add('code-language');
+                langLabel.textContent = lang.toUpperCase();
+
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
                 copyBtn.classList.add('copy-btn');
@@ -391,13 +396,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 
+                codeBlockHeader.appendChild(langLabel);
+                codeBlockHeader.appendChild(copyBtn);
+                
+                const codeBlock = document.createElement('pre');
+                const code = document.createElement('code');
+                code.classList.add(`language-${lang}`);
+                code.textContent = codeContent;
+                
                 codeBlock.appendChild(code);
-                codeBlock.appendChild(copyBtn);
-                content.appendChild(codeBlock);
+                codeBlockContainer.appendChild(codeBlockHeader);
+                codeBlockContainer.appendChild(codeBlock);
+                content.appendChild(codeBlockContainer);
+                
             } else if (part.trim()) {
-                const textContent = document.createElement('p');
-                textContent.textContent = part;
-                content.appendChild(textContent);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = `<p>${part}</p>`;
+                content.appendChild(tempDiv);
             }
         });
 

@@ -354,8 +354,14 @@ body {
     margin-left: auto;
     background-color: var(--chat-bubble-bg);
     color: var(--chat-bubble-color);
-    padding: 12px 16px; /* Padding lebih kecil */
+    padding: 16px;
     border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.document-card .file-content {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -364,13 +370,12 @@ body {
 .document-card .file-content p {
     margin: 0;
     font-weight: 500;
-    font-size: 0.9em; /* Ukuran font lebih kecil */
 }
 
 /* Ikon untuk setiap jenis file */
 .document-card::before {
-    content: '';
-    font-size: 1.2rem; /* Ukuran ikon lebih kecil */
+    content: ''; /* Ikon default */
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--primary-text-color);
 }
@@ -418,40 +423,56 @@ body {
     margin: 0;
 }
 
-.message-content pre {
+.code-block-container {
     background-color: var(--code-bg);
-    color: var(--text-color);
     border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    margin: 10px 0;
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: #2b2b2b;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-text-color);
+    font-size: 0.9em;
+}
+
+.code-language {
+    font-weight: 500;
+    color: #9e9e9e;
+}
+
+.copy-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--copy-btn-color);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: background-color 0.2s ease;
+}
+
+.copy-btn:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+.message-content pre {
+    background: none;
+    color: var(--text-color);
     padding: 16px;
     position: relative;
     font-family: 'Consolas', 'Courier New', monospace;
     font-size: 0.9em;
     white-space: pre-wrap;
     word-break: break-all;
-    margin: 10px 0;
-}
-
-.message-content .copy-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--copy-btn-bg);
-    color: var(--copy-btn-color);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 0.8em;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    opacity: 0;
-}
-
-.message-content pre:hover .copy-btn {
-    opacity: 1;
-}
-
-.message-content .copy-btn:hover {
-    background-color: #666;
+    margin: 0;
+    border-radius: 0;
 }
 
 .typing-indicator {
