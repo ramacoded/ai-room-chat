@@ -242,7 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.sessionId && !currentSessionId) {
                     currentSessionId = data.sessionId;
-                    currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
+                    // Baris ini telah dihapus agar judul tetap "Noa AI"
+                    // currentChatTitle.textContent = userMessage.split(' ').slice(0, 5).join(' ');
                 }
                 
                 loadSessionsList();
