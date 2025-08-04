@@ -309,7 +309,6 @@ body {
 
 .user-message {
     margin-left: auto;
-    justify-content: flex-end;
 }
 
 .ai-message {
@@ -324,30 +323,85 @@ body {
     word-wrap: break-word;
     white-space: pre-wrap;
     transition: background-color 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 }
 
-/* Tata letak khusus untuk gambar di dalam bubble chat */
-.message-file-container {
-    padding: 8px;
-    background-color: var(--input-bg);
-    border-radius: 16px;
-    overflow: hidden;
+/* Gaya untuk kartu gambar (tanpa bubble) */
+.image-card {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    display: block;
+    max-width: 85%;
+    margin-left: auto;
+    cursor: pointer;
 }
 
-.message-file-preview {
+.image-card img {
     max-width: 100%;
-}
-
-.message-file-preview img {
-    max-width: 100%;
+    max-height: 250px;
     height: auto;
     display: block;
     border-radius: 12px;
+    cursor: pointer;
+    object-fit: contain;
 }
 
+/* Gaya untuk kartu dokumen (dengan bubble dan logo) */
+.document-card {
+    display: block;
+    max-width: 85%;
+    line-height: 1.6;
+    margin-left: auto;
+    background-color: var(--chat-bubble-bg);
+    color: var(--chat-bubble-color);
+    padding: 12px 16px; /* Padding lebih kecil */
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.document-card .file-content p {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.9em; /* Ukuran font lebih kecil */
+}
+
+/* Ikon untuk setiap jenis file */
+.document-card::before {
+    content: '';
+    font-size: 1.2rem; /* Ukuran ikon lebih kecil */
+    font-weight: bold;
+    color: var(--primary-text-color);
+}
+.document-card.file-type-xml::before { content: '<>'; color: #f2e379; }
+.document-card.file-type-css::before { content: '#'; color: #29b6f6; }
+.document-card.file-type-js::before { content: 'JS'; color: #ffd600; }
+.document-card.file-type-html::before { content: '</>'; color: #e54b23; }
+
+/* Gaya untuk overlay preview gambar */
+.image-preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    cursor: pointer;
+}
+
+.image-preview-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 16px;
+    object-fit: contain;
+}
+
+/* Animasi gradient pada pesan pengguna saat AI mengetik */
 .user-message.user-typing .message-content {
     background: linear-gradient(270deg, var(--card-bg), var(--sidebar-link-hover), var(--card-bg));
     background-size: 200% 200%;
@@ -362,15 +416,6 @@ body {
 
 .message-content p {
     margin: 0;
-}
-
-.message-file-preview {
-    margin-bottom: 10px;
-}
-
-.message-file-preview img {
-    max-width: 150px;
-    border-radius: 10px;
 }
 
 .message-content pre {

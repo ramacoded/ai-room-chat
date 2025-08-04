@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sidebar = document.getElementById('sidebar');
     const openSidebarBtn = document.getElementById('open-sidebar-btn');
-    const closeSidebarBtn = document = document.getElementById('close-sidebar-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
     let welcomeMessage = document.getElementById('welcome-message');
 
     const uploadMenu = document.getElementById('upload-menu');
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let isSubmitting = false;
 
-    // Perbaikan: Kumpulan fungsi untuk animasi mengetik di welcome message
+    // Fungsi untuk animasi mengetik di welcome message
     let typingTimeout;
     let deletionTimeout;
 
@@ -37,11 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let i = 0;
         let isTyping = true;
         
-        // Hapus kursor yang mungkin ada
         const cursor = welcomeMessage.querySelector('.blinking-cursor');
         if (cursor) cursor.remove();
 
-        // Tambahkan kursor baru
         const newCursor = document.createElement('span');
         newCursor.className = 'blinking-cursor';
         newCursor.textContent = '|';
@@ -61,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     isTyping = false;
                     deletionTimeout = setTimeout(animateLoop, 7000);
                 }
-            } else { // Proses menghapus
+            } else {
                 if (i >= 0) {
                     welcomeMessage.textContent = message.substring(0, i);
                     welcomeMessage.appendChild(newCursor);
@@ -73,11 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         };
-
         animateLoop();
     };
 
-    // Hentikan animasi welcome message
     const stopTypingAnimation = () => {
         clearTimeout(typingTimeout);
         clearTimeout(deletionTimeout);
@@ -86,11 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
         welcomeMessage.textContent = '';
     };
 
-    // Panggil animasi saat pertama kali halaman dimuat
     const initialMessage = `${getGreeting()}, aku Noa AI`;
     startTypingAnimation(initialMessage);
 
-    // Sidebar functionality
     openSidebarBtn.addEventListener('click', () => {
         sidebar.classList.add('open');
         loadSessionsList();
@@ -183,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeMessage.classList.add('hide');
             isFirstMessage = false;
 
-            // Hentikan animasi saat memuat riwayat
             stopTypingAnimation();
 
             if (history && history.length > 0) {
@@ -262,8 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isSubmitting) return;
 
         const userMessage = chatInput.value.trim();
-        
-        if (userMessage || fileInput.files.length > 0) {
+        const fileToSend = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+        if (userMessage || fileToSend) {
             isSubmitting = true;
 
             if (isFirstMessage) {
@@ -272,9 +266,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 stopTypingAnimation();
             }
 
-            const fileToSend = fileInput.files.length > 0 ? fileInput.files[0] : null;
+            // PERBAIKAN: Pisahkan file dan teks ke dalam elemen terpisah
+            if (fileToSend) {
+                if (fileToSend.type.startsWith('image/')) {
+                    const imageCard = document.createElement('div');
+                    imageCard.classList.add('message', 'user-message', 'image-card');
+                    imageCard.addEventListener('click', () => showImagePreview(fileToSend));
+                    
+                    const image = document.createElement('img');
+                    image.src = URL.createObjectURL(fileToSend);
+                    imageCard.appendChild(image);
+                    chatBox.appendChild(imageCard);
+                } else {
+                    const fileCard = document.createElement('div');
+                    fileCard.classList.add('message', 'user-message', 'document-card');
+                    
+                    // Ambil ekstensi file dan tambahkan sebagai kelas
+                    const fileExtension = fileToSend.name.split('.').pop().toLowerCase();
+                    fileCard.classList.add(`file-type-${fileExtension}`);
 
-            appendMessage('user', userMessage, fileToSend);
+                    const fileContent = document.createElement('div');
+                    fileContent.classList.add('file-content');
+                    const fileName = document.createElement('p');
+                    fileName.textContent = `${fileToSend.name}`;
+                    fileContent.appendChild(fileName);
+                    
+                    fileCard.appendChild(fileContent);
+                    chatBox.appendChild(fileCard);
+                }
+            }
+            
+            if (userMessage) {
+                appendMessage('user', userMessage);
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+
             chatInput.value = '';
             chatInput.style.height = 'auto';
             removeFile();
@@ -319,30 +346,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function appendMessage(sender, message, file = null) {
+    function showImagePreview(file) {
+        const previewOverlay = document.createElement('div');
+        previewOverlay.classList.add('image-preview-overlay');
+        const previewImage = document.createElement('img');
+        previewImage.src = URL.createObjectURL(file);
+        
+        previewOverlay.appendChild(previewImage);
+        document.body.appendChild(previewOverlay);
+        
+        previewOverlay.addEventListener('click', () => {
+            previewOverlay.remove();
+        });
+    }
+
+    function appendMessage(sender, message) {
+        if (!message) return;
+
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
         
         const content = document.createElement('div');
         content.classList.add('message-content');
-        
-        if (file) {
-            const fileContainer = document.createElement('div');
-            fileContainer.classList.add('message-file-container');
-            const filePreview = document.createElement('div');
-            filePreview.classList.add('message-file-preview');
-            if (file.type.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                filePreview.appendChild(img);
-            } else {
-                const fileName = document.createElement('p');
-                fileName.textContent = file.name;
-                filePreview.appendChild(fileName);
-            }
-            fileContainer.appendChild(filePreview);
-            content.appendChild(fileContainer);
-        }
         
         const parts = message.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);
         parts.forEach((part, index) => {
