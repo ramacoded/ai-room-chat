@@ -66,8 +66,7 @@ async function saveChatHistory(sessionId, history) {
 
 async function createNewSession(userId, initialMessage) {
     const newSessionId = uuidv4();
-    // Perbaikan: Hapus '...' dari judul
-    const title = initialMessage.split(' ').slice(0, 5).join(' ');
+    const title = initialMessage.split(' ').slice(0, 5).join(' ') + '...';
     
     const { data, error } = await supabase
         .from('chat_sessions')
@@ -78,19 +77,6 @@ async function createNewSession(userId, initialMessage) {
         return null;
     }
     return newSessionId;
-}
-
-async function deleteChatSession(sessionId) {
-    const { error } = await supabase
-        .from('chat_sessions')
-        .delete()
-        .eq('session_id', sessionId);
-    
-    if (error) {
-        console.error('Error deleting chat session:', error);
-        return false;
-    }
-    return true;
 }
 
 async function uploadToGemini(path, mimeType) {
@@ -161,7 +147,8 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     if (file) {
       console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
-      parts.unshift(uploadedFile);
+      // Perbaikan: Bungkus file yang diunggah dalam objek fileData
+      parts.unshift({ fileData: uploadedFile });
     }
     
     const result = await chat.sendMessage(parts); 
@@ -220,18 +207,7 @@ module.exports = async (req, res) => {
   }
   
   if (req.method === 'DELETE') {
-    const { sessionId } = req.query;
-    if (sessionId) {
-        const success = await deleteChatSession(sessionId);
-        if (success) {
-            res.status(200).json({ message: 'Session deleted successfully.' });
-        } else {
-            res.status(500).json({ message: 'Failed to delete session.' });
-        }
-    } else {
-        res.status(400).json({ message: 'Session ID is required.' });
-    }
-    return;
+    return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
   const form = new IncomingForm();
