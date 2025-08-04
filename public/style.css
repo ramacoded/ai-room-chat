@@ -1,4 +1,4 @@
-@import url('[https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap](https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap)');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
 
 :root {
     --bg-color: #202124;
@@ -469,41 +469,6 @@ body {
     margin: 0;
 }
 
-/* Gaya untuk code block yang sederhana */
-.code-wrapper {
-    position: relative;
-    max-width: 100%;
-    margin-top: 10px;
-    background-color: var(--chat-bubble-bg);
-    border-radius: 12px;
-    padding: 16px;
-    overflow-x: auto;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 0.9em;
-    color: var(--code-text-color);
-    white-space: pre-wrap;
-    word-break: break-all;
-}
-
-.copy-btn-simple {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: var(--copy-btn-bg);
-    color: var(--copy-btn-color);
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 0.8em;
-    transition: background-color 0.3s ease;
-    z-index: 10;
-}
-
-.copy-btn-simple:hover {
-    background-color: var(--sidebar-link-hover);
-}
-
 .typing-indicator {
     width: fit-content;
 }
@@ -725,10 +690,11 @@ body {
     }
 }
 
-/* ===== KODE BARU UNTUK HEADER BLOK KODE ===== */
+/* ===== CODE BLOCK HEADER STYLES START (REVISED) ===== */
 
-/* Container utama untuk blok kode */
+/* Container utama untuk blok kode, sekarang dengan posisi relatif */
 .code-block-container {
+    position: relative;
     background-color: var(--code-bg, #2b2b2b);
     border-radius: 12px;
     overflow: hidden;
@@ -736,52 +702,63 @@ body {
     border: 1px solid var(--border-color);
 }
 
-/* Header untuk blok kode */
+/* Header tidak lagi memiliki latar belakang atau border bawah agar menyatu */
 .code-block-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px;
-    background-color: var(--input-bg, #3c4043);
-    border-bottom: 1px solid var(--border-color);
+    padding: 12px 16px;
+    /* Menghapus background dan border-bottom */
 }
 
-/* Label nama bahasa (e.g., JAVASCRIPT) */
+/* Label nama bahasa */
 .code-language {
-    font-size: 0.8em;
-    font-weight: 700;
+    font-size: 0.85em;
+    font-weight: 500;
     color: var(--primary-text-color, #bdc1c6);
     text-transform: uppercase;
 }
 
-/* Tombol Copy */
+/* Tombol Copy diposisikan secara absolut di pojok kanan atas */
 .copy-btn {
-    background-color: var(--copy-btn-bg, #5f6368);
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: var(--input-bg);
     color: var(--copy-btn-color, #e8eaed);
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 4px 10px;
     cursor: pointer;
     font-size: 0.8em;
     font-family: inherit;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    opacity: 0.8;
+    /* Sedikit transparan saat tidak di-hover */
 }
 
 .copy-btn:hover {
-    background-color: var(--sidebar-link-hover, #3c4043);
+    background-color: var(--sidebar-link-hover);
+    opacity: 1;
+    /* Terlihat jelas saat di-hover */
 }
 
-/* Styling untuk <pre> dan <code> dari Prism.js di dalam container baru */
+/* Beri padding atas pada <pre> agar kode tidak tertutup header */
 .code-block-container pre {
     margin: 0 !important;
     padding: 16px !important;
+    padding-top: 48px !important;
+    /* Ruang ekstra di atas untuk header */
     white-space: pre-wrap;
     word-break: break-all;
 }
 
+/* Reset gaya default PrismJS agar menyatu */
 .code-block-container pre,
 .code-block-container code {
     background: none !important;
     font-size: 0.9em;
     text-shadow: none !important;
 }
+
+/* ===== CODE BLOCK HEADER STYLES END (REVISED) ===== */
