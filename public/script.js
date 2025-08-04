@@ -377,12 +377,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
 
-                const codeWrapper = document.createElement('div');
-                codeWrapper.classList.add('code-wrapper');
+                const codeBlockContainer = document.createElement('div');
+                codeBlockContainer.classList.add('code-block-container');
+
+                const codeBlockHeader = document.createElement('div');
+                codeBlockHeader.classList.add('code-block-header');
+
+                const langLabel = document.createElement('span');
+                langLabel.classList.add('code-language');
+                langLabel.textContent = lang.toUpperCase().trim() || 'TEXT';
 
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
-                copyBtn.classList.add('copy-btn-simple');
+                copyBtn.classList.add('copy-btn');
                 copyBtn.addEventListener('click', () => {
                     navigator.clipboard.writeText(codeContent).then(() => {
                         copyBtn.textContent = 'Copied!';
@@ -392,15 +399,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 
+                codeBlockHeader.appendChild(langLabel);
+                codeBlockHeader.appendChild(copyBtn);
+                
                 const codeBlock = document.createElement('pre');
                 const code = document.createElement('code');
-                code.textContent = codeContent;
                 code.classList.add(`language-${lang.trim()}`);
+                code.textContent = codeContent;
                 
-                codeWrapper.appendChild(codeBlock);
-                codeWrapper.appendChild(copyBtn);
-                content.appendChild(codeWrapper);
-
+                codeBlock.appendChild(code);
+                codeBlockContainer.appendChild(codeBlockHeader);
+                codeBlockContainer.appendChild(codeBlock);
+                content.appendChild(codeBlockContainer);
             } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
                 const textContent = document.createElement('p');
                 textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");

@@ -435,7 +435,6 @@ body {
     margin: 0;
 }
 
-/* Gaya untuk code snippet (teks biasa) */
 .code-wrapper {
     position: relative;
     max-width: 100%;
@@ -464,8 +463,8 @@ body {
     background-color: var(--copy-btn-bg);
     color: var(--copy-btn-color);
     border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
+    border-radius: 5px;
+    padding: 6px 10px;
     cursor: pointer;
     font-size: 0.8em;
     transition: background-color 0.3s ease;
@@ -474,19 +473,6 @@ body {
 
 .copy-btn-simple:hover {
     background-color: var(--sidebar-link-hover);
-}
-
-.message-content pre {
-    background: none;
-    color: var(--text-color);
-    padding: 16px;
-    position: relative;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 0.9em;
-    white-space: pre-wrap;
-    word-break: break-all;
-    margin: 0;
-    border-radius: 0;
 }
 
 .typing-indicator {
