@@ -272,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 stopTypingAnimation();
             }
 
-            // Perbaikan: Ambil file dari input secara langsung
             const fileToSend = fileInput.files.length > 0 ? fileInput.files[0] : null;
 
             appendMessage('user', userMessage, fileToSend);
@@ -328,6 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
         content.classList.add('message-content');
         
         if (file) {
+            const fileContainer = document.createElement('div');
+            fileContainer.classList.add('message-file-container');
             const filePreview = document.createElement('div');
             filePreview.classList.add('message-file-preview');
             if (file.type.startsWith('image/')) {
@@ -339,7 +340,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 fileName.textContent = file.name;
                 filePreview.appendChild(fileName);
             }
-            content.appendChild(filePreview);
+            fileContainer.appendChild(filePreview);
+            content.appendChild(fileContainer);
         }
         
         const parts = message.split(/`{3}([\w+\-.]+)?\n([\s\S]*?)`{3}/g);

@@ -272,9 +272,9 @@ body {
     pointer-events: none;
     width: 80%;
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
-    white-space: nowrap; /* Penting untuk efek mengetik */
-    overflow: hidden; /* Penting untuk efek mengetik */
-    border-right: 2px solid transparent; /* Menyembunyikan kursor asli */
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 2px solid transparent;
 }
 
 .welcome-message.hide {
@@ -324,6 +324,28 @@ body {
     word-wrap: break-word;
     white-space: pre-wrap;
     transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Tata letak khusus untuk gambar di dalam bubble chat */
+.message-file-container {
+    padding: 8px;
+    background-color: var(--input-bg);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.message-file-preview {
+    max-width: 100%;
+}
+
+.message-file-preview img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
 }
 
 .user-message.user-typing .message-content {
