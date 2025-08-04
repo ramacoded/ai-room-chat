@@ -312,9 +312,9 @@ body {
     transition: background-color 0.3s ease;
 }
 
-/* Animasi gradient untuk pesan pengguna */
-.user-typing .message-content {
-    background: linear-gradient(135deg, #1f4068, #162447, #1f4068);
+/* Animasi gradient pada pesan pengguna saat AI mengetik */
+.user-message.user-typing .message-content {
+    background: linear-gradient(270deg, var(--card-bg), var(--sidebar-link-hover), var(--card-bg));
     background-size: 200% 200%;
     animation: gradient-animation 4s ease infinite;
 }

@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadMenu = document.getElementById('upload-menu');
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
-    const fileBtn = document = document.getElementById('file-btn');
+    const fileBtn = document.getElementById('file-btn');
     
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
@@ -208,9 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 isFirstMessage = false;
             }
 
-            const userMessageElement = appendMessage('user', userMessage, selectedFile);
-            showUserTypingIndicator(userMessageElement);
-
+            appendMessage('user', userMessage, selectedFile);
             chatInput.value = '';
             chatInput.style.height = 'auto';
             removeFile();
@@ -250,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideTypingIndicator();
                 appendMessage('ai', 'Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.');
             } finally {
-                hideUserTypingIndicator(userMessageElement);
                 isSubmitting = false;
             }
         }
@@ -317,15 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const codeElements = content.querySelectorAll('pre code');
             codeElements.forEach(Prism.highlightElement);
         }
-        return messageElement; // Mengembalikan elemen yang baru dibuat
-    }
-
-    function showUserTypingIndicator(messageElement) {
-        messageElement.classList.add('user-typing');
-    }
-
-    function hideUserTypingIndicator(messageElement) {
-        messageElement.classList.remove('user-typing');
     }
 
     function displayFilePreview(file) {
