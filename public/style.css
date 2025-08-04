@@ -425,7 +425,7 @@ body {
 
 .code-block-container {
     max-width: 100%;
-    /* Perbaikan: Menggunakan warna yang lebih cocok dengan tema */
+    /* Perbaikan: Atur ulang warna background menjadi gelap */
     background-color: #2b2b2b;
     border-radius: 12px;
     overflow: hidden;
