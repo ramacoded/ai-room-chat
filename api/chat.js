@@ -154,12 +154,8 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     
     let respon = await result.response.text();
     
-    // Perbaikan: Menyederhanakan proses replace
-    let responseText = respon
-      .replace(/"/g, "'")
-      .replace(/```(javascript|bash|python|html|css|json|shell|ruby|java|c|cpp|sql|markdown|xml)\n/g, (match, lang) => {
-        return `\n*${lang.toUpperCase()} Snippet* :\n\n\`\`\`${lang}\n`;
-      });
+    // Perbaikan: Hapus semua .replace() agar format markdown asli dari AI tetap ada
+    let responseText = respon;
 
     return { text: responseText };
   } catch (error) {
