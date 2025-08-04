@@ -12,7 +12,7 @@ const { v4: uuidv4 } = require('uuid');
 const cookie = require('cookie');
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = "[https://puqbduevlwefdlcmfbuv.supabase.co](https://puqbduevlwefdlcmfbuv.supabase.co)";
+const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -237,4 +237,3 @@ module.exports = async (req, res) => {
     }
   });
 };
-      
