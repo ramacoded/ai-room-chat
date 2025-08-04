@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isFirstMessage = true;
     let currentSessionId = null;
     let isSubmitting = false;
-    let currentAiMessageElement = null;
 
     let typingTimeout;
     let deletionTimeout;
@@ -370,8 +369,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
+
+        // Regex untuk menemukan URL
+        const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         
-        const parts = message.split('```');
+        const parts = message.split(/```/g);
         
         for (let i = 0; i < parts.length; i++) {
             if (i % 2 === 1) { // Kode block
@@ -414,7 +416,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 content.appendChild(codeBlockContainer);
             } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
                 const textContent = document.createElement('p');
-                textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
+                let formattedText = parts[i]
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>')
+                    .replace(urlRegex, (url) => {
+                        // Tambahkan tag <a> untuk link
+                        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+                    });
+                textContent.innerHTML = formattedText;
                 content.appendChild(textContent);
             }
         }
