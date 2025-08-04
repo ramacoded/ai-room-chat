@@ -147,8 +147,8 @@ Silakan tanyakan apa pun. Aku siap bantu.`,
     if (file) {
       console.log('File detected. Uploading to Gemini...');
       const uploadedFile = await uploadToGemini(file.filepath, file.mimetype);
-      // Perbaikan: Bungkus file yang diunggah dengan format yang benar
-      parts.unshift({ fileData: { mimeType: uploadedFile.mimeType, uri: uploadedFile.uri } });
+      // Perbaikan: Mengganti 'uri' menjadi 'fileUri'
+      parts.unshift({ fileData: { mimeType: uploadedFile.mimeType, fileUri: uploadedFile.uri } });
     }
     
     const result = await chat.sendMessage(parts); 
