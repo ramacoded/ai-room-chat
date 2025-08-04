@@ -1,6 +1,6 @@
 /* File: public/style.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
+@import url('[https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap](https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap)');
 
 :root {
     --bg-color: #202124;
