@@ -369,30 +369,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
-
-        // Regex untuk menemukan URL
-        const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         
-        const parts = message.split(/```/g);
+        const parts = message.split('```');
         
         for (let i = 0; i < parts.length; i++) {
             if (i % 2 === 1) { // Kode block
                 const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
 
-                const codeBlockContainer = document.createElement('div');
-                codeBlockContainer.classList.add('code-block-container');
-
-                const codeBlockHeader = document.createElement('div');
-                codeBlockHeader.classList.add('code-block-header');
-
-                const langLabel = document.createElement('span');
-                langLabel.classList.add('code-language');
-                langLabel.textContent = lang.toUpperCase().trim() || 'TEXT';
+                const codeHeader = document.createElement('div');
+                codeHeader.classList.add('code-header-simple');
 
                 const copyBtn = document.createElement('button');
                 copyBtn.textContent = 'Copy';
-                copyBtn.classList.add('copy-btn');
+                copyBtn.classList.add('copy-btn-simple');
                 copyBtn.addEventListener('click', () => {
                     navigator.clipboard.writeText(codeContent).then(() => {
                         copyBtn.textContent = 'Copied!';
@@ -402,28 +392,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 
-                codeBlockHeader.appendChild(langLabel);
-                codeBlockHeader.appendChild(copyBtn);
-                
+                codeHeader.appendChild(copyBtn);
+                content.appendChild(codeHeader);
+
                 const codeBlock = document.createElement('pre');
                 const code = document.createElement('code');
                 code.classList.add(`language-${lang.trim()}`);
                 code.textContent = codeContent;
                 
                 codeBlock.appendChild(code);
-                codeBlockContainer.appendChild(codeBlockHeader);
-                codeBlockContainer.appendChild(codeBlock);
-                content.appendChild(codeBlockContainer);
+                content.appendChild(codeBlock);
             } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
                 const textContent = document.createElement('p');
-                let formattedText = parts[i]
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br>')
-                    .replace(urlRegex, (url) => {
-                        // Tambahkan tag <a> untuk link
-                        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-                    });
-                textContent.innerHTML = formattedText;
+                textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
                 content.appendChild(textContent);
             }
         }
