@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const parts = message.split('```');
         
         for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 1) { // Kode block
+            if (i % 2 === 1) {
                 const [lang, ...codeLines] = parts[i].split('\n');
                 const codeContent = codeLines.join('\n').trim();
 
@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 codeBlockContainer.appendChild(codeBlockHeader);
                 codeBlockContainer.appendChild(codeBlock);
                 content.appendChild(codeBlockContainer);
-            } else if (i % 2 === 0 && parts[i].trim()) { // Teks biasa
+            } else if (i % 2 === 0 && parts[i].trim()) {
                 const textContent = document.createElement('p');
                 textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
                 content.appendChild(textContent);
