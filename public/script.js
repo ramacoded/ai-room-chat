@@ -40,12 +40,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
 
     openSettingsBtn.addEventListener('click', () => {
-        settingsPage.classList.add('open');
         sidebar.classList.remove('open');
+        if (document.startViewTransition) {
+            document.startViewTransition(() => {
+                settingsPage.classList.add('open');
+            });
+        } else {
+            settingsPage.classList.add('open');
+        }
     });
 
     closeSettingsBtn.addEventListener('click', () => {
-        settingsPage.classList.remove('open');
+        if (document.startViewTransition) {
+            document.startViewTransition(() => {
+                settingsPage.classList.remove('open');
+            });
+        } else {
+            settingsPage.classList.remove('open');
+        }
     });
 
     // --- Logika Tema ---
@@ -516,7 +528,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
             } else if (parts[i].trim()) { // Logika jika ini teks biasa
                 const textContent = document.createElement('p');
-                const urlRegex = /(https?:\/\/[^\s"'<>()]+)/g;
+
+                // --- PERBAIKAN REGEX LINK ADA DI SINI ---
+                const urlRegex = /(https?:\/\/[^\s"'<>()\[\]]+)/g;
                 let processedText = parts[i]
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\n/g, '<br>');

@@ -52,18 +52,10 @@ html, body {
     position: relative;
 }
 
-/* Efek Transisi Tema Lingkaran */
-@keyframes reveal {
-  from { clip-path: circle(0% at 50% 50%); }
-  to { clip-path: circle(150% at 50% 50%); }
-}
-
-::view-transition-new(root) {
-  animation: reveal 0.5s ease-out;
-}
-::view-transition-old(root) {
-  animation: reveal 0.5s ease-in reverse;
-}
+/*
+  Dengan menghapus @keyframes dan ::view-transition-* kustom,
+  browser akan kembali menggunakan efek cross-fade default yang cepat dan halus.
+*/
 
 
 /* Gaya Halaman Pengaturan */
@@ -76,7 +68,8 @@ html, body {
     background-color: var(--card-bg);
     z-index: 2000;
     transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
+    /* Hapus transisi lama agar dikontrol oleh View Transition API */
+    /* transition: transform 0.3s ease-in-out; */
     display: flex;
     flex-direction: column;
 }
@@ -351,10 +344,10 @@ input:checked + .slider:before {
     background-color: var(--sidebar-link-hover);
 }
 
+/* Gaya Riwayat Chat */
 .caret-icon {
     transition: transform 0.2s ease;
     margin-left: auto;
-    transform: rotate(0deg);
 }
 
 #chat-history-btn.active .caret-icon {
@@ -365,6 +358,7 @@ input:checked + .slider:before {
     padding: 0;
     list-style: none;
     display: none;
+    background-color: rgba(0,0,0,0.1);
 }
 
 .sessions-list.show {
@@ -374,10 +368,10 @@ input:checked + .slider:before {
 .session-list-item {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
-    margin: 4px 8px;
-    border-radius: 8px;
+    border-radius: 0;
     transition: background-color 0.2s ease;
+    padding: 0;
+    margin: 0;
 }
 
 .session-list-item:hover {
@@ -386,7 +380,7 @@ input:checked + .slider:before {
 
 .session-title-button {
     flex-grow: 1;
-    padding: 0;
+    padding: 12px 16px 12px 48px;
     font-size: 0.9em;
     font-weight: 400;
     white-space: nowrap;
@@ -402,14 +396,9 @@ input:checked + .slider:before {
 .session-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    padding-right: 16px;
 }
 
-.delete-popup-container,
-.delete-popup-box,
-.delete-popup-buttons {
-    display: none !important;
-}
 
 .chat-container {
     background-color: var(--card-bg);
@@ -495,21 +484,11 @@ input:checked + .slider:before {
     50% { opacity: 1; }
 }
 
-.chat-box::-webkit-scrollbar {
-    width: 8px;
-}
-
-.chat-box::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 10px;
-}
-
 .message {
     display: block;
     max-width: 85%;
     line-height: 1.6;
 }
-
 .user-message {
     margin-left: auto;
 }
