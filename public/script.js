@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.add('open');
         }
     });
-
     closeSettingsBtn.addEventListener('click', () => {
         if (document.startViewTransition) {
             document.startViewTransition(() => {
@@ -59,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.remove('open');
         }
     });
-
     // --- Logika Tema ---
     const applyTheme = (theme) => {
         const doc = document.documentElement;
@@ -92,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateThemeButtons(selectedTheme);
         }
     });
-
     // --- Logika Ukuran Teks ---
     const applyTextSize = (size) => {
         const doc = document.documentElement;
@@ -100,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (size === 'small') doc.classList.add('text-small');
         if (size === 'large') doc.classList.add('text-large');
     };
-
     const updateTextSizeButtons = (selectedSize) => {
         textSizeSwitcher.querySelectorAll('button').forEach(button => {
             button.classList.remove('active');
@@ -116,23 +112,19 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTextSizeButtons(selectedSize);
         }
     });
-    
     // --- Logika Kirim dengan Enter ---
     let enterToSend = localStorage.getItem('app-enter-to-send') === 'true';
     enterToSendToggle.checked = enterToSend;
-
     enterToSendToggle.addEventListener('change', () => {
         enterToSend = enterToSendToggle.checked;
         localStorage.setItem('app-enter-to-send', enterToSend);
     });
-
     chatInput.addEventListener('keydown', (e) => {
         if (enterToSend && e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
         }
     });
-
     // --- Pengaturan Placeholder ---
     langSetting.addEventListener('click', () => alert('Fitur ganti bahasa belum tersedia.'));
     exportSetting.addEventListener('click', () => alert('Fitur ekspor data belum tersedia.'));
@@ -142,12 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Anda bisa menambahkan logika penghapusan data di sini
         }
     });
-
     // --- Muat semua pengaturan saat halaman dibuka ---
     const savedTheme = localStorage.getItem('app-theme') || 'system';
     applyTheme(savedTheme);
     updateThemeButtons(savedTheme);
-
     const savedTextSize = localStorage.getItem('app-text-size') || 'normal';
     applyTextSize(savedTextSize);
     updateTextSizeButtons(savedTextSize);
@@ -216,21 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.add('open');
         loadSessionsList();
     });
-
     closeSidebarBtn.addEventListener('click', () => {
         sidebar.classList.remove('open');
     });
-
     newSessionBtn.addEventListener('click', () => {
         startNewSession();
         sidebar.classList.remove('open');
     });
-
     chatHistoryBtn.addEventListener('click', () => {
         sessionsList.classList.toggle('show');
         chatHistoryBtn.classList.toggle('active');
     });
-
     function startNewSession() {
         currentSessionId = null;
         chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
@@ -295,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { history } = await response.json();
             
             chatBox.innerHTML = '';
-            welcomeMessage.classList.add('hide');
+            // welcomeMessage.classList.add('hide'); // This line can cause errors, better to just clear the box.
             isFirstMessage = false;
 
             stopTypingAnimation();
@@ -309,9 +295,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             currentSessionId = sessionId;
+            currentChatTitle.textContent = title; // Set title when loading history
         } catch (error) {
             console.error('Error loading history:', error);
-            chatBox.innerHTML = `<div id="welcome-message" class="welcome-message hide"></div>`;
+            chatBox.innerHTML = ``;
             appendMessage('ai', 'Maaf, terjadi kesalahan saat memuat riwayat chat.');
             currentChatTitle.textContent = 'Noa AI';
             currentSessionId = null;
@@ -330,37 +317,31 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
-
     uploadBtn.addEventListener('click', () => {
         uploadMenu.classList.toggle('show');
     });
-
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.upload-area') && uploadMenu.classList.contains('show')) {
             uploadMenu.classList.remove('show');
         }
     });
-
     cameraBtn.addEventListener('click', () => {
         fileInput.setAttribute('capture', 'camera');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
     fileBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.removeAttribute('accept');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files.length > 0 ? e.target.files.item(0) : null;
         if (file) {
@@ -368,7 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayFilePreview(file);
         }
     });
-
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -381,7 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
             isSubmitting = true;
 
             if (isFirstMessage) {
-                welcomeMessage.classList.add('hide');
+                if(welcomeMessage) {
+                    welcomeMessage.classList.add('hide');
+                }
                 isFirstMessage = false;
                 stopTypingAnimation();
             }
@@ -438,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     body: formData,
                 });
-
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
@@ -464,7 +445,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
     function showImagePreview(file) {
         const previewOverlay = document.createElement('div');
         previewOverlay.classList.add('image-preview-overlay');
@@ -486,7 +466,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
-        
         const parts = message.split('```');
         
         for (let i = 0; i < parts.length; i++) {
@@ -525,16 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 codeBlockContainer.appendChild(codeAsText);
                 content.appendChild(codeBlockContainer);
                 content.classList.add('has-code-block');
-    
             } else if (parts[i].trim()) { // Logika jika ini teks biasa
                 const textContent = document.createElement('p');
-
-                // --- PERBAIKAN REGEX LINK ADA DI SINI ---
-                const urlRegex = /(https?:\/\/[^\s"'<>()\[\]]+)/g;
+                
+                // === PERBAIKAN REGEX LINK ADA DI SINI ===
+                const urlRegex = /(https?:\/\/[^\]\s"'<>()\[]+)/g;
                 let processedText = parts[i]
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\n/g, '<br>');
-                
+            
                 processedText = processedText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>');
                 
                 textContent.innerHTML = processedText;

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
 
 /* Variabel Warna untuk Tema Gelap (Default) & Terang */
 :root {
@@ -15,6 +15,8 @@
     --shadow-color: rgba(0, 0, 0, 0.3);
     --destructive-color: #ff5252;
     --font-size-base: 1rem; /* Ukuran font dasar */
+    --font-family-sans: 'Google Sans', sans-serif;
+    --font-family-mono: 'Roboto Mono', 'SF Mono', 'Consolas', 'Menlo', monospace;
 }
 
 html.light-theme {
@@ -36,14 +38,15 @@ html.light-theme {
 html.text-small { --font-size-base: 0.9rem; }
 html.text-large { --font-size-base: 1.1rem; }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box;
+}
 
 html, body {
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Google Sans', sans-serif;
+    font-family: var(--font-family-sans);
     background-color: var(--bg-color);
     color: var(--text-color);
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -69,7 +72,8 @@ html, body {
     z-index: 2000;
     transform: translateX(100%);
     /* Hapus transisi lama agar dikontrol oleh View Transition API */
-    /* transition: transform 0.3s ease-in-out; */
+    /* transition: transform 0.3s ease-in-out;
+*/
     display: flex;
     flex-direction: column;
 }
@@ -264,6 +268,7 @@ input:checked + .slider:before {
     width: 100%;
     height: 100vh;
     max-width: 960px;
+    margin: 0 auto; /* Center the container on larger screens */
     border-radius: 28px;
     box-shadow: 0 4px 12px var(--shadow-color);
     overflow: hidden;
@@ -506,6 +511,11 @@ input:checked + .slider:before {
     white-space: pre-wrap;
 }
 
+/* === PERBAIKAN: Memberi jarak antara elemen di dalam bubble (misal: teks dan blok kode) === */
+.message-content > * + * {
+    margin-top: 12px;
+}
+
 .message-content p {
     margin: 0;
 }
@@ -559,10 +569,12 @@ input:checked + .slider:before {
     font-weight: bold;
     color: var(--primary-text-color);
 }
-.document-card.file-type-xml::before { content: '<>'; color: #f2e379; }
+.document-card.file-type-xml::before { content: '<>'; color: #f2e379;
+}
 .document-card.file-type-css::before { content: '#'; color: #29b6f6; }
 .document-card.file-type-js::before { content: 'JS'; color: #ffd600; }
-.document-card.file-type-html::before { content: '</>'; color: #e54b23; }
+.document-card.file-type-html::before { content: '</>'; color: #e54b23;
+}
 
 .image-preview-overlay {
     position: fixed;
@@ -601,7 +613,8 @@ input:checked + .slider:before {
 
 @keyframes gradient-animation {
     0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    50% { background-position: 100% 50%;
+}
     100% { background-position: 0% 50%; }
 }
 
@@ -614,7 +627,8 @@ input:checked + .slider:before {
     animation: typing-wave 1.4s infinite ease-in-out;
 }
 .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s;
+}
 .typing-dot:nth-child(3) { animation-delay: 0s; }
 
 @keyframes typing-wave {
@@ -790,7 +804,6 @@ input:checked + .slider:before {
     body {
         align-items: flex-start;
     }
-
     .main-container {
         height: 100%;
         width: 100%;
@@ -799,15 +812,13 @@ input:checked + .slider:before {
     }
 }
 
-/* GAYA UNTUK BLOK KODE */
-.message-content.has-code-block {
-    background-color: transparent;
-    padding: 0;
-}
+/* === GAYA UNTUK BLOK KODE (SUDAH DIPERBAIKI) === */
+
+/* Aturan .message-content.has-code-block yang menyebabkan bug telah dihapus */
 
 .code-block-container {
     background-color: var(--input-bg);
-    border-radius: 20px;
+    border-radius: 12px; /* Dikecilkan agar pas di dalam bubble */
     overflow: hidden;
     border: 1px solid var(--border-color);
 }
@@ -849,7 +860,7 @@ input:checked + .slider:before {
     white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.6;
-    font-family: 'Google Sans', sans-serif;
+    font-family: var(--font-family-mono); /* PERBAIKAN: Menggunakan font monospace */
     font-size: 0.9em;
     color: var(--text-color);
 }
