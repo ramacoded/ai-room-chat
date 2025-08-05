@@ -22,31 +22,51 @@ const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw"
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
-function markdownToHtml(markdownText) {
-    let html = '';
-    const lines = (markdownText || '').split('\n');
-    let inList = null; 
-    let inCodeBlock = false;
-    let codeBlockContent = '';
-    let codeBlockLang = '';
+// --- FUNGSI PARSER MARKDOWN LENGKAP ---
+
+/**
+ * Mengubah string teks Markdown lengkap menjadi HTML.
+ * @param {string} md Teks mentah dari Gemini.
+ * @returns {string} String HTML yang sudah diformat.
+ */
+function markdownToHtml(md) {
+    if (!md) return '';
 
     const processInlineMarkdown = (text) => {
         return text
+            // Tautan: [teks](url)
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+            // Bold: **teks**
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            // Italic: *teks*
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            // Strikethrough: ~~teks~~
+            .replace(/~~(.*?)~~/g, '<s>$1</s>')
+            // Inline Code: `kode`
             .replace(/`(.*?)`/g, '<code>$1</code>');
     };
-    
+
     const escapeHtml = (unsafe) => {
         return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
-    }
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
 
-    for (const line of lines) {
+    let html = '';
+    const lines = md.split('\n');
+    let inList = null; // Tipe list: 'ul' atau 'ol'
+    let inCodeBlock = false;
+    let codeBlockContent = '';
+    let codeBlockLang = '';
+    let inBlockquote = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+
+        // 1. BLOK KODE (Prioritas Utama)
         if (line.trim().startsWith('```')) {
             if (inCodeBlock) {
                 html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
@@ -54,23 +74,69 @@ function markdownToHtml(markdownText) {
                 codeBlockContent = '';
                 codeBlockLang = '';
             } else {
-                if (inList) { 
-                    html += `</${inList}>\n`;
-                    inList = null;
-                }
+                if (inList) { html += `</${inList}>\n`; inList = null; }
+                if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
                 inCodeBlock = true;
                 codeBlockLang = line.substring(3).trim();
             }
             continue;
         }
-
         if (inCodeBlock) {
             codeBlockContent += line + '\n';
             continue;
         }
-        
-        if (line.startsWith('#')) {
+
+        // Tutup tag jika blok elemen baru akan dimulai
+        const closeOpenTags = () => {
             if (inList) { html += `</${inList}>\n`; inList = null; }
+            if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
+        };
+
+        // 2. TABEL
+        if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|--')) {
+            closeOpenTags();
+            let tableHtml = '<table>\n';
+            const headers = line.split('|').slice(1, -1).map(h => h.trim());
+            tableHtml += '<thead>\n<tr>\n' + headers.map(h => `<th>${processInlineMarkdown(h)}</th>`).join('') + '</tr>\n</thead>\n';
+
+            let j = i + 2;
+            tableHtml += '<tbody>\n';
+            while (j < lines.length && lines[j].includes('|')) {
+                const cells = lines[j].split('|').slice(1, -1).map(c => c.trim());
+                tableHtml += '<tr>' + cells.map(c => `<td>${processInlineMarkdown(c)}</td>`).join('') + '</tr>\n';
+                j++;
+            }
+            tableHtml += '</tbody>\n</table>\n';
+            html += tableHtml;
+            i = j - 1;
+            continue;
+        }
+        
+        // 3. GARIS HORIZONTAL
+        if (line.match(/^(---|___|\*\*\*)$/)) {
+            closeOpenTags();
+            html += '<hr>\n';
+            continue;
+        }
+
+        // 4. BLOCKQUOTE
+        if (line.startsWith('>')) {
+            if (!inBlockquote) {
+                if (inList) { html += `</${inList}>\n`; inList = null; }
+                html += '<blockquote>\n';
+                inBlockquote = true;
+            }
+            html += `<p>${processInlineMarkdown(line.substring(1).trim())}</p>\n`;
+            continue;
+        }
+        if (inBlockquote && !line.startsWith('>')) {
+            html += '</blockquote>\n';
+            inBlockquote = false;
+        }
+
+        // 5. JUDUL
+        if (line.startsWith('#')) {
+            closeOpenTags();
             const level = line.match(/^#+/)[0].length;
             if (level <= 6) {
                 const content = line.substring(level).trim();
@@ -78,10 +144,10 @@ function markdownToHtml(markdownText) {
                 continue;
             }
         }
-        
+
+        // 6. DAFTAR (LISTS)
         const ulMatch = line.match(/^\s*[\*-]\s+(.*)/);
         const olMatch = line.match(/^\s*\d+\.\s+(.*)/);
-
         if (ulMatch) {
             if (inList !== 'ul') {
                 if (inList) html += `</${inList}>\n`;
@@ -99,25 +165,25 @@ function markdownToHtml(markdownText) {
             html += `  <li>${processInlineMarkdown(olMatch[1])}</li>\n`;
             continue;
         }
-        
-        if (inList) {
+        if (inList && !ulMatch && !olMatch) {
             html += `</${inList}>\n`;
             inList = null;
         }
 
+        // 7. PARAGRAF
         if (line.trim() !== '') {
             html += `<p>${processInlineMarkdown(line)}</p>\n`;
         }
     }
 
-    if (inList) {
-        html += `</${inList}>\n`;
-    }
-    if (inCodeBlock) { // Menangani jika blok kode tidak ditutup
-         html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
-    }
-    return html;
+    // Tutup semua tag yang mungkin masih terbuka di akhir
+    if (inList) html += `</${inList}>\n`;
+    if (inBlockquote) html += `</blockquote>\n`;
+    if (inCodeBlock) html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
+
+    return html.trim();
 }
+
 
 // --- PENGATURAN API SERVER ---
 export const config = {
