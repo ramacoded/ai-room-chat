@@ -617,18 +617,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Inisialisasi ---
     // Karena saat load history kita butuh parser, maka parsernya kita letakkan di sini.
-    function markdownToHtml(markdownText) {
-        let html = '';
-        const lines = (markdownText || '').split('\n');
-        for(const line of lines){
-            if(line.trim() === '') continue;
-            let processedLine = line
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`(.*?)`/g, '<code>$1</code>');
-            html += `<p>${processedLine}</p>`;
+    function markdownToHtml(md) {
+        if (!md) return '';
+        const processInlineMarkdown = (text) => text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/~~(.*?)~~/g, '<s>$1</s>').replace(/`(.*?)`/g, '<code>$1</code>');
+        const escapeHtml = (unsafe) => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        let html = '', lines = md.split('\n'), inList = null, inCodeBlock = false, codeBlockContent = '', codeBlockLang = '', inBlockquote = false;
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            if (line.trim().startsWith('```')) {
+                if (inCodeBlock) {
+                    html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
+                    inCodeBlock = false, codeBlockContent = '', codeBlockLang = '';
+                } else {
+                    if (inList) { html += `</${inList}>\n`; inList = null; }
+                    if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
+                    inCodeBlock = true, codeBlockLang = line.substring(3).trim();
+                }
+                continue;
+            }
+            if (inCodeBlock) { codeBlockContent += line + '\n'; continue; }
+            const closeOpenTags = () => {
+                if (inList) { html += `</${inList}>\n`; inList = null; }
+                if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
+            };
+            if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|--')) {
+                closeOpenTags();
+                let tableHtml = '<table>\n';
+                const headers = line.split('|').slice(1, -1).map(h => h.trim());
+                tableHtml += '<thead>\n<tr>\n' + headers.map(h => `<th>${processInlineMarkdown(h)}</th>`).join('') + '</tr>\n</thead>\n';
+                let j = i + 2;
+                tableHtml += '<tbody>\n';
+                while (j < lines.length && lines[j].includes('|')) {
+                    const cells = lines[j].split('|').slice(1, -1).map(c => c.trim());
+                    tableHtml += '<tr>' + cells.map(c => `<td>${processInlineMarkdown(c)}</td>`).join('') + '</tr>\n';
+                    j++;
+                }
+                tableHtml += '</tbody>\n</table>\n';
+                html += tableHtml;
+                i = j - 1;
+                continue;
+            }
+            if (line.match(/^(---|___|\*\*\*)$/)) { closeOpenTags(); html += '<hr>\n'; continue; }
+            if (line.startsWith('>')) {
+                if (!inBlockquote) {
+                    if (inList) { html += `</${inList}>\n`; inList = null; }
+                    html += '<blockquote>\n'; inBlockquote = true;
+                }
+                html += `<p>${processInlineMarkdown(line.substring(1).trim())}</p>\n`;
+                continue;
+            }
+            if (inBlockquote && !line.startsWith('>')) { html += '</blockquote>\n'; inBlockquote = false; }
+            if (line.startsWith('#')) {
+                closeOpenTags();
+                const level = line.match(/^#+/)[0].length;
+                if (level <= 6) { html += `<h${level}>${processInlineMarkdown(line.substring(level).trim())}</h${level}>\n`; continue; }
+            }
+            const ulMatch = line.match(/^\s*[\*-]\s+(.*)/), olMatch = line.match(/^\s*\d+\.\s+(.*)/);
+            if (ulMatch) {
+                if (inList !== 'ul') { if (inList) html += `</${inList}>\n`; html += '<ul>\n'; inList = 'ul'; }
+                html += `  <li>${processInlineMarkdown(ulMatch[1])}</li>\n`; continue;
+            } else if (olMatch) {
+                if (inList !== 'ol') { if (inList) html += `</${inList}>\n`; html += '<ol>\n'; inList = 'ol'; }
+                html += `  <li>${processInlineMarkdown(olMatch[1])}</li>\n`; continue;
+            }
+            if (inList && !ulMatch && !olMatch) { html += `</${inList}>\n`; inList = null; }
+            if (line.trim() !== '') { html += `<p>${processInlineMarkdown(line)}</p>\n`; }
         }
-        return html;
+        if (inList) html += `</${inList}>\n`;
+        if (inBlockquote) html += `</blockquote>\n`;
+        if (inCodeBlock) html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
+        return html.trim();
     }
 
     loadSessionsList();

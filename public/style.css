@@ -818,6 +818,12 @@ input:checked + .slider:before {
 
 /* Aturan .message-content.has-code-block yang menyebabkan bug telah dihapus */
 
+/* Tambahkan ini di file CSS Anda, contohnya style.css */
+
+.message-content .code-block-container pre code {
+  font-size: 0.875em; /* Anda bisa sesuaikan nilainya, misal 0.8em atau 0.9em */
+}
+
 .code-block-container {
     background-color: var(--input-bg);
     border-radius: 12px; /* Dikecilkan agar pas di dalam bubble */
@@ -878,4 +884,71 @@ input:checked + .slider:before {
     color: var(--text-color);
     border-bottom-color: var(--text-color);
 }
+
+/* Tambahkan ini di file CSS Anda untuk elemen Markdown baru */
+
+/* --- Garis Horizontal --- */
+hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5em 0;
+}
+
+/* --- Kutipan (Blockquote) --- */
+.message-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--primary-color);
+  background-color: var(--secondary-bg-color);
+  color: var(--secondary-text-color);
+  border-radius: 0 4px 4px 0;
+}
+
+.message-content blockquote p {
+  margin: 0;
+}
+
+/* --- Tabel --- */
+.message-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+  border: 1px solid var(--border-color);
+}
+
+.message-content th,
+.message-content td {
+  border: 1px solid var(--border-color);
+  padding: 0.75em;
+  text-align: left;
+}
+
+.message-content th {
+  background-color: var(--secondary-bg-color);
+  font-weight: 600;
+}
+
+.message-content tr:nth-child(even) {
+  background-color: var(--tertiary-bg-color);
+}
+
+/* --- Teks Coret & Link --- */
+.message-content s {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.message-content a {
+  color: var(--accent-color);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-color-translucent);
+  transition: all 0.2s ease;
+}
+
+.message-content a:hover {
+  background-color: var(--accent-color-translucent);
+  border-bottom-color: var(--accent-color);
+}
+
 
