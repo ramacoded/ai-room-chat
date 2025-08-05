@@ -96,6 +96,9 @@ async function uploadToGemini(path, mimeType) {
   }
 }
 
+const allTime = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm, dddd, DD - MM/MMMM, YYYY');
+const timeOnly = moment(Date.now()).tz('Asia/Jakarta').locale('id').format('HH:mm');
+
 // --- Fungsi gemini (Tidak ada perubahan) ---
 async function gemini(history, input, file) {
   try {
