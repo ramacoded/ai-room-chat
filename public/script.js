@@ -1,30 +1,148 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const mainContainer = document.querySelector('.main-container');
+    // --- Elemen Utama ---
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
     const chatBox = document.getElementById('chat-box');
-    const fileInput = document.getElementById('file-input');
-    const uploadBtn = document.getElementById('upload-btn');
-    const filePreviewContainer = document.getElementById('file-preview');
     const sidebar = document.getElementById('sidebar');
     const openSidebarBtn = document.getElementById('open-sidebar-btn');
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
     let welcomeMessage = document.getElementById('welcome-message');
-
-    const uploadMenu = document.getElementById('upload-menu');
-    const cameraBtn = document.getElementById('camera-btn');
-    const galleryBtn = document.getElementById('gallery-btn');
-    const fileBtn = document.getElementById('file-btn');
-    
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
     const sessionsList = document.getElementById('sessions-list');
     const currentChatTitle = document.getElementById('current-chat-title');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const filePreviewContainer = document.getElementById('file-preview');
+    const uploadMenu = document.getElementById('upload-menu');
+    const cameraBtn = document.getElementById('camera-btn');
+    const galleryBtn = document.getElementById('gallery-btn');
+    const fileBtn = document.getElementById('file-btn');
+
+    // --- Elemen Pengaturan ---
+    const settingsPage = document.getElementById('settings-page');
+    const openSettingsBtn = document.getElementById('open-settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const themeSwitcher = document.getElementById('theme-switcher');
+    const textSizeSwitcher = document.getElementById('text-size-switcher');
+    const enterToSendToggle = document.getElementById('enter-to-send-toggle');
+    const clearHistoryBtn = document.getElementById('clear-history-btn');
+    const langSetting = document.getElementById('setting-language');
+    const exportSetting = document.getElementById('setting-export');
 
     let selectedFile = null;
     let isFirstMessage = true;
     let currentSessionId = null;
     let isSubmitting = false;
+
+    // =================================================================
+    // PENGATURAN & TEMA
+    // =================================================================
+
+    openSettingsBtn.addEventListener('click', () => {
+        settingsPage.classList.add('open');
+        sidebar.classList.remove('open');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsPage.classList.remove('open');
+    });
+
+    // --- Logika Tema ---
+    const applyTheme = (theme) => {
+        const doc = document.documentElement;
+        doc.classList.remove('light-theme', 'dark-theme');
+        let themeToApply = theme;
+
+        if (theme === 'system') {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            themeToApply = prefersDark ? 'dark' : 'light';
+        }
+        doc.classList.add(themeToApply === 'light' ? 'light-theme' : 'dark-theme');
+    };
+
+    const updateThemeButtons = (selectedTheme) => {
+        themeSwitcher.querySelectorAll('button').forEach(button => {
+            button.classList.remove('active');
+            if (button.dataset.theme === selectedTheme) button.classList.add('active');
+        });
+    };
+
+    themeSwitcher.addEventListener('click', (event) => {
+        if (event.target.tagName === 'BUTTON') {
+            const selectedTheme = event.target.dataset.theme;
+            if (document.startViewTransition) {
+                document.startViewTransition(() => applyTheme(selectedTheme));
+            } else {
+                applyTheme(selectedTheme);
+            }
+            localStorage.setItem('app-theme', selectedTheme);
+            updateThemeButtons(selectedTheme);
+        }
+    });
+
+    // --- Logika Ukuran Teks ---
+    const applyTextSize = (size) => {
+        const doc = document.documentElement;
+        doc.classList.remove('text-small', 'text-large');
+        if (size === 'small') doc.classList.add('text-small');
+        if (size === 'large') doc.classList.add('text-large');
+    };
+
+    const updateTextSizeButtons = (selectedSize) => {
+        textSizeSwitcher.querySelectorAll('button').forEach(button => {
+            button.classList.remove('active');
+            if (button.dataset.size === selectedSize) button.classList.add('active');
+        });
+    };
+
+    textSizeSwitcher.addEventListener('click', (event) => {
+        if (event.target.tagName === 'BUTTON') {
+            const selectedSize = event.target.dataset.size;
+            applyTextSize(selectedSize);
+            localStorage.setItem('app-text-size', selectedSize);
+            updateTextSizeButtons(selectedSize);
+        }
+    });
+    
+    // --- Logika Kirim dengan Enter ---
+    let enterToSend = localStorage.getItem('app-enter-to-send') === 'true';
+    enterToSendToggle.checked = enterToSend;
+
+    enterToSendToggle.addEventListener('change', () => {
+        enterToSend = enterToSendToggle.checked;
+        localStorage.setItem('app-enter-to-send', enterToSend);
+    });
+
+    chatInput.addEventListener('keydown', (e) => {
+        if (enterToSend && e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+    });
+
+    // --- Pengaturan Placeholder ---
+    langSetting.addEventListener('click', () => alert('Fitur ganti bahasa belum tersedia.'));
+    exportSetting.addEventListener('click', () => alert('Fitur ekspor data belum tersedia.'));
+    clearHistoryBtn.addEventListener('click', () => {
+        if (confirm('Apakah Anda yakin ingin menghapus SEMUA riwayat percakapan? Tindakan ini tidak dapat diurungkan.')) {
+            alert('Semua riwayat telah dihapus.');
+            // Anda bisa menambahkan logika penghapusan data di sini
+        }
+    });
+
+    // --- Muat semua pengaturan saat halaman dibuka ---
+    const savedTheme = localStorage.getItem('app-theme') || 'system';
+    applyTheme(savedTheme);
+    updateThemeButtons(savedTheme);
+
+    const savedTextSize = localStorage.getItem('app-text-size') || 'normal';
+    applyTextSize(savedTextSize);
+    updateTextSizeButtons(savedTextSize);
+
+    // =================================================================
+    // LOGIKA CHAT
+    // =================================================================
 
     let typingTimeout;
     let deletionTimeout;
@@ -39,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const newCursor = document.createElement('span');
         newCursor.className = 'blinking-cursor';
         newCursor.textContent = '|';
-        welcomeMessage.appendChild(newCursor);
         
         welcomeMessage.textContent = '';
         welcomeMessage.appendChild(newCursor);
@@ -75,12 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(deletionTimeout);
         const cursor = welcomeMessage.querySelector('.blinking-cursor');
         if (cursor) cursor.remove();
-        welcomeMessage.textContent = '';
+        welcomeMessage.innerHTML = '';
     };
 
-    const initialMessage = `${getGreeting()}, aku Noa AI`;
-    startTypingAnimation(initialMessage);
-
+    const initialMessage = `${getGreeting()}, Aku Noa`;
+    if (welcomeMessage) {
+        startTypingAnimation(initialMessage);
+    }
+    
     openSidebarBtn.addEventListener('click', () => {
         sidebar.classList.add('open');
         loadSessionsList();
@@ -106,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isFirstMessage = true;
         welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage) {
-            const greetingMessage = `${getGreeting()}, aku Noa AI`;
+            const greetingMessage = `${getGreeting()}, Aku Noa`;
             startTypingAnimation(greetingMessage);
         }
         currentChatTitle.textContent = 'Noa AI';
@@ -140,10 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const sessionActions = document.createElement('div');
                     sessionActions.classList.add('session-actions');
-
-                    const separator = document.createElement('div');
-                    separator.classList.add('separator');
-                    sessionActions.appendChild(separator);
                     
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
@@ -359,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const content = document.createElement('div');
         content.classList.add('message-content');
+        
         const parts = message.split('```');
         
         for (let i = 0; i < parts.length; i++) {
@@ -382,30 +498,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 copyBtn.addEventListener('click', () => {
                     navigator.clipboard.writeText(codeContent).then(() => {
                         copyBtn.textContent = 'Copied!';
-                        setTimeout(() => {
-                            copyBtn.textContent = 'Copy';
-                        }, 2000);
+                        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
                     });
                 });
     
                 codeBlockHeader.appendChild(langLabel);
                 codeBlockHeader.appendChild(copyBtn);
                 
-                // --- PERUBAHAN UTAMA ADA DI SINI ---
-                // Kita tidak lagi membuat <pre> dan <code>, tapi sebuah <p>
                 const codeAsText = document.createElement('p');
                 codeAsText.classList.add('code-as-plain-text');
-                // Menggunakan innerText agar line break (baris baru) tetap muncul
                 codeAsText.innerText = codeContent;
-                // --- AKHIR DARI PERUBAHAN ---
     
                 codeBlockContainer.appendChild(codeBlockHeader);
-                codeBlockContainer.appendChild(codeAsText); // Menambahkan elemen <p> yang baru
+                codeBlockContainer.appendChild(codeAsText);
                 content.appendChild(codeBlockContainer);
+                content.classList.add('has-code-block');
     
-            } else if (i % 2 === 0 && parts[i].trim()) { // Logika jika ini teks biasa
+            } else if (parts[i].trim()) { // Logika jika ini teks biasa
                 const textContent = document.createElement('p');
-                textContent.innerHTML = parts[i].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>').replace(/"/g, "'");
+                const urlRegex = /(https?:\/\/[^\s"'<>()]+)/g;
+                let processedText = parts[i]
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>');
+                
+                processedText = processedText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>');
+                
+                textContent.innerHTML = processedText;
                 content.appendChild(textContent);
             }
         }
@@ -414,8 +532,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
     
-        // Panggilan ke Prism.highlightElement tidak akan berpengaruh lagi
-        // karena kita tidak menggunakan elemen <pre><code> untuk blok kode ini.
         if (typeof Prism !== 'undefined') {
             const codeElements = content.querySelectorAll('pre code');
             codeElements.forEach(Prism.highlightElement);
@@ -427,13 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const typingIndicator = document.createElement('div');
             typingIndicator.id = 'typing-indicator';
             typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
-            typingIndicator.innerHTML = `
-                <div class="message-content">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
-            `;
+            typingIndicator.innerHTML = `<div class="message-content"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
             chatBox.appendChild(typingIndicator);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -445,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
-
+    
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
