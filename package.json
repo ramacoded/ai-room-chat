@@ -1,5 +1,5 @@
 {
-  "name": "noa-ai-chatbot",
+  "name": "evelyn-ai-chatbot",
   "version": "1.0.0",
   "description": "Simple AI ChatBot Using Gemini API",
   "main": "api/chat.js",
@@ -12,14 +12,15 @@
     "gemini",
     "nodejs"
   ],
-  "author": "RAMACODE",
+  "author": "Didik Ramadani (RAMACODE)",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.15.0",
-    "cookie": "^0.6.0",
-    "formidable": "^3.5.1",
-    "moment-timezone": "^0.5.45",
     "@supabase/supabase-js": "^2.44.2",
+    "@google/generative-ai": "^0.15.0",
+    "moment-timezone": "^0.5.45",
+    "formidable": "^3.5.1",
+    "marked": "^13.0.0",
+    "cookie": "^0.6.0",
     "uuid": "^9.0.1"
   }
 }
