@@ -1,3 +1,5 @@
+// File: script.js (Versi Final)
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- Elemen Utama ---
     const chatForm = document.getElementById('chat-form');
@@ -49,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.add('open');
         }
     });
+
     closeSettingsBtn.addEventListener('click', () => {
         if (document.startViewTransition) {
             document.startViewTransition(() => {
@@ -58,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.remove('open');
         }
     });
+
     // --- Logika Tema ---
     const applyTheme = (theme) => {
         const doc = document.documentElement;
@@ -78,18 +82,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // --- PERMINTAAN PERSONALISASI ANDA: Efek transisi tema yang halus ---
     themeSwitcher.addEventListener('click', (event) => {
-        if (event.target.tagName === 'BUTTON') {
-            const selectedTheme = event.target.dataset.theme;
-            if (document.startViewTransition) {
-                document.startViewTransition(() => applyTheme(selectedTheme));
-            } else {
+        const button = event.target.closest('button');
+        if (!button) return;
+
+        const selectedTheme = button.dataset.theme;
+
+        if (document.startViewTransition) {
+            const x = event.clientX;
+            const y = event.clientY;
+            const endRadius = Math.hypot(
+                Math.max(x, window.innerWidth - x),
+                Math.max(y, window.innerHeight - y)
+            );
+
+            const transition = document.startViewTransition(() => {
                 applyTheme(selectedTheme);
-            }
-            localStorage.setItem('app-theme', selectedTheme);
-            updateThemeButtons(selectedTheme);
+            });
+
+            transition.ready.then(() => {
+                document.documentElement.animate({
+                    clipPath: [
+                        `circle(0% at ${x}px ${y}px)`,
+                        `circle(${endRadius}px at ${x}px ${y}px)`
+                    ]
+                }, {
+                    duration: 500,
+                    easing: 'ease-in-out',
+                    pseudoElement: '::view-transition-new(root)'
+                });
+            });
+        } else {
+            applyTheme(selectedTheme);
         }
+
+        localStorage.setItem('app-theme', selectedTheme);
+        updateThemeButtons(selectedTheme);
     });
+
     // --- Logika Ukuran Teks ---
     const applyTextSize = (size) => {
         const doc = document.documentElement;
@@ -97,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (size === 'small') doc.classList.add('text-small');
         if (size === 'large') doc.classList.add('text-large');
     };
+
     const updateTextSizeButtons = (selectedSize) => {
         textSizeSwitcher.querySelectorAll('button').forEach(button => {
             button.classList.remove('active');
@@ -112,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTextSizeButtons(selectedSize);
         }
     });
+
     // --- Logika Kirim dengan Enter ---
     let enterToSend = localStorage.getItem('app-enter-to-send') === 'true';
     enterToSendToggle.checked = enterToSend;
@@ -119,12 +152,14 @@ document.addEventListener('DOMContentLoaded', () => {
         enterToSend = enterToSendToggle.checked;
         localStorage.setItem('app-enter-to-send', enterToSend);
     });
+
     chatInput.addEventListener('keydown', (e) => {
         if (enterToSend && e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
         }
     });
+
     // --- Pengaturan Placeholder ---
     langSetting.addEventListener('click', () => alert('Fitur ganti bahasa belum tersedia.'));
     exportSetting.addEventListener('click', () => alert('Fitur ekspor data belum tersedia.'));
@@ -134,10 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Anda bisa menambahkan logika penghapusan data di sini
         }
     });
+
     // --- Muat semua pengaturan saat halaman dibuka ---
     const savedTheme = localStorage.getItem('app-theme') || 'system';
     applyTheme(savedTheme);
     updateThemeButtons(savedTheme);
+
     const savedTextSize = localStorage.getItem('app-text-size') || 'normal';
     applyTextSize(savedTextSize);
     updateTextSizeButtons(savedTextSize);
@@ -146,20 +183,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // LOGIKA CHAT
     // =================================================================
 
+    // --- Logika Pesan Selamat Datang (Welcome Message) ---
     let typingTimeout;
     let deletionTimeout;
 
     const startTypingAnimation = (message) => {
         let i = 0;
         let isTyping = true;
-        
         const cursor = welcomeMessage.querySelector('.blinking-cursor');
         if (cursor) cursor.remove();
-
         const newCursor = document.createElement('span');
         newCursor.className = 'blinking-cursor';
         newCursor.textContent = '|';
-        
         welcomeMessage.textContent = '';
         welcomeMessage.appendChild(newCursor);
 
@@ -192,31 +227,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const stopTypingAnimation = () => {
         clearTimeout(typingTimeout);
         clearTimeout(deletionTimeout);
-        const cursor = welcomeMessage.querySelector('.blinking-cursor');
-        if (cursor) cursor.remove();
-        welcomeMessage.innerHTML = '';
+        if (welcomeMessage) {
+            const cursor = welcomeMessage.querySelector('.blinking-cursor');
+            if (cursor) cursor.remove();
+            welcomeMessage.innerHTML = '';
+        }
     };
 
     const initialMessage = `${getGreeting()}, Namaku Evelyn.`;
     if (welcomeMessage) {
         startTypingAnimation(initialMessage);
     }
-    
+
+    // --- Navigasi & Sesi ---
     openSidebarBtn.addEventListener('click', () => {
         sidebar.classList.add('open');
         loadSessionsList();
     });
+
     closeSidebarBtn.addEventListener('click', () => {
         sidebar.classList.remove('open');
     });
+
     newSessionBtn.addEventListener('click', () => {
         startNewSession();
         sidebar.classList.remove('open');
     });
+
     chatHistoryBtn.addEventListener('click', () => {
         sessionsList.classList.toggle('show');
         chatHistoryBtn.classList.toggle('active');
     });
+
     function startNewSession() {
         currentSessionId = null;
         chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
@@ -229,43 +271,35 @@ document.addEventListener('DOMContentLoaded', () => {
         currentChatTitle.textContent = 'Evelyn';
         chatInput.focus();
     }
-    
+
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Failed to load sessions list: ${response.status} - ${errorData.message}`);
+                throw new Error(`Gagal memuat daftar sesi: ${response.status}`);
             }
-            
             const { sessions } = await response.json();
             sessionsList.innerHTML = '';
             if (sessions && sessions.length > 0) {
                 sessions.forEach(session => {
                     const li = document.createElement('li');
                     li.classList.add('session-list-item');
-
                     const titleButton = document.createElement('button');
                     titleButton.textContent = session.title;
                     titleButton.classList.add('session-title-button');
                     titleButton.dataset.sessionId = session.session_id;
-
                     titleButton.addEventListener('click', () => {
                         loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
-                    
                     const sessionActions = document.createElement('div');
                     sessionActions.classList.add('session-actions');
-                    
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
                     sessionsList.appendChild(li);
                 });
             } else {
-                const li = document.createElement('li');
-                li.innerHTML = '<button style="color:var(--primary-text-color);">Tidak ada riwayat</button>';
-                sessionsList.appendChild(li);
+                sessionsList.innerHTML = '<li><button style="color:var(--secondary-text-color);">Tidak ada riwayat</button></li>';
             }
         } catch (error) {
             console.error('Error loading sessions:', error);
@@ -276,35 +310,29 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadChatHistory(sessionId, title) {
         try {
             const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
-            if (!response.ok) throw new Error('Failed to load chat history.');
-            
+            if (!response.ok) throw new Error('Gagal memuat riwayat chat.');
             const { history } = await response.json();
-            
             chatBox.innerHTML = '';
-            // welcomeMessage.classList.add('hide'); // This line can cause errors, better to just clear the box.
             isFirstMessage = false;
-
             stopTypingAnimation();
-
             if (history && history.length > 0) {
                 history.forEach(msg => {
-                    appendMessage(msg.role, msg.text);
+                    // Saat memuat riwayat, pesan AI perlu diparsing lagi karena di DB tersimpan teks mentah
+                    const content = (msg.role === 'ai') ? markdownToHtml(msg.text) : msg.text;
+                    appendMessage(msg.role, content);
                 });
-            } else {
-                appendMessage('ai', 'Riwayat chat ini masih kosong.');
             }
-
             currentSessionId = sessionId;
-            currentChatTitle.textContent = title; // Set title when loading history
+            currentChatTitle.textContent = title;
         } catch (error) {
             console.error('Error loading history:', error);
-            chatBox.innerHTML = ``;
-            appendMessage('ai', 'Maaf, terjadi kesalahan saat memuat riwayat chat.');
+            appendMessage('ai', '<p>Maaf, terjadi kesalahan saat memuat riwayat chat.</p>');
             currentChatTitle.textContent = 'Evelyn';
             currentSessionId = null;
         }
     }
 
+    // --- Fungsi Pembantu (Helpers) ---
     function getGreeting() {
         const hour = new Date().getHours();
         if (hour < 11) return "Selamat Pagi";
@@ -317,31 +345,38 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
+
+    // --- Logika Upload File ---
     uploadBtn.addEventListener('click', () => {
         uploadMenu.classList.toggle('show');
     });
+
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.upload-area') && uploadMenu.classList.contains('show')) {
             uploadMenu.classList.remove('show');
         }
     });
+
     cameraBtn.addEventListener('click', () => {
         fileInput.setAttribute('capture', 'camera');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
+
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
+
     fileBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.removeAttribute('accept');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
+
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files.length > 0 ? e.target.files.item(0) : null;
         if (file) {
@@ -349,187 +384,154 @@ document.addEventListener('DOMContentLoaded', () => {
             displayFilePreview(file);
         }
     });
+
+    // --- FORM SUBMISSION UTAMA ---
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         if (isSubmitting) return;
 
         const userMessage = chatInput.value.trim();
         const fileToSend = fileInput.files.length > 0 ? fileInput.files.item(0) : null;
 
-        if (userMessage || fileToSend) {
-            isSubmitting = true;
+        if (!userMessage && !fileToSend) return;
 
-            if (isFirstMessage) {
-                if(welcomeMessage) {
-                    welcomeMessage.classList.add('hide');
-                }
-                isFirstMessage = false;
-                stopTypingAnimation();
-            }
+        isSubmitting = true;
 
-            if (fileToSend) {
-                if (fileToSend.type.startsWith('image/')) {
-                    const imageCard = document.createElement('div');
-                    imageCard.classList.add('message', 'user-message', 'image-card');
-                    imageCard.addEventListener('click', () => showImagePreview(fileToSend));
-                    
-                    const image = document.createElement('img');
-                    image.src = URL.createObjectURL(fileToSend);
-                    imageCard.appendChild(image);
-                    chatBox.appendChild(imageCard);
-                } else {
-                    const fileCard = document.createElement('div');
-                    fileCard.classList.add('message', 'user-message', 'document-card');
-                    
-                    const fileExtension = fileToSend.name.split('.').pop().toLowerCase();
-                    fileCard.classList.add(`file-type-${fileExtension}`);
+        if (isFirstMessage) {
+            if (welcomeMessage) welcomeMessage.classList.add('hide');
+            isFirstMessage = false;
+            stopTypingAnimation();
+        }
 
-                    const fileContent = document.createElement('div');
-                    fileContent.classList.add('file-content');
-                    const fileName = document.createElement('p');
-                    fileName.textContent = `${fileToSend.name}`;
-                    fileContent.appendChild(fileName);
-                    
-                    fileCard.appendChild(fileContent);
-                    chatBox.appendChild(fileCard);
-                }
-            }
-            
-            if (userMessage) {
-                appendMessage('user', userMessage);
+        // Tampilkan pesan pengguna (jika ada teks)
+        if (userMessage) {
+            appendMessage('user', userMessage);
+        }
+        
+        // Tampilkan preview file yang dikirim
+        if (fileToSend) {
+            displaySentFile(fileToSend);
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        removeFilePreview(); // Ganti dari removeFile()
+        showTypingIndicator();
+
+        try {
+            const formData = new FormData();
+            formData.append('message', userMessage);
+            if (fileToSend) formData.append('file', fileToSend);
+            if (currentSessionId) formData.append('sessionId', currentSessionId);
+
+            const response = await fetch('/api/chat', { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
             }
             
-            chatBox.scrollTop = chatBox.scrollHeight;
-            chatInput.value = '';
-            chatInput.style.height = 'auto';
-            removeFile();
-            showTypingIndicator();
-
-            try {
-                const formData = new FormData();
-                formData.append('message', userMessage);
-                if (fileToSend) {
-                    formData.append('file', fileToSend);
-                }
-                if (currentSessionId) {
-                    formData.append('sessionId', currentSessionId);
-                }
-
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    body: formData,
-                });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
-                }
-                
-                hideTypingIndicator();
-                const data = await response.json();
-                appendMessage('ai', data.text);
-                
-                if (data.sessionId && !currentSessionId) {
-                    currentSessionId = data.sessionId;
-                }
-                
-                loadSessionsList();
-            } catch (error) {
-                console.error('Error:', error);
-                hideTypingIndicator();
-                currentSessionId = null;
-                isFirstMessage = true;
-                appendMessage('ai', `Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya. Error: ${error.message}`);
-            } finally {
-                isSubmitting = false;
+            hideTypingIndicator();
+            const data = await response.json();
+            
+            // Langsung gunakan data.text karena sudah dalam format HTML
+            appendMessage('ai', data.text);
+            
+            if (data.sessionId && !currentSessionId) {
+                currentSessionId = data.sessionId;
             }
+            loadSessionsList();
+        } catch (error) {
+            console.error('Error:', error);
+            hideTypingIndicator();
+            appendMessage('ai', `<p>Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.<br><small>Error: ${error.message}</small></p>`);
+        } finally {
+            isSubmitting = false;
         }
     });
-    function showImagePreview(file) {
-        const previewOverlay = document.createElement('div');
-        previewOverlay.classList.add('image-preview-overlay');
-        const previewImage = document.createElement('img');
-        previewImage.src = URL.createObjectURL(file);
-        
-        previewOverlay.appendChild(previewImage);
-        document.body.appendChild(previewOverlay);
-        
-        previewOverlay.addEventListener('click', () => {
-            previewOverlay.remove();
-        });
-    }
 
-    function appendMessage(sender, message) {
-        if (!message) return;
+    // --- FUNGSI TAMPILAN PESAN ---
+
+    /**
+     * Menambahkan pesan ke kotak chat.
+     * @param {string} sender 'user' atau 'ai'.
+     * @param {string} content Isi pesan. Untuk 'user' ini teks biasa, untuk 'ai' ini adalah HTML.
+     */
+    function appendMessage(sender, content) {
+        if (!content) return;
+
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
         
-        const content = document.createElement('div');
-        content.classList.add('message-content');
-        const parts = message.split('```');
-        
-        for (let i = 0; i < parts.length; i++) {
-            if (i % 2 === 1) { // Logika jika ini adalah blok kode
-                const [lang, ...codeLines] = parts[i].split('\n');
-                const codeContent = codeLines.join('\n').trim();
-    
-                const codeBlockContainer = document.createElement('div');
-                codeBlockContainer.classList.add('code-block-container');
-    
-                const codeBlockHeader = document.createElement('div');
-                codeBlockHeader.classList.add('code-block-header');
-    
-                const langLabel = document.createElement('span');
-                langLabel.classList.add('code-language');
-                langLabel.textContent = lang.toUpperCase().trim() || 'TEXT';
-    
-                const copyBtn = document.createElement('button');
-                copyBtn.textContent = 'Copy';
-                copyBtn.classList.add('copy-btn');
-                copyBtn.addEventListener('click', () => {
-                    navigator.clipboard.writeText(codeContent).then(() => {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
-                    });
-                });
-    
-                codeBlockHeader.appendChild(langLabel);
-                codeBlockHeader.appendChild(copyBtn);
-                
-                const codeAsText = document.createElement('p');
-                codeAsText.classList.add('code-as-plain-text');
-                codeAsText.innerText = codeContent;
-    
-                codeBlockContainer.appendChild(codeBlockHeader);
-                codeBlockContainer.appendChild(codeAsText);
-                content.appendChild(codeBlockContainer);
-                content.classList.add('has-code-block');
-            } else if (parts[i].trim()) { // Logika jika ini teks biasa
-                const textContent = document.createElement('p');
-                
-                // === PERBAIKAN REGEX LINK ADA DI SINI ===
-                const urlRegex = /(https?:\/\/[^\]\s"'<>()\[]+)/g;
-                let processedText = parts[i]
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\n/g, '<br>');
-            
-                processedText = processedText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="chat-link">$1</a>');
-                
-                textContent.innerHTML = processedText;
-                content.appendChild(textContent);
-            }
+        const contentWrapper = document.createElement('div');
+        contentWrapper.classList.add('message-content');
+
+        if (sender === 'user') {
+            // Pesan pengguna adalah teks biasa, ubah newline menjadi <br>
+            contentWrapper.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
+        } else {
+            // Pesan AI adalah HTML dari server, masukkan langsung
+            contentWrapper.innerHTML = content;
         }
     
-        messageElement.appendChild(content);
+        messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
     
-        if (typeof Prism !== 'undefined') {
-            const codeElements = content.querySelectorAll('pre code');
-            codeElements.forEach(Prism.highlightElement);
+        // Setelah HTML dimasukkan, cari blok kode dan tambahkan fungsionalitas
+        if (sender === 'ai') {
+            enhanceCodeBlocks(messageElement);
         }
     }
-    
+
+    /**
+     * Menemukan semua blok kode dalam sebuah elemen dan menambahkan header dengan info bahasa & tombol copy.
+     * @param {HTMLElement} container Elemen pesan yang mungkin berisi blok kode.
+     */
+    function enhanceCodeBlocks(container) {
+        const codeBlocks = container.querySelectorAll('pre > code[class*="language-"]');
+        codeBlocks.forEach(codeElement => {
+            const preElement = codeElement.parentElement;
+            
+            // Hindari menambahkan header jika sudah ada
+            if (preElement.parentElement.classList.contains('code-block-container')) return;
+
+            const codeContainer = document.createElement('div');
+            codeContainer.className = 'code-block-container';
+
+            const header = document.createElement('div');
+            header.className = 'code-block-header';
+
+            const langLabel = document.createElement('span');
+            langLabel.className = 'code-language';
+            const langMatch = codeElement.className.match(/language-(\w+)/);
+            langLabel.textContent = (langMatch && langMatch[1]) ? langMatch[1].toUpperCase() : 'CODE';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = 'Copy';
+            copyBtn.className = 'copy-btn';
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(codeElement.innerText).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+                });
+            });
+
+            header.appendChild(langLabel);
+            header.appendChild(copyBtn);
+
+            // Bungkus <pre> dengan kontainer baru
+            preElement.parentNode.insertBefore(codeContainer, preElement);
+            codeContainer.appendChild(header);
+            codeContainer.appendChild(preElement);
+
+            // Jalankan syntax highlighting jika Prism.js ada
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightElement(codeElement);
+            }
+        });
+    }
+
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
             const typingIndicator = document.createElement('div');
@@ -548,10 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // --- Fungsi Tampilan File ---
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
-        
         if (file.type.startsWith('image/')) {
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
@@ -563,19 +565,70 @@ document.addEventListener('DOMContentLoaded', () => {
             fileInfo.textContent = `File: ${file.name}`;
             filePreviewContainer.appendChild(fileInfo);
         }
-
         const closeBtn = document.createElement('span');
         closeBtn.classList.add('file-preview-close');
         closeBtn.innerHTML = '&#x2716;';
-        closeBtn.onclick = removeFile;
+        closeBtn.onclick = removeFilePreview;
         filePreviewContainer.appendChild(closeBtn);
     }
     
-    window.removeFile = function() {
+    function removeFilePreview() {
         selectedFile = null;
         fileInput.value = '';
         filePreviewContainer.style.display = 'none';
         filePreviewContainer.innerHTML = '';
+    }
+
+    function displaySentFile(file) {
+        if (file.type.startsWith('image/')) {
+            const imageCard = document.createElement('div');
+            imageCard.classList.add('message', 'user-message', 'image-card');
+            imageCard.addEventListener('click', () => showImagePreview(file));
+            const image = document.createElement('img');
+            image.src = URL.createObjectURL(file);
+            imageCard.appendChild(image);
+            chatBox.appendChild(imageCard);
+        } else {
+            const fileCard = document.createElement('div');
+            fileCard.classList.add('message', 'user-message', 'document-card');
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            fileCard.classList.add(`file-type-${fileExtension}`);
+            const fileContent = document.createElement('div');
+            fileContent.classList.add('file-content');
+            const fileName = document.createElement('p');
+            fileName.textContent = `${file.name}`;
+            fileContent.appendChild(fileName);
+            fileCard.appendChild(fileContent);
+            chatBox.appendChild(fileCard);
+        }
+    }
+    
+    function showImagePreview(file) {
+        const previewOverlay = document.createElement('div');
+        previewOverlay.classList.add('image-preview-overlay');
+        const previewImage = document.createElement('img');
+        previewImage.src = URL.createObjectURL(file);
+        previewOverlay.appendChild(previewImage);
+        document.body.appendChild(previewOverlay);
+        previewOverlay.addEventListener('click', () => {
+            previewOverlay.remove();
+        });
+    }
+
+    // --- Inisialisasi ---
+    // Karena saat load history kita butuh parser, maka parsernya kita letakkan di sini.
+    function markdownToHtml(markdownText) {
+        let html = '';
+        const lines = (markdownText || '').split('\n');
+        for(const line of lines){
+            if(line.trim() === '') continue;
+            let processedLine = line
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>');
+            html += `<p>${processedLine}</p>`;
+        }
+        return html;
     }
 
     loadSessionsList();
