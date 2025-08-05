@@ -468,11 +468,13 @@ input:checked + .slider:before {
     text-align: center;
     pointer-events: none;
     width: 80%;
+    max-width: 500px; /* Batas lebar maksimum agar tidak terlalu lebar di layar besar */
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    white-space: nowrap;
-    overflow: hidden;
-    border-right: 2px solid transparent;
+    white-space: normal; /* Diubah dari nowrap agar teks bisa turun */
+    border-right: 2px solid transparent; /* Untuk animasi kursor ketik */
+    line-height: 1.4; /* Menambah jarak antar baris jika teksnya turun */
 }
+/* === MODIFIKASI SELESAI === */
 
 .welcome-message.hide {
     display: none;
@@ -876,3 +878,4 @@ input:checked + .slider:before {
     color: var(--text-color);
     border-bottom-color: var(--text-color);
 }
+

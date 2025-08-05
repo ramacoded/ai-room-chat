@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         welcomeMessage.innerHTML = '';
     };
 
-    const initialMessage = `${getGreeting()}, Aku Noa`;
+    const initialMessage = `${getGreeting()}, Namaku Evelyn.`;
     if (welcomeMessage) {
         startTypingAnimation(initialMessage);
     }
@@ -223,10 +223,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isFirstMessage = true;
         welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage) {
-            const greetingMessage = `${getGreeting()}, Aku Noa`;
+            const greetingMessage = `${getGreeting()}, Aku Evelyn`;
             startTypingAnimation(greetingMessage);
         }
-        currentChatTitle.textContent = 'Noa AI';
+        currentChatTitle.textContent = 'Evelyn';
         chatInput.focus();
     }
     
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading history:', error);
             chatBox.innerHTML = ``;
             appendMessage('ai', 'Maaf, terjadi kesalahan saat memuat riwayat chat.');
-            currentChatTitle.textContent = 'Noa AI';
+            currentChatTitle.textContent = 'Evelyn';
             currentSessionId = null;
         }
     }
