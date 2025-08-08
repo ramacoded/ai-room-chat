@@ -1,16 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
 
 /* Variabel Warna untuk Tema Gelap (Default) & Terang */
+/* === PERUBAHAN WARNA DI SINI === */
 :root {
-    --bg-color: #202124;
-    --card-bg: #303134;
+    --bg-color: #1E1F22;
+    --card-bg: #000000;
     --text-color: #e8eaed;
     --primary-text-color: #bdc1c6;
-    --input-bg: #3c4043;
-    --border-color: #5f6368;
-    --chat-bubble-bg: #444649;
-    --sidebar-bg: #28292c;
-    --sidebar-link-hover: #3c4043;
+    --input-bg: #343538;
+    --border-color: #404143;
+    --chat-bubble-bg: #3A3B3D;
+    --sidebar-bg: #1E1F22;
+    --sidebar-link-hover: #2A2B2E;
     --link-color: #8ab4f8;
     --shadow-color: rgba(0, 0, 0, 0.3);
     --destructive-color: #ff5252;
@@ -23,6 +24,7 @@
     --font-family-sans: 'Google Sans', sans-serif;
     --font-family-mono: 'Roboto Mono', 'SF Mono', 'Consolas', 'Menlo', monospace;
 }
+/* ================================ */
 
 html.light-theme {
     --bg-color: #f0f2f5;
@@ -205,11 +207,19 @@ input:checked + .slider:before { transform: translateX(20px); }
 .welcome-message .blinking-cursor { font-size: 1em; color: var(--text-color); animation: blink 1s step-end infinite; }
 @keyframes blink { from, to { opacity: 0; } 50% { opacity: 1; } }
 
-.message { display: block; max-width: 85%; line-height: 1.6; }
-.user-message { margin-left: auto; }
-.ai-message { margin-right: auto; padding: 8px 0; } /* Perubahan: Menambahkan padding agar tidak terlalu mepet */
+.message { 
+    display: block; 
+    line-height: 1.6; 
+}
+.user-message { 
+    margin-left: auto; 
+    max-width: 85%;
+}
+.ai-message { 
+    margin-right: auto;
+    padding: 8px 0; 
+}
 
-/* Perubahan: Aturan bubble hanya untuk user */
 .user-message .message-content {
     background-color: var(--chat-bubble-bg);
     padding: 16px;
@@ -255,12 +265,10 @@ input:checked + .slider:before { transform: translateX(20px); }
 }
 .image-preview-overlay img { max-width: 90%; max-height: 90%; border-radius: 16px; object-fit: contain; }
 
-/* Perubahan: Menghilangkan bubble pada typing indicator */
 .typing-indicator { width: fit-content; }
 .typing-indicator .message-content {
     display: flex;
     align-items: center;
-    /* Hapus background, padding, dll. */
 }
 .typing-dot {
     width: 8px; height: 8px; background-color: var(--text-color);
