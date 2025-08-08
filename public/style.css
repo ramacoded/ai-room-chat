@@ -1,10 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
 
 /* Variabel Warna untuk Tema Gelap (Default) & Terang */
-/* === PERUBAHAN WARNA DI SINI === */
 :root {
     --bg-color: #1E1F22;
-    --card-bg: #000000;
+    --card-bg: #2A2B2E;
     --text-color: #e8eaed;
     --primary-text-color: #bdc1c6;
     --input-bg: #343538;
@@ -24,7 +23,6 @@
     --font-family-sans: 'Google Sans', sans-serif;
     --font-family-mono: 'Roboto Mono', 'SF Mono', 'Consolas', 'Menlo', monospace;
 }
-/* ================================ */
 
 html.light-theme {
     --bg-color: #f0f2f5;
@@ -189,11 +187,20 @@ input:checked + .slider:before { transform: translateX(20px); }
 .header-title { flex-grow: 1; text-align: left; }
 .header-title h1 { font-size: 1.5rem; font-weight: 500; margin: 0; text-align: left; }
 .open-sidebar-btn { background-color: transparent; border: none; color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: flex; flex-shrink: 0; }
+
+/* === PERUBAHAN DI SINI === */
 .chat-box {
-    flex-grow: 1; padding: 24px; overflow-y: auto;
-    display: flex; flex-direction: column; gap: 12px;
-    scroll-behavior: smooth; position: relative;
+    flex-grow: 1;
+    padding: 24px 16px; /* Mengurangi padding horizontal */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+    position: relative;
 }
+/* ======================== */
+
 .welcome-message {
     position: absolute; top: 50%;
     left: 50%;
