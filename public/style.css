@@ -14,14 +14,11 @@
     --link-color: #8ab4f8;
     --shadow-color: rgba(0, 0, 0, 0.3);
     --destructive-color: #ff5252;
-
-    /* --- PERBAIKAN 1: Menambahkan variabel yang hilang --- */
     --secondary-bg-color: #28292c;
     --tertiary-bg-color: #3c4043;
     --accent-color: var(--link-color);
     --accent-color-translucent: rgba(138, 180, 248, 0.15);
     --code-text-color: #dadce0;
-    
     --font-size-base: 1rem;
     --font-family-sans: 'Google Sans', sans-serif;
     --font-family-mono: 'Roboto Mono', 'SF Mono', 'Consolas', 'Menlo', monospace;
@@ -40,8 +37,6 @@ html.light-theme {
     --link-color: #1a73e8;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --destructive-color: #d93025;
-
-    /* --- PERBAIKAN 1: Menambahkan variabel yang hilang --- */
     --secondary-bg-color: #f8f9fa;
     --tertiary-bg-color: #f1f3f4;
     --accent-color: var(--link-color);
@@ -57,7 +52,8 @@ html.text-large { --font-size-base: 1.1rem; }
 
 html, body {
     height: 100%; width: 100%;
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     font-family: var(--font-family-sans);
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -69,7 +65,8 @@ html, body {
 
 /* Gaya Halaman Pengaturan */
 .settings-page-container {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    position: absolute; top: 0; left: 0; width: 100%;
+    height: 100%;
     background-color: var(--card-bg); z-index: 2000;
     transform: translateX(100%); display: flex; flex-direction: column;
 }
@@ -80,7 +77,8 @@ html, body {
 }
 .settings-header h1 { font-size: 1.5rem; font-weight: 500; margin: 0; margin-left: 16px; }
 .icon-btn {
-    background: none; border: none; color: var(--primary-text-color);
+    background: none; border: none;
+    color: var(--primary-text-color);
     cursor: pointer; padding: 8px; display: flex; align-items: center;
     justify-content: center; border-radius: 50%; transition: background-color 0.2s ease;
 }
@@ -94,7 +92,8 @@ html, body {
 .setting-item-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 12px 16px; border-radius: 12px;
-    transition: background-color 0.2s ease; cursor: pointer;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
 }
 .setting-item-row:not(.no-hover):hover { background-color: var(--input-bg); }
 .setting-item-row.no-hover { cursor: default; }
@@ -115,13 +114,15 @@ html, body {
     cursor: pointer; border-radius: 6px; transition: background-color 0.2s ease, color 0.2s ease;
 }
 .segmented-control button.active {
-    background-color: var(--card-bg); color: var(--text-color);
+    background-color: var(--card-bg);
+    color: var(--text-color);
     font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    position: absolute; cursor: pointer; top: 0;
+    left: 0; right: 0; bottom: 0;
     background-color: var(--input-bg); transition: .4s; border-radius: 24px;
 }
 .slider:before {
@@ -134,7 +135,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 /* Gaya Utama Aplikasi */
 .main-container {
     display: flex; position: relative; width: 100%; height: 100vh;
-    max-width: 960px; margin: 0 auto; border-radius: 28px;
+    max-width: 960px;
+    margin: 0 auto; border-radius: 28px;
     box-shadow: 0 4px 12px var(--shadow-color); overflow: hidden; background-color: var(--card-bg);
 }
 .sidebar {
@@ -167,7 +169,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 .session-list-item { display: flex; align-items: center; border-radius: 0; transition: background-color 0.2s ease; padding: 0; margin: 0; }
 .session-list-item:hover { background-color: var(--sidebar-link-hover); }
 .session-title-button {
-    flex-grow: 1; padding: 12px 16px 12px 48px; font-size: 0.9em;
+    flex-grow: 1; padding: 12px 16px 12px 48px;
+    font-size: 0.9em;
     font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     text-align: left; background: none; border: none; color: var(--text-color); cursor: pointer;
 }
@@ -190,10 +193,12 @@ input:checked + .slider:before { transform: translateX(20px); }
     scroll-behavior: smooth; position: relative;
 }
 .welcome-message {
-    position: absolute; top: 50%; left: 50%;
+    position: absolute; top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%); opacity: 1; font-size: 1.5rem;
     font-weight: 500; text-align: center; pointer-events: none; width: 80%;
-    max-width: 500px; text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     white-space: normal; border-right: 2px solid transparent; line-height: 1.4;
 }
 .welcome-message.hide { display: none; }
@@ -202,12 +207,21 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .message { display: block; max-width: 85%; line-height: 1.6; }
 .user-message { margin-left: auto; }
-.ai-message { margin-right: auto; }
-.message-content {
-    background-color: var(--chat-bubble-bg); color: var(--text-color);
-    padding: 16px; border-radius: 20px;
-    word-wrap: break-word; white-space: pre-wrap;
+.ai-message { margin-right: auto; padding: 8px 0; } /* Perubahan: Menambahkan padding agar tidak terlalu mepet */
+
+/* Perubahan: Aturan bubble hanya untuk user */
+.user-message .message-content {
+    background-color: var(--chat-bubble-bg);
+    padding: 16px;
+    border-radius: 20px;
 }
+
+.message-content {
+    color: var(--text-color);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
 .message-content > * + * { margin-top: 1em; }
 .message-content p { margin: 0; }
 
@@ -222,7 +236,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 .document-card {
     max-width: 85%; margin-left: auto; background-color: var(--chat-bubble-bg);
     color: var(--text-color); padding: 16px; border-radius: 20px;
-    display: flex; align-items: center; gap: 10px;
+    display: flex;
+    align-items: center; gap: 10px;
 }
 .document-card .file-content { display: flex; align-items: center; gap: 10px; }
 .document-card .file-content p { margin: 0; font-weight: 500; }
@@ -234,22 +249,23 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .image-preview-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.85); display: flex;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
     justify-content: center; align-items: center; z-index: 3000; cursor: pointer;
 }
 .image-preview-overlay img { max-width: 90%; max-height: 90%; border-radius: 16px; object-fit: contain; }
 
+/* Perubahan: Menghilangkan bubble pada typing indicator */
 .typing-indicator { width: fit-content; }
 .typing-indicator .message-content {
-    display: flex; align-items: center;
-    background: linear-gradient(270deg, var(--input-bg), var(--border-color), var(--input-bg));
-    background-size: 200% 200%;
-    animation: gradient-animation 4s ease infinite; padding: 12px 16px; border-radius: 20px;
+    display: flex;
+    align-items: center;
+    /* Hapus background, padding, dll. */
 }
-@keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .typing-dot {
     width: 8px; height: 8px; background-color: var(--text-color);
-    border-radius: 50%; margin: 0 2px; animation: typing-wave 1.4s infinite ease-in-out;
+    border-radius: 50%; margin: 0 2px;
+    animation: typing-wave 1.4s infinite ease-in-out;
 }
 .typing-dot:nth-child(1) { animation-delay: -0.32s; }
 .typing-dot:nth-child(2) { animation-delay: -0.16s; }
@@ -258,14 +274,16 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .chat-form {
     position: relative; display: flex; align-items: center; padding: 16px 24px;
-    border-top: 1px solid var(--border-color); background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    background-color: var(--card-bg);
     gap: 12px; flex-shrink: 0;
 }
 .upload-area { position: relative; height: 48px; width: 48px; }
 .upload-btn {
     width: 48px; height: 48px; background-color: transparent;
     color: var(--primary-text-color); border: none; cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
+    display: flex;
+    justify-content: center; align-items: center;
     border-radius: 50%; transition: background-color 0.2s ease, transform 0.2s ease; flex-shrink: 0;
 }
 .upload-btn:hover { background-color: var(--sidebar-link-hover); }
@@ -274,7 +292,8 @@ input:checked + .slider:before { transform: translateX(20px); }
     background-color: var(--card-bg); border-radius: 12px;
     box-shadow: 0 4px 8px var(--shadow-color); padding: 8px; display: none;
     flex-direction: column; gap: 8px; transform: translateY(10px);
-    opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .upload-menu.show { display: flex; opacity: 1; transform: translateY(0); }
 .upload-menu button {
@@ -296,7 +315,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 .send-btn {
     width: 48px; height: 48px; background-color: transparent;
     color: var(--primary-text-color); border: none; cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
+    display: flex;
+    justify-content: center; align-items: center;
     border-radius: 50%; transition: background-color 0.2s ease, transform 0.2s ease; flex-shrink: 0;
 }
 .send-btn:hover { background-color: var(--sidebar-link-hover); }
@@ -304,49 +324,35 @@ input:checked + .slider:before { transform: translateX(20px); }
 .file-preview-container {
     display: flex; align-items: center; padding: 12px 24px;
     border-top: 1px solid var(--border-color); background-color: var(--card-bg);
-    gap: 16px; position: relative; flex-shrink: 0;
+    gap: 16px;
+    position: relative; flex-shrink: 0;
 }
 .file-preview-image { max-height: 80px; max-width: 100px; border-radius: 12px; object-fit: cover; }
 .file-preview-info { flex-grow: 1; font-size: 0.9rem; }
 .file-preview-close {
     position: absolute; top: 5px; right: 5px; background-color: var(--input-bg);
-    color: var(--text-color); border-radius: 50%; width: 20px; height: 20px;
+    color: var(--text-color); border-radius: 50%; width: 20px;
+    height: 20px;
     display: flex; justify-content: center; align-items: center;
     font-size: 0.8rem; cursor: pointer; line-height: 1;
 }
 
-/* =================================================================== */
-/* === PERBAIKAN 2: MENGGANTI TOTAL BLOK INI DENGAN VERSI YANG BENAR === */
-/* =================================================================== */
-
-/* --- BLOK LAMA YANG MENYEBABKAN MASALAH DIHAPUS --- */
-/* .code-block-container ... */
-/* .code-as-plain-text ... */
-/* .message-content .chat-link ... */
-/* dan lainnya... */
-
-/* --- BLOK BARU YANG BERSIH DAN BENAR --- */
-
-/* --- Garis Horizontal --- */
+/* --- Styling Elemen Markdown --- */
 hr {
   border: none;
   border-top: 1px solid var(--border-color);
   margin: 1em 0;
 }
-
-/* --- Kutipan (Blockquote) --- */
 .message-content blockquote {
-  margin: 0; /* Jarak sudah diatur oleh .message-content > * + * */
+  margin: 0;
   padding: 0.5em 1em;
   border-left: 4px solid var(--accent-color);
-  background-color: var(--input-bg); /* Menggunakan warna yang konsisten */
+  background-color: var(--input-bg);
   border-radius: 0 8px 8px 0;
 }
 .message-content blockquote p { margin: 0.5em 0; }
 .message-content blockquote p:first-child { margin-top: 0; }
 .message-content blockquote p:last-child { margin-bottom: 0; }
-
-/* --- Tabel --- */
 .message-content table {
   width: 100%;
   border-collapse: collapse;
@@ -354,7 +360,7 @@ hr {
   font-size: 0.9em;
   border: 1px solid var(--border-color);
   border-radius: 10px;
-  overflow: hidden; /* Agar sudutnya rapi */
+  overflow: hidden;
 }
 .message-content th,
 .message-content td {
@@ -369,8 +375,6 @@ hr {
 .message-content tr:nth-child(even) {
   background-color: var(--sidebar-bg);
 }
-
-/* --- Teks Coret & Link --- */
 .message-content s {
   text-decoration: line-through;
   opacity: 0.7;
@@ -398,7 +402,7 @@ hr {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px; /* Padding disesuaikan */
+    padding: 8px 16px;
 }
 .code-language {
     font-size: 0.8em;
@@ -420,12 +424,11 @@ hr {
 .copy-btn:hover {
     background-color: var(--sidebar-link-hover);
 }
-/* Ini adalah bagian kunci yang hilang: menata <pre> dan <code> */
 .code-block-container pre {
     margin: 0;
     padding: 0 16px 16px 16px;
-    overflow-x: auto; /* Mengaktifkan scroll horizontal */
-    white-space: pre; /* Mencegah teks turun (wrap) */
+    overflow-x: auto;
+    white-space: pre;
 }
 .code-block-container code {
     font-family: var(--font-family-mono);
