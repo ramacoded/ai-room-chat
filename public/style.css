@@ -3,7 +3,7 @@
 /* Variabel Warna untuk Tema Gelap (Default) & Terang */
 :root {
     --bg-color: #1E1F22;
-    --card-bg: #2A2B2E;
+    --card-bg: #000000;
     --text-color: #e8eaed;
     --primary-text-color: #bdc1c6;
     --input-bg: #343538;
@@ -187,11 +187,9 @@ input:checked + .slider:before { transform: translateX(20px); }
 .header-title { flex-grow: 1; text-align: left; }
 .header-title h1 { font-size: 1.5rem; font-weight: 500; margin: 0; text-align: left; }
 .open-sidebar-btn { background-color: transparent; border: none; color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: flex; flex-shrink: 0; }
-
-/* === PERUBAHAN DI SINI === */
 .chat-box {
     flex-grow: 1;
-    padding: 24px 16px; /* Mengurangi padding horizontal */
+    padding: 24px 16px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -199,7 +197,6 @@ input:checked + .slider:before { transform: translateX(20px); }
     scroll-behavior: smooth;
     position: relative;
 }
-/* ======================== */
 
 .welcome-message {
     position: absolute; top: 50%;
@@ -439,12 +436,18 @@ hr {
 .copy-btn:hover {
     background-color: var(--sidebar-link-hover);
 }
+
+/* === PERUBAHAN DI SINI === */
 .code-block-container pre {
     margin: 0;
     padding: 0 16px 16px 16px;
     overflow-x: auto;
     white-space: pre;
+    word-wrap: normal;
+    overflow-wrap: normal;
 }
+/* ======================== */
+
 .code-block-container code {
     font-family: var(--font-family-mono);
     font-size: 0.9em;
