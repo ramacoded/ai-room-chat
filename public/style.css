@@ -3,7 +3,7 @@
 /* Variabel Warna untuk Tema Gelap (Default) & Terang */
 :root {
     --bg-color: #1E1F22;
-    --card-bg: #000000; /* Sesuai permintaan Anda */
+    --card-bg: #000000;
     --text-color: #e8eaed;
     --primary-text-color: #bdc1c6;
     --input-bg: #343538;
@@ -13,7 +13,7 @@
     --sidebar-link-hover: #2A2B2E;
     --link-color: #8ab4f8;
     --shadow-color: rgba(0, 0, 0, 0.3);
-    --destructive-color: #ff5252;
+    --destructive-color: #FFFFFF;
     --secondary-bg-color: #28292c;
     --tertiary-bg-color: #3c4043;
     --accent-color: var(--link-color);
@@ -36,7 +36,7 @@ html.light-theme {
     --sidebar-link-hover: #e8eaed;
     --link-color: #1a73e8;
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --destructive-color: #d93025;
+    --destructive-color: #000000;
     --secondary-bg-color: #f8f9fa;
     --tertiary-bg-color: #f1f3f4;
     --accent-color: var(--link-color);
@@ -192,13 +192,12 @@ input:checked + .slider:before { transform: translateX(20px); }
     justify-content: space-between; flex-shrink: 0;
 }
 
-/* === ATURAN BARU UNTUK LOGO === */
 .header-title { 
     flex-grow: 1; 
     text-align: left; 
     display: flex;
     align-items: center;
-    height: 35px;
+    height: 30px; /* Sesuai penetapan Anda */
 }
 .logo-dark, .logo-light {
     height: 100%;
@@ -214,7 +213,6 @@ html.light-theme .logo-dark {
 html.light-theme .logo-light {
     display: block;
 }
-/* ============================= */
 
 .open-sidebar-btn { background-color: transparent; border: none; color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: flex; flex-shrink: 0; }
 .chat-box {
@@ -271,37 +269,6 @@ html.light-theme .logo-light {
 .message-content > * + * { margin-top: 1em; }
 .message-content p { margin: 0; }
 
-.image-card {
-    background: none; padding: 0; border-radius: 0; display: block;
-    max-width: 85%; margin-left: auto; cursor: pointer;
-}
-.image-card img {
-    max-width: 100%; max-height: 250px; height: auto; display: block;
-    border-radius: 12px; cursor: pointer; object-fit: contain;
-}
-.document-card {
-    max-width: 85%; margin-left: auto; background-color: var(--chat-bubble-bg);
-    color: var(--text-color); padding: 16px; border-radius: 20px;
-    display: flex;
-    align-items: center; gap: 10px;
-}
-.document-card .file-content { display: flex; align-items: center; gap: 10px; }
-.document-card .file-content p { margin: 0; font-weight: 500; }
-.document-card::before { content: ''; font-size: 1.5rem; font-weight: bold; color: var(--primary-text-color); }
-.document-card.file-type-xml::before { content: '<>'; color: #f2e379; }
-.document-card.file-type-css::before { content: '#'; color: #29b6f6; }
-.document-card.file-type-js::before { content: 'JS'; color: #ffd600; }
-.document-card.file-type-html::before { content: '</>'; color: #e54b23; }
-
-.image-preview-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
-    display: flex;
-    justify-content: center; align-items: center; z-index: 3000; cursor: pointer;
-}
-.image-preview-overlay img { max-width: 90%; max-height: 90%; border-radius: 16px; object-fit: contain; }
-
-.typing-indicator { width: fit-content; }
 .typing-indicator .message-content {
     display: flex;
     align-items: center;
@@ -324,6 +291,23 @@ html.light-theme .logo-light {
     background-color: var(--card-bg);
     gap: 12px; flex-shrink: 0;
 }
+
+.chat-input {
+    flex-grow: 1;
+    padding: 12px 16px;
+    border-radius: 24px;
+    border: none;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: none;
+    height: 48px;
+    max-height: 150px;
+}
+.chat-input:focus { outline: none; }
+
 .upload-area { position: relative; height: 48px; width: 48px; }
 .upload-btn {
     width: 48px; height: 48px; background-color: transparent;
@@ -350,23 +334,6 @@ html.light-theme .logo-light {
 .upload-menu button:hover { background-color: var(--sidebar-link-hover); }
 .upload-menu button svg { stroke: var(--primary-text-color); }
 
-.chat-input {
-    flex-grow: 1;
-    padding: 12px 16px;
-    border-radius: 24px;
-    border: none;
-    background-color: var(--input-bg);
-    color: var(--text-color);
-    font-family: inherit;
-    font-size: 1rem;
-    line-height: 1.6;
-    resize: none;
-    height: 48px;
-    max-height: 150px;
-}
-
-.chat-input:focus { outline: none; }
-
 .send-btn {
     width: 48px; height: 48px; background-color: transparent;
     color: var(--primary-text-color); border: none; cursor: pointer;
@@ -390,62 +357,6 @@ html.light-theme .logo-light {
     height: 20px;
     display: flex; justify-content: center; align-items: center;
     font-size: 0.8rem; cursor: pointer; line-height: 1;
-}
-
-/* --- Styling Elemen Markdown --- */
-hr {
-  border: none;
-  border-top: 1px solid var(--border-color);
-  margin: 1em 0;
-}
-.message-content blockquote {
-  margin: 0;
-  padding: 0.5em 1em;
-  border-left: 4px solid var(--accent-color);
-  background-color: var(--input-bg);
-  border-radius: 0 8px 8px 0;
-}
-.message-content blockquote p { margin: 0.5em 0; }
-.message-content blockquote p:first-child { margin-top: 0; }
-.message-content blockquote p:last-child { margin-bottom: 0; }
-.message-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0;
-  font-size: 0.9em;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.message-content th,
-.message-content td {
-  border: 1px solid var(--border-color);
-  padding: 0.75em;
-  text-align: left;
-}
-.message-content th {
-  background-color: var(--input-bg);
-  font-weight: 600;
-}
-.message-content tr:nth-child(even) {
-  background-color: var(--sidebar-bg);
-}
-.message-content s {
-  text-decoration: line-through;
-  opacity: 0.7;
-}
-.message-content a {
-  color: var(--link-color);
-  text-decoration: none;
-  border-bottom: 1px solid var(--link-color);
-  transition: all 0.2s ease;
-}
-.message-content a:hover {
-  color: var(--text-color);
-  border-bottom-color: var(--text-color);
-}
-.message-content ul, .message-content ol {
-    padding-left: 20px;
 }
 
 .code-block-container {
