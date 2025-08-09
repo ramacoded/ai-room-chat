@@ -1,6 +1,19 @@
-// File: script.js (Versi Final)
-
 document.addEventListener('DOMContentLoaded', () => {
+    // =================================================================
+    // PERBAIKAN LAYOUT KEYBOARD MOBILE
+    // =================================================================
+    const mainContainer = document.querySelector('.main-container');
+
+    const handleViewportHeight = () => {
+        if (mainContainer) {
+            mainContainer.style.height = `${window.innerHeight}px`;
+        }
+    };
+
+    handleViewportHeight();
+    window.addEventListener('resize', handleViewportHeight);
+
+
     // --- Elemen Utama ---
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
@@ -51,7 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.add('open');
         }
     });
-
     closeSettingsBtn.addEventListener('click', () => {
         if (document.startViewTransition) {
             document.startViewTransition(() => {
@@ -61,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.remove('open');
         }
     });
-
     // --- Logika Tema ---
     const applyTheme = (theme) => {
         const doc = document.documentElement;
@@ -82,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // --- PERMINTAAN PERSONALISASI ANDA: Efek transisi tema yang halus ---
     themeSwitcher.addEventListener('click', (event) => {
         const button = event.target.closest('button');
         if (!button) return;
@@ -120,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('app-theme', selectedTheme);
         updateThemeButtons(selectedTheme);
     });
-
     // --- Logika Ukuran Teks ---
     const applyTextSize = (size) => {
         const doc = document.documentElement;
@@ -128,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (size === 'small') doc.classList.add('text-small');
         if (size === 'large') doc.classList.add('text-large');
     };
-
     const updateTextSizeButtons = (selectedSize) => {
         textSizeSwitcher.querySelectorAll('button').forEach(button => {
             button.classList.remove('active');
@@ -144,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTextSizeButtons(selectedSize);
         }
     });
-
     // --- Logika Kirim dengan Enter ---
     let enterToSend = localStorage.getItem('app-enter-to-send') === 'true';
     enterToSendToggle.checked = enterToSend;
@@ -152,14 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
         enterToSend = enterToSendToggle.checked;
         localStorage.setItem('app-enter-to-send', enterToSend);
     });
-
     chatInput.addEventListener('keydown', (e) => {
         if (enterToSend && e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
         }
     });
-
     // --- Pengaturan Placeholder ---
     langSetting.addEventListener('click', () => alert('Fitur ganti bahasa belum tersedia.'));
     exportSetting.addEventListener('click', () => alert('Fitur ekspor data belum tersedia.'));
@@ -169,12 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Anda bisa menambahkan logika penghapusan data di sini
         }
     });
-
     // --- Muat semua pengaturan saat halaman dibuka ---
     const savedTheme = localStorage.getItem('app-theme') || 'system';
     applyTheme(savedTheme);
     updateThemeButtons(savedTheme);
-
     const savedTextSize = localStorage.getItem('app-text-size') || 'normal';
     applyTextSize(savedTextSize);
     updateTextSizeButtons(savedTextSize);
@@ -234,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const initialMessage = `${getGreeting()}, Namaku Evelyn.`;
+    const initialMessage = `${getGreeting()}, Namaku Coreon.`;
     if (welcomeMessage) {
         startTypingAnimation(initialMessage);
     }
@@ -244,31 +247,27 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.classList.add('open');
         loadSessionsList();
     });
-
     closeSidebarBtn.addEventListener('click', () => {
         sidebar.classList.remove('open');
     });
-
     newSessionBtn.addEventListener('click', () => {
         startNewSession();
         sidebar.classList.remove('open');
     });
-
     chatHistoryBtn.addEventListener('click', () => {
         sessionsList.classList.toggle('show');
         chatHistoryBtn.classList.toggle('active');
     });
-
     function startNewSession() {
         currentSessionId = null;
         chatBox.innerHTML = `<div id="welcome-message" class="welcome-message"></div>`;
         isFirstMessage = true;
         welcomeMessage = document.getElementById('welcome-message');
         if (welcomeMessage) {
-            const greetingMessage = `${getGreeting()}, Aku Evelyn`;
+            const greetingMessage = `${getGreeting()}, saya Coreon`;
             startTypingAnimation(greetingMessage);
         }
-        currentChatTitle.textContent = 'Evelyn';
+        currentChatTitle.textContent = 'Coreon';
         chatInput.focus();
     }
 
@@ -317,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
             stopTypingAnimation();
             if (history && history.length > 0) {
                 history.forEach(msg => {
-                    // Saat memuat riwayat, pesan AI perlu diparsing lagi karena di DB tersimpan teks mentah
                     const content = (msg.role === 'ai') ? markdownToHtml(msg.text) : msg.text;
                     appendMessage(msg.role, content);
                 });
@@ -327,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error loading history:', error);
             appendMessage('ai', '<p>Maaf, terjadi kesalahan saat memuat riwayat chat.</p>');
-            currentChatTitle.textContent = 'Evelyn';
+            currentChatTitle.textContent = 'Coreon';
             currentSessionId = null;
         }
     }
@@ -345,38 +343,32 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
-
     // --- Logika Upload File ---
     uploadBtn.addEventListener('click', () => {
         uploadMenu.classList.toggle('show');
     });
-
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.upload-area') && uploadMenu.classList.contains('show')) {
             uploadMenu.classList.remove('show');
         }
     });
-
     cameraBtn.addEventListener('click', () => {
         fileInput.setAttribute('capture', 'camera');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
     galleryBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.setAttribute('accept', 'image/*');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
     fileBtn.addEventListener('click', () => {
         fileInput.removeAttribute('capture');
         fileInput.removeAttribute('accept');
         fileInput.click();
         uploadMenu.classList.remove('show');
     });
-
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files && e.target.files.length > 0 ? e.target.files.item(0) : null;
         if (file) {
@@ -384,7 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayFilePreview(file);
         }
     });
-
     // --- FORM SUBMISSION UTAMA ---
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -403,22 +394,18 @@ document.addEventListener('DOMContentLoaded', () => {
             stopTypingAnimation();
         }
 
-        // Tampilkan pesan pengguna (jika ada teks)
         if (userMessage) {
             appendMessage('user', userMessage);
         }
         
-        // Tampilkan preview file yang dikirim
         if (fileToSend) {
             displaySentFile(fileToSend);
         }
 
-        chatBox.scrollTop = chatBox.scrollHeight;
         chatInput.value = '';
         chatInput.style.height = 'auto';
-        removeFilePreview(); // Ganti dari removeFile()
+        removeFilePreview(); 
         showTypingIndicator();
-
         try {
             const formData = new FormData();
             formData.append('message', userMessage);
@@ -434,13 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
             hideTypingIndicator();
             const data = await response.json();
             
-            // Langsung gunakan data.text karena sudah dalam format HTML
             appendMessage('ai', data.text);
-            
             if (data.sessionId && !currentSessionId) {
                 currentSessionId = data.sessionId;
             }
-            loadSessionsList();
+            if(isFirstMessage) loadSessionsList();
         } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
@@ -451,49 +436,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- FUNGSI TAMPILAN PESAN ---
-
     /**
      * Menambahkan pesan ke kotak chat.
      * @param {string} sender 'user' atau 'ai'.
-     * @param {string} content Isi pesan. Untuk 'user' ini teks biasa, untuk 'ai' ini adalah HTML.
+     * @param {string} content Isi pesan HTML.
      */
     function appendMessage(sender, content) {
         if (!content) return;
-
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
         
         const contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content');
-
+        
+        // Pesan pengguna juga diperlakukan sebagai HTML untuk konsistensi <br>
         if (sender === 'user') {
-            // Pesan pengguna adalah teks biasa, ubah newline menjadi <br>
             contentWrapper.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
         } else {
-            // Pesan AI adalah HTML dari server, masukkan langsung
             contentWrapper.innerHTML = content;
         }
     
         messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    
-        // Setelah HTML dimasukkan, cari blok kode dan tambahkan fungsionalitas
+
+        // === PERUBAHAN LOGIKA SCROLL DI SINI ===
+        if (sender === 'ai') {
+            // Jika pesan dari AI, scroll ke bagian atas pesan tersebut
+            messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            // Jika pesan dari pengguna, tetap scroll ke paling bawah
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        // ======================================
+        
         if (sender === 'ai') {
             enhanceCodeBlocks(messageElement);
         }
     }
 
-    /**
-     * Menemukan semua blok kode dalam sebuah elemen dan menambahkan header dengan info bahasa & tombol copy.
-     * @param {HTMLElement} container Elemen pesan yang mungkin berisi blok kode.
-     */
     function enhanceCodeBlocks(container) {
         const codeBlocks = container.querySelectorAll('pre > code[class*="language-"]');
         codeBlocks.forEach(codeElement => {
             const preElement = codeElement.parentElement;
             
-            // Hindari menambahkan header jika sudah ada
             if (preElement.parentElement.classList.contains('code-block-container')) return;
 
             const codeContainer = document.createElement('div');
@@ -519,13 +504,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             header.appendChild(langLabel);
             header.appendChild(copyBtn);
-
-            // Bungkus <pre> dengan kontainer baru
             preElement.parentNode.insertBefore(codeContainer, preElement);
             codeContainer.appendChild(header);
             codeContainer.appendChild(preElement);
 
-            // Jalankan syntax highlighting jika Prism.js ada
             if (typeof Prism !== 'undefined') {
                 Prism.highlightElement(codeElement);
             }
@@ -615,77 +597,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Inisialisasi ---
-    // Karena saat load history kita butuh parser, maka parsernya kita letakkan di sini.
+    // Parser Sisi Klien untuk memuat riwayat chat dengan benar
     function markdownToHtml(md) {
         if (!md) return '';
         const processInlineMarkdown = (text) => text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/~~(.*?)~~/g, '<s>$1</s>').replace(/`(.*?)`/g, '<code>$1</code>');
         const escapeHtml = (unsafe) => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        let html = '', lines = md.split('\n'), inList = null, inCodeBlock = false, codeBlockContent = '', codeBlockLang = '', inBlockquote = false;
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            if (line.trim().startsWith('```')) {
-                if (inCodeBlock) {
-                    html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
-                    inCodeBlock = false, codeBlockContent = '', codeBlockLang = '';
-                } else {
-                    if (inList) { html += `</${inList}>\n`; inList = null; }
-                    if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
-                    inCodeBlock = true, codeBlockLang = line.substring(3).trim();
-                }
+        const blocks = md.split(/\n{2,}/);
+        let html = '';
+
+        for (const block of blocks) {
+            if (!block.trim()) continue;
+            if (block.startsWith('```') && block.endsWith('```')) {
+                const lines = block.split('\n');
+                const lang = lines[0].substring(3).trim();
+                const code = lines.slice(1, -1).join('\n');
+                html += `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
                 continue;
             }
-            if (inCodeBlock) { codeBlockContent += line + '\n'; continue; }
-            const closeOpenTags = () => {
-                if (inList) { html += `</${inList}>\n`; inList = null; }
-                if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
-            };
-            if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|--')) {
-                closeOpenTags();
-                let tableHtml = '<table>\n';
-                const headers = line.split('|').slice(1, -1).map(h => h.trim());
-                tableHtml += '<thead>\n<tr>\n' + headers.map(h => `<th>${processInlineMarkdown(h)}</th>`).join('') + '</tr>\n</thead>\n';
-                let j = i + 2;
-                tableHtml += '<tbody>\n';
-                while (j < lines.length && lines[j].includes('|')) {
-                    const cells = lines[j].split('|').slice(1, -1).map(c => c.trim());
-                    tableHtml += '<tr>' + cells.map(c => `<td>${processInlineMarkdown(c)}</td>`).join('') + '</tr>\n';
-                    j++;
+            const isList = block.match(/^\s*([\*\-+]|\d+\.)\s/);
+            if (isList) {
+                let listHtml = '';
+                const lines = block.split('\n');
+                const listType = lines[0].match(/^\s*\d+\./) ? 'ol' : 'ul';
+                listHtml += `<${listType}>`;
+                for (const line of lines) {
+                    const itemContent = line.replace(/^\s*([\*\-+]|\d+\.)\s/, '');
+                    listHtml += `<li>${processInlineMarkdown(itemContent)}</li>`;
                 }
-                tableHtml += '</tbody>\n</table>\n';
-                html += tableHtml;
-                i = j - 1;
+                listHtml += `</${listType}>`;
+                html += listHtml;
                 continue;
             }
-            if (line.match(/^(---|___|\*\*\*)$/)) { closeOpenTags(); html += '<hr>\n'; continue; }
-            if (line.startsWith('>')) {
-                if (!inBlockquote) {
-                    if (inList) { html += `</${inList}>\n`; inList = null; }
-                    html += '<blockquote>\n'; inBlockquote = true;
-                }
-                html += `<p>${processInlineMarkdown(line.substring(1).trim())}</p>\n`;
-                continue;
-            }
-            if (inBlockquote && !line.startsWith('>')) { html += '</blockquote>\n'; inBlockquote = false; }
-            if (line.startsWith('#')) {
-                closeOpenTags();
-                const level = line.match(/^#+/)[0].length;
-                if (level <= 6) { html += `<h${level}>${processInlineMarkdown(line.substring(level).trim())}</h${level}>\n`; continue; }
-            }
-            const ulMatch = line.match(/^\s*[\*-]\s+(.*)/), olMatch = line.match(/^\s*\d+\.\s+(.*)/);
-            if (ulMatch) {
-                if (inList !== 'ul') { if (inList) html += `</${inList}>\n`; html += '<ul>\n'; inList = 'ul'; }
-                html += `  <li>${processInlineMarkdown(ulMatch[1])}</li>\n`; continue;
-            } else if (olMatch) {
-                if (inList !== 'ol') { if (inList) html += `</${inList}>\n`; html += '<ol>\n'; inList = 'ol'; }
-                html += `  <li>${processInlineMarkdown(olMatch[1])}</li>\n`; continue;
-            }
-            if (inList && !ulMatch && !olMatch) { html += `</${inList}>\n`; inList = null; }
-            if (line.trim() !== '') { html += `<p>${processInlineMarkdown(line)}</p>\n`; }
+            const paragraphContent = block.replace(/\n/g, '<br>');
+            html += `<p>${processInlineMarkdown(paragraphContent)}</p>`;
         }
-        if (inList) html += `</${inList}>\n`;
-        if (inBlockquote) html += `</blockquote>\n`;
-        if (inCodeBlock) html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
         return html.trim();
     }
 

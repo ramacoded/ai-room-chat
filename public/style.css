@@ -3,7 +3,7 @@
 /* Variabel Warna untuk Tema Gelap (Default) & Terang */
 :root {
     --bg-color: #1E1F22;
-    --card-bg: #000000;
+    --card-bg: #2A2B2E;
     --text-color: #e8eaed;
     --primary-text-color: #bdc1c6;
     --input-bg: #343538;
@@ -404,12 +404,18 @@ hr {
 .message-content ul, .message-content ol {
     padding-left: 20px;
 }
+
+/* === PERUBAHAN DI SINI === */
 .code-block-container {
     background-color: var(--input-bg);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border-color);
+    max-width: 100%;
+    box-sizing: border-box;
 }
+/* ======================== */
+
 .code-block-header {
     display: flex;
     justify-content: space-between;
@@ -436,8 +442,6 @@ hr {
 .copy-btn:hover {
     background-color: var(--sidebar-link-hover);
 }
-
-/* === PERUBAHAN DI SINI === */
 .code-block-container pre {
     margin: 0;
     padding: 0 16px 16px 16px;
@@ -446,7 +450,6 @@ hr {
     word-wrap: normal;
     overflow-wrap: normal;
 }
-/* ======================== */
 
 .code-block-container code {
     font-family: var(--font-family-mono);
