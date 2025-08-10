@@ -247,7 +247,7 @@ async function gemini(history, input, file) {
     const allTime = now.format('dddd, D MMMM YYYY');
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      systemInstruction: `[COREON AI - SISTEM AKTIF. MENUNGGU PERINTAH]
+      systemInstruction: `[NAMAMU COREON AI - SISTEM AKTIF. MENUNGGU PERINTAH]
 [DEVELOPER: Didik Ramadani]
 
 [PROTOKOL OPERASI DASAR]
