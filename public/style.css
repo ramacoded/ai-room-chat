@@ -203,15 +203,9 @@ input:checked + .slider:before { transform: translateX(20px); }
     width: auto;
     object-fit: contain;
 }
-.logo-light {
-    display: none;
-}
-html.light-theme .logo-dark {
-    display: none;
-}
-html.light-theme .logo-light {
-    display: block;
-}
+.logo-light { display: none; }
+html.light-theme .logo-dark { display: none; }
+html.light-theme .logo-light { display: block; }
 .open-sidebar-btn { background-color: transparent; border: none; color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: flex; flex-shrink: 0; }
 .chat-box {
     flex-grow: 1;
@@ -245,9 +239,14 @@ html.light-theme .logo-light {
     margin-left: auto;
     max-width: 85%;
 }
+
+/* === PERUBAHAN UTAMA UNTUK BLOK KODE === */
 .ai-message {
     margin-right: auto;
     padding: 8px 0;
+    display: table;
+    table-layout: fixed;
+    width: 100%;
 }
 
 .user-message .message-content {
@@ -256,14 +255,13 @@ html.light-theme .logo-light {
     border-radius: 20px;
 }
 
+/* Mengembalikan .message-content dan memperbaiki typing indicator */
 .message-content {
     font-size: var(--font-size-base);
     color: var(--text-color);
     word-wrap: break-word;
     white-space: pre-wrap;
-    /* PERBAIKAN BARU: Menjadi Flex Container */
-    display: flex;
-    flex-direction: column;
+    /* overflow-x: hidden; dihapus dari sini karena sekarang diatur oleh .ai-message */
 }
 
 .message-content > * + * { margin-top: 1em; }
@@ -361,8 +359,8 @@ html.light-theme .logo-light {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     overflow: hidden;
-    /* PERBAIKAN BARU: Kunci agar bisa menyusut */
-    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .code-block-header {
