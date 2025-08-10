@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     handleViewportHeight();
     window.addEventListener('resize', handleViewportHeight);
 
+    // Variabel global untuk interval teks typing
+    let typingInterval;
 
     // --- Elemen Utama ---
     const chatForm = document.getElementById('chat-form');
@@ -436,11 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- FUNGSI TAMPILAN PESAN ---
-    /**
-     * Menambahkan pesan ke kotak chat.
-     * @param {string} sender 'user' atau 'ai'.
-     * @param {string} content Isi pesan HTML.
-     */
     function appendMessage(sender, content) {
         if (!content) return;
         const messageElement = document.createElement('div');
@@ -449,7 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content');
         
-        // Pesan pengguna juga diperlakukan sebagai HTML untuk konsistensi <br>
         if (sender === 'user') {
             contentWrapper.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
         } else {
@@ -459,15 +455,11 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
 
-        // === PERUBAHAN LOGIKA SCROLL DI SINI ===
         if (sender === 'ai') {
-            // Jika pesan dari AI, scroll ke bagian atas pesan tersebut
             messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
-            // Jika pesan dari pengguna, tetap scroll ke paling bawah
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-        // ======================================
         
         if (sender === 'ai') {
             enhanceCodeBlocks(messageElement);
@@ -514,24 +506,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ==========================================================
+    // === PERUBAHAN FUNGSI TYPING INDICATOR DI SINI ===
+    // ==========================================================
     function showTypingIndicator() {
-        if (!document.getElementById('typing-indicator')) {
-            const typingIndicator = document.createElement('div');
-            typingIndicator.id = 'typing-indicator';
-            typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
-            typingIndicator.innerHTML = `<div class="message-content"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
-            chatBox.appendChild(typingIndicator);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        if (document.getElementById('typing-indicator')) return; 
+
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = 'typing-indicator';
+        typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
+        
+        typingIndicator.innerHTML = `
+            <div class="message-content">
+                <div class="typing-dots-container">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+                <p class="typing-text"></p>
+            </div>`;
+        
+        chatBox.appendChild(typingIndicator);
+
+        const typingTextElement = typingIndicator.querySelector('.typing-text');
+        const possibleTexts = [
+            "Berpikir...",
+            "Mencari informasi...",
+            "Menyusun jawaban...",
+            "Mencari sumber..."
+        ];
+
+        let currentIndex = Math.floor(Math.random() * possibleTexts.length);
+        typingTextElement.textContent = possibleTexts[currentIndex];
+
+        clearInterval(typingInterval);
+
+        typingInterval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % possibleTexts.length;
+            typingTextElement.textContent = possibleTexts[currentIndex];
+        }, 3000);
+
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     function hideTypingIndicator() {
+        clearInterval(typingInterval);
         const typingIndicator = document.getElementById('typing-indicator');
         if (typingIndicator) {
             typingIndicator.remove();
         }
     }
-    
+    // ==========================================================
+
     // --- Fungsi Tampilan File ---
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
