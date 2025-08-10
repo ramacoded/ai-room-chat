@@ -13,7 +13,7 @@
     --sidebar-link-hover: #2A2B2E;
     --link-color: #8ab4f8;
     --shadow-color: rgba(0, 0, 0, 0.3);
-    --destructive-color: #ff5252;
+    --destructive-color: #FFFFFF;
     --secondary-bg-color: #28292c;
     --tertiary-bg-color: #3c4043;
     --accent-color: var(--link-color);
@@ -36,7 +36,7 @@ html.light-theme {
     --sidebar-link-hover: #e8eaed;
     --link-color: #1a73e8;
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --destructive-color: #d93025;
+    --destructive-color: #000000;
     --secondary-bg-color: #f8f9fa;
     --tertiary-bg-color: #f1f3f4;
     --accent-color: var(--link-color);
