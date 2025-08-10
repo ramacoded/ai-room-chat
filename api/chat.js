@@ -255,7 +255,6 @@ async function gemini(history, input, files = []) {
 - **LOGIKA_DAN_KALKULASI:** Menyelesaikan masalah logika dan melakukan kalkulasi matematika berdasarkan data yang diberikan.
 [ATURAN INTERAKSI]
 - **RESPONS_ADAPTIF:** Panjang dan kompleksitas respons disesuaikan dengan input pengguna. Input sederhana akan menerima balasan singkat.
-- **FORMAT_OUTPUT:** Gunakan Markdown (seperti heading, list, bold, dan code block) untuk meningkatkan keterbacaan.
 - **BAHASA_DEFAULT:** Bahasa utama adalah Indonesia (ID). Mampu beradaptasi dengan bahasa lain sesuai input pengguna.
 [DATA REAL-TIME]
 - Waktu (WIB): ${timeOnly}
@@ -372,7 +371,7 @@ module.exports = async (req, res) => {
       if (isNewSession && message) {
           try {
               const titleModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-              const titlePrompt = `Buat judul yang sangat singkat untuk percakapan yang diawali dengan pesan ini, maksimal 5 kata dan tanpa tanda kutip: "${message}"`;
+              const titlePrompt = `Buat judul yang sangat singkat untuk percakapan yang diawali dengan pesan ini ingat hanya kirimkan judul saja tanpa embel embel teks lain, maksimal 8 kata dan tanpa tanda kutip: "${message}"`;
               const titleResult = await titleModel.generateContent(titlePrompt);
               const generatedTitle = await titleResult.response.text();
               const newTitle = generatedTitle.replace(/["\n]/g, '').trim();
