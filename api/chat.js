@@ -10,7 +10,6 @@ const { v4: uuidv4 } = require('uuid');
 const cookie = require('cookie');
 const { createClient } = require('@supabase/supabase-js');
 
-// --- PENGATURAN DATABASE & API ---
 const supabaseUrl = "https://puqbduevlwefdlcmfbuv.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1cWJkdWV2bHdlZmRsY21mYnV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMjEwMTcsImV4cCI6MjA2OTc5NzAxN30.FayCG8SPb4pwzl0gHWLPWHc1MZJ3cH49h7TV7tmX2mM";
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -20,7 +19,6 @@ const apiKey = "AIzaSyALQ0oGgElou5_3cXQv_hJBQUh-p8_Uqqw";
 const genAI = new GoogleGenerativeAI(apiKey);
 const fileManager = new GoogleAIFileManager(apiKey);
 
-// --- FUNGSI PARSER MARKDOWN LENGKAP ---
 function markdownToHtml(md) {
     if (!md) return '';
     const processInlineMarkdown = (text) => {
@@ -31,7 +29,6 @@ function markdownToHtml(md) {
             .replace(/~~(.*?)~~/g, '<s>$1</s>')
             .replace(/`(.*?)`/g, '<code>$1</code>');
     };
-
     const escapeHtml = (unsafe) => {
         return unsafe
             .replace(/&/g, "&amp;")
@@ -40,133 +37,61 @@ function markdownToHtml(md) {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     };
-
     let html = '';
-    const lines = md.split('\n');
-    let inList = null;
-    let inCodeBlock = false;
-    let codeBlockContent = '';
-    let codeBlockLang = '';
-    let inBlockquote = false;
+    const blocks = md.split(/\n\s*\n/);
+    for (const block of blocks) {
+        if (!block.trim()) continue;
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-
-        if (line.trim().startsWith('```')) {
-            if (inCodeBlock) {
-                html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
-                inCodeBlock = false;
-                codeBlockContent = '';
-                codeBlockLang = '';
-            } else {
-                if (inList) { html += `</${inList}>\n`; inList = null; }
-                if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
-                inCodeBlock = true;
-                codeBlockLang = line.substring(3).trim();
-            }
-            continue;
-        }
-        if (inCodeBlock) {
-            codeBlockContent += line + '\n';
+        if (block.startsWith('```') && block.endsWith('```')) {
+            const lines = block.split('\n');
+            const lang = lines[0].substring(3).trim();
+            const code = lines.slice(1, -1).join('\n');
+            html += `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
             continue;
         }
 
-        const closeOpenTags = () => {
-            if (inList) { html += `</${inList}>\n`; inList = null; }
-            if (inBlockquote) { html += `</blockquote>\n`; inBlockquote = false; }
-        };
-        if (line.includes('|') && i + 1 < lines.length && lines[i + 1].includes('|--')) {
-            closeOpenTags();
-            let tableHtml = '<table>\n';
-            const headers = line.split('|').slice(1, -1).map(h => h.trim());
-            tableHtml += '<thead>\n<tr>\n' + headers.map(h => `<th>${processInlineMarkdown(h)}</th>`).join('') + '</tr>\n</thead>\n';
-            let j = i + 2;
-            tableHtml += '<tbody>\n';
-            while (j < lines.length && lines[j].includes('|')) {
-                const cells = lines[j].split('|').slice(1, -1).map(c => c.trim());
-                tableHtml += '<tr>' + cells.map(c => `<td>${processInlineMarkdown(c)}</td>`).join('') + '</tr>\n';
-                j++;
-            }
-            tableHtml += '</tbody>\n</table>\n';
-            html += tableHtml;
-            i = j - 1;
-            continue;
-        }
-        
-        if (line.match(/^(---|___|\*\*\*)$/)) {
-            closeOpenTags();
-            html += '<hr>\n';
-            continue;
-        }
-
-        if (line.startsWith('>')) {
-            if (!inBlockquote) {
-                if (inList) { html += `</${inList}>\n`; inList = null; }
-                html += '<blockquote>\n';
-                inBlockquote = true;
-            }
-            html += `<p>${processInlineMarkdown(line.substring(1).trim())}</p>\n`;
-            continue;
-        }
-        if (inBlockquote && !line.startsWith('>')) {
-            html += '</blockquote>\n';
-            inBlockquote = false;
-        }
-
-        if (line.startsWith('#')) {
-            closeOpenTags();
-            const level = line.match(/^#+/)[0].length;
+        if (block.startsWith('#')) {
+            const level = block.match(/^#+/)[0].length;
             if (level <= 6) {
-                const content = line.substring(level).trim();
-                html += `<h${level}>${processInlineMarkdown(content)}</h${level}>\n`;
+                const content = block.substring(level).trim();
+                html += `<h${level}>${processInlineMarkdown(content)}</h${level}>`;
                 continue;
             }
         }
 
-        const ulMatch = line.match(/^\s*[\*-]\s+(.*)/);
-        const olMatch = line.match(/^\s*\d+\.\s+(.*)/);
-        if (ulMatch) {
-            if (inList !== 'ul') {
-                if (inList) html += `</${inList}>\n`;
-                html += '<ul>\n';
-                inList = 'ul';
+        const isList = block.match(/^\s*([\*\-+]|\d+\.)\s/);
+        if (isList) {
+            let listHtml = '';
+            const lines = block.split('\n');
+            const listType = lines[0].match(/^\s*\d+\./) ? 'ol' : 'ul';
+            listHtml += `<${listType}>`;
+            for (const line of lines) {
+                const itemContent = line.replace(/^\s*([\*\-+]|\d+\.)\s/, '');
+                listHtml += `<li>${processInlineMarkdown(itemContent)}</li>`;
             }
-            html += `  <li>${processInlineMarkdown(ulMatch[1])}</li>\n`;
+            listHtml += `</${listType}>`;
+            html += listHtml;
             continue;
-        } else if (olMatch) {
-            if (inList !== 'ol') {
-                if (inList) html += `</${inList}>\n`;
-                html += '<ol>\n';
-                inList = 'ol';
-            }
-            html += `  <li>${processInlineMarkdown(olMatch[1])}</li>\n`;
-            continue;
-        }
-        if (inList && !ulMatch && !olMatch) {
-            html += `</${inList}>\n`;
-            inList = null;
         }
 
-        if (line.trim() !== '') {
-            html += `<p>${processInlineMarkdown(line)}</p>\n`;
+        if (block.startsWith('>')) {
+            const content = block.split('\n').map(line => line.substring(1).trim()).join('<br>');
+            html += `<blockquote><p>${processInlineMarkdown(content)}</p></blockquote>`;
+            continue;
         }
+
+        const paragraphContent = block.replace(/\n/g, '<br>');
+        html += `<p>${processInlineMarkdown(paragraphContent)}</p>`;
     }
-
-    if (inList) html += `</${inList}>\n`;
-    if (inBlockquote) html += `</blockquote>\n`;
-    if (inCodeBlock) html += `<pre><code class="language-${codeBlockLang}">${escapeHtml(codeBlockContent.trim())}</code></pre>\n`;
 
     return html.trim();
 }
 
-
-// --- PENGATURAN API SERVER ---
 export const config = {
   api: {
     bodyParser: false,
   },
 };
-// --- FUNGSI HELPER DATABASE ---
 async function getAllChatSessions(userId) {
   const { data, error } = await supabase
     .from('chat_sessions')
@@ -176,7 +101,6 @@ async function getAllChatSessions(userId) {
   if (error) console.error('Error fetching chat sessions:', error);
   return data || [];
 }
-
 async function getChatHistory(sessionId) {
   const { data, error } = await supabase
     .from('chat_sessions')
@@ -188,17 +112,15 @@ async function getChatHistory(sessionId) {
   }
   return data ? data.history : [];
 }
-
 async function saveChatHistory(sessionId, history) {
   const { error } = await supabase
     .from('chat_sessions')
     .upsert({ session_id: sessionId, history }, { onConflict: 'session_id' });
   if (error) console.error('Error saving chat history:', error);
 }
-
 async function createNewSession(userId) {
   const newSessionId = uuidv4();
-  const title = 'Percakapan Baru...'; // Judul sementara
+  const title = 'Percakapan Baru...';
   const { error } = await supabase
     .from('chat_sessions')
     .insert({ session_id: newSessionId, user_id: userId, title, history: [] });
@@ -208,7 +130,6 @@ async function createNewSession(userId) {
   }
   return newSessionId;
 }
-
 async function updateSessionTitle(sessionId, title) {
   const { error } = await supabase
     .from('chat_sessions')
@@ -218,8 +139,6 @@ async function updateSessionTitle(sessionId, title) {
     console.error('Error updating session title:', error);
   }
 }
-
-// --- FUNGSI INTERAKSI DENGAN GEMINI ---
 async function uploadToGemini(path, mimeType) {
   try {
     const uploadResult = await fileManager.uploadFile(path, { mimeType, displayName: path });
@@ -238,7 +157,7 @@ async function gemini(history, input, files = []) {
     const allTime = now.format('dddd, D MMMM YYYY');
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      systemInstruction: `[COREON AI - SISTEM AKTIF. MENUNGGU PERINTAH]
+      systemInstruction: `[NAMAMU COREON AI - SISTEM AKTIF. MENUNGGU PERINTAH]
 [DEVELOPER: Didik Ramadani]
 [PROTOKOL OPERASI DASAR]
 1.  **AKURASI_DATA:** Prioritaskan informasi yang faktual, terverifikasi, dan relevan. Jika data tidak tersedia atau tidak yakin, nyatakan secara eksplisit.
@@ -294,7 +213,6 @@ async function gemini(history, input, files = []) {
   }
 }
 
-// --- HANDLER UTAMA PERMINTAAN (REQUEST) ---
 module.exports = async (req, res) => {
   let userId;
   const cookies = cookie.parse(req.headers.cookie || '');
@@ -371,7 +289,7 @@ module.exports = async (req, res) => {
       if (isNewSession && message) {
           try {
               const titleModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-              const titlePrompt = `Buat judul yang sangat singkat untuk percakapan yang diawali dengan pesan ini ingat hanya kirimkan judul saja tanpa embel embel teks lain, maksimal 8 kata dan tanpa tanda kutip: "${message}"`;
+              const titlePrompt = `Buat judul yang sangat singkat untuk percakapan yang diawali dengan pesan ini lalu kirimkan judul saja tanpa embel embel apapun, maksimal 5 kata dan tanpa tanda kutip: "${message}"`;
               const titleResult = await titleModel.generateContent(titlePrompt);
               const generatedTitle = await titleResult.response.text();
               const newTitle = generatedTitle.replace(/["\n]/g, '').trim();
