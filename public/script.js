@@ -1,7 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // =================================================================
-    // PERBAIKAN LAYOUT KEYBOARD MOBILE
-    // =================================================================
     const mainContainer = document.querySelector('.main-container');
 
     const handleViewportHeight = () => {
@@ -13,11 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     handleViewportHeight();
     window.addEventListener('resize', handleViewportHeight);
 
-    // Variabel global untuk interval teks typing
     let typingInterval;
 
- 
-    // --- Elemen Utama ---
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
     const chatBox = document.getElementById('chat-box');
@@ -28,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newSessionBtn = document.getElementById('new-session-btn');
     const chatHistoryBtn = document.getElementById('chat-history-btn');
     const sessionsList = document.getElementById('sessions-list');
+    const headerTitle = document.querySelector('.header-title');
     const currentChatTitle = document.getElementById('current-chat-title');
     const fileInput = document.getElementById('file-input');
     const uploadBtn = document.getElementById('upload-btn');
@@ -37,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
 
-    // --- Elemen Pengaturan ---
     const settingsPage = document.getElementById('settings-page');
     const openSettingsBtn = document.getElementById('open-settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
@@ -53,10 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSessionId = null;
     let isSubmitting = false;
 
-    // =================================================================
-    // PENGATURAN & TEMA
-    // =================================================================
-
     openSettingsBtn.addEventListener('click', () => {
         sidebar.classList.remove('open');
         if (document.startViewTransition) {
@@ -64,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 settingsPage.classList.add('open');
             });
         } else {
-  
            settingsPage.classList.add('open');
         }
     });
@@ -77,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsPage.classList.remove('open');
         }
     });
-    // --- Logika Tema ---
     const applyTheme = (theme) => {
         const doc = document.documentElement;
         doc.classList.remove('light-theme', 'dark-theme');
@@ -107,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = event.clientX;
             const y = event.clientY;
             const endRadius = Math.hypot(
-         
                Math.max(x, window.innerWidth - x),
                 Math.max(y, window.innerHeight - y)
             );
@@ -122,13 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     clipPath: [
                         `circle(0% at ${x}px ${y}px)`,
                         `circle(${endRadius}px at ${x}px ${y}px)`
-         
                    ]
                 }, {
                     duration: 500,
                     easing: 'ease-in-out',
                     pseudoElement: '::view-transition-new(root)'
-         
                });
             });
         } else {
@@ -138,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('app-theme', selectedTheme);
         updateThemeButtons(selectedTheme);
     });
-    // --- Logika Ukuran Teks ---
     const applyTextSize = (size) => {
         const doc = document.documentElement;
         doc.classList.remove('text-small', 'text-large');
@@ -160,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTextSizeButtons(selectedSize);
         }
     });
-    // --- Logika Kirim dengan Enter ---
     let enterToSend = localStorage.getItem('app-enter-to-send') === 'true';
     enterToSendToggle.checked = enterToSend;
     enterToSendToggle.addEventListener('change', () => {
@@ -173,16 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
             chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
         }
     });
-    // --- Pengaturan Placeholder ---
     langSetting.addEventListener('click', () => alert('Fitur ganti bahasa belum tersedia.'));
     exportSetting.addEventListener('click', () => alert('Fitur ekspor data belum tersedia.'));
     clearHistoryBtn.addEventListener('click', () => {
         if (confirm('Apakah Anda yakin ingin menghapus SEMUA riwayat percakapan? Tindakan ini tidak dapat diurungkan.')) {
             alert('Semua riwayat telah dihapus.');
-            // Anda bisa menambahkan logika penghapusan data di sini
         }
     });
-    // --- Muat semua pengaturan saat halaman dibuka ---
     const savedTheme = localStorage.getItem('app-theme') || 'system';
     applyTheme(savedTheme);
     updateThemeButtons(savedTheme);
@@ -190,11 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTextSize(savedTextSize);
     updateTextSizeButtons(savedTextSize);
 
-    // =================================================================
-    // LOGIKA CHAT
-    // =================================================================
-
-    // --- Logika Pesan Selamat Datang (Welcome Message) ---
     let typingTimeout;
     let deletionTimeout;
 
@@ -250,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startTypingAnimation(initialMessage);
     }
 
-    // --- Navigasi & Sesi ---
     openSidebarBtn.addEventListener('click', () => {
         sidebar.classList.add('open');
         loadSessionsList();
@@ -275,7 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const greetingMessage = `${getGreeting()}, saya Coreon`;
             startTypingAnimation(greetingMessage);
         }
-        currentChatTitle.textContent = 'Coreon';
+        if (headerTitle) {
+            headerTitle.classList.remove('in-conversation');
+        }
         chatInput.focus();
     }
 
@@ -325,6 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
             chatBox.innerHTML = '';
             isFirstMessage = false;
             stopTypingAnimation();
+            if (headerTitle) {
+                headerTitle.classList.add('in-conversation');
+            }
             if (history && history.length > 0) {
                 history.forEach(msg => {
                     const content = (msg.role === 'ai') ? markdownToHtml(msg.text) : msg.text;
@@ -336,12 +315,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error loading history:', error);
             appendMessage('ai', '<p>Maaf, terjadi kesalahan saat memuat riwayat chat.</p>');
-            currentChatTitle.textContent = 'Coreon';
+            if (headerTitle) {
+                headerTitle.classList.remove('in-conversation');
+            }
             currentSessionId = null;
         }
     }
 
-    // --- Fungsi Pembantu (Helpers) ---
     function getGreeting() {
         const hour = new Date().getHours();
         if (hour < 11) return "Selamat Pagi";
@@ -354,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
-    // --- Logika Upload File ---
     uploadBtn.addEventListener('click', () => {
         uploadMenu.classList.toggle('show');
     });
@@ -387,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayFilePreview(file);
         }
     });
-    // --- FORM SUBMISSION UTAMA ---
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
@@ -399,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isSubmitting = true;
 
-        const wasFirstMessage = isFirstMessage; // Simpan status pesan pertama
+        const wasFirstMessage = isFirstMessage;
 
         if (wasFirstMessage) {
             if (welcomeMessage) welcomeMessage.classList.add('hide');
@@ -411,7 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (fileToSend) {
-            
             displaySentFile(fileToSend);
         }
 
@@ -440,15 +417,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentSessionId = data.sessionId;
             }
             
-            // --- LOGIKA BARU UNTUK MENANGANI JUDUL ---
             if (wasFirstMessage) {
-                // Jika server mengirimkan judul baru, perbarui UI
+                if (headerTitle) {
+                    headerTitle.classList.add('in-conversation');
+                }
                 if (data.newTitle) {
                     currentChatTitle.textContent = data.newTitle;
                 }
-                // Muat ulang daftar sesi untuk menampilkan sesi baru dengan judulnya
                 loadSessionsList();
-                isFirstMessage = false; // Setel setelah semua logika pesan pertama selesai
+                isFirstMessage = false;
             }
             
         } catch (error) {
@@ -460,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- FUNGSI TAMPILAN PESAN ---
     function appendMessage(sender, content) {
         if (!content) return;
         const messageElement = document.createElement('div');
@@ -527,10 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // ==========================================================
-    // === PERUBAHAN FUNGSI TYPING INDICATOR DI SINI ===
-    // ==========================================================
+    
     function showTypingIndicator() {
         if (document.getElementById('typing-indicator')) return;
         const typingIndicator = document.createElement('div');
@@ -542,7 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
-     
                    </div>
                 <p class="typing-text"></p>
             </div>`;
@@ -573,9 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
-    // ==========================================================
-
-    // --- Fungsi Tampilan File ---
+    
     function displayFilePreview(file) {
         filePreviewContainer.style.display = 'flex';
         filePreviewContainer.innerHTML = '';
@@ -640,7 +610,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Parser Sisi Klien untuk memuat riwayat chat dengan benar
     function markdownToHtml(md) {
         if (!md) return '';
         const processInlineMarkdown = (text) => text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/~~(.*?)~~/g, '<s>$1</s>').replace(/`(.*?)`/g, '<code>$1</code>');
