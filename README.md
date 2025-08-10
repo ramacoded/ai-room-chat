@@ -16,7 +16,7 @@ Anda dapat mencoba aplikasi ini secara langsung di: **[https://oreonai.vercel.ap
 
 ### 📸 Tampilan Aplikasi
 
-![Coreon AI](publi/coreon.jpeg)
+![Coreon AI](public/coreon.jpeg)
 
 ### 🚀 Fitur Utama
 
