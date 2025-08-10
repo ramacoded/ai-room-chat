@@ -317,23 +317,6 @@ color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: 
 }
 .message-content p { margin: 0; }
 
-/* --- PERBAIKAN SPASI KOSONG DIMULAI DI SINI --- */
-/* Menghapus margin bawaan dari semua elemen di dalam pesan AI */
-.ai-message .message-content > * {
-    margin: 0;
-}
-/* Memberi jarak atas HANYA jika elemen tersebut bukan yang pertama */
-.ai-message .message-content > * + * {
-    margin-top: 1em;
-}
-/* Memberi padding khusus untuk list agar tidak terlalu mepet */
-.ai-message .message-content ul,
-.ai-message .message-content ol {
-    padding-left: 24px;
-}
-/* --- AKHIR PERBAIKAN --- */
-
-
 .sent-media-grid {
     display: flex;
     gap: 8px;
