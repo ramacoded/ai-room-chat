@@ -13,7 +13,7 @@
     --sidebar-link-hover: #2A2B2E;
     --link-color: #8ab4f8;
     --shadow-color: rgba(0, 0, 0, 0.3);
-    --destructive-color: #FFFFFF;
+    --destructive-color: #ff5252;
     --secondary-bg-color: #28292c;
     --tertiary-bg-color: #3c4043;
     --accent-color: var(--link-color);
@@ -36,7 +36,7 @@ html.light-theme {
     --sidebar-link-hover: #e8eaed;
     --link-color: #1a73e8;
     --shadow-color: rgba(0, 0, 0, 0.1);
-    --destructive-color: #000000;
+    --destructive-color: #d93025;
     --secondary-bg-color: #f8f9fa;
     --tertiary-bg-color: #f1f3f4;
     --accent-color: var(--link-color);
@@ -191,13 +191,12 @@ input:checked + .slider:before { transform: translateX(20px); }
     border-bottom: 1px solid var(--border-color); position: relative;
     justify-content: space-between; flex-shrink: 0;
 }
-
-.header-title { 
-    flex-grow: 1; 
-    text-align: left; 
+.header-title {
+    flex-grow: 1;
+    text-align: left;
     display: flex;
     align-items: center;
-    height: 30px; /* Sesuai penetapan Anda */
+    height: 30px;
 }
 .logo-dark, .logo-light {
     height: 100%;
@@ -213,7 +212,6 @@ html.light-theme .logo-dark {
 html.light-theme .logo-light {
     display: block;
 }
-
 .open-sidebar-btn { background-color: transparent; border: none; color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: flex; flex-shrink: 0; }
 .chat-box {
     flex-grow: 1;
@@ -239,17 +237,17 @@ html.light-theme .logo-light {
 .welcome-message .blinking-cursor { font-size: 1em; color: var(--text-color); animation: blink 1s step-end infinite; }
 @keyframes blink { from, to { opacity: 0; } 50% { opacity: 1; } }
 
-.message { 
-    display: block; 
-    line-height: 1.6; 
+.message {
+    display: block;
+    line-height: 1.6;
 }
-.user-message { 
-    margin-left: auto; 
+.user-message {
+    margin-left: auto;
     max-width: 85%;
 }
-.ai-message { 
+.ai-message {
     margin-right: auto;
-    padding: 8px 0; 
+    padding: 8px 0;
 }
 
 .user-message .message-content {
@@ -263,7 +261,9 @@ html.light-theme .logo-light {
     color: var(--text-color);
     word-wrap: break-word;
     white-space: pre-wrap;
-    overflow-x: hidden;
+    /* PERBAIKAN BARU: Menjadi Flex Container */
+    display: flex;
+    flex-direction: column;
 }
 
 .message-content > * + * { margin-top: 1em; }
@@ -274,7 +274,6 @@ html.light-theme .logo-light {
     align-items: center;
     padding: 8px 0;
 }
-
 .typing-dot {
     width: 8px; height: 8px; background-color: var(--text-color);
     border-radius: 50%; margin: 0 2px;
@@ -291,7 +290,6 @@ html.light-theme .logo-light {
     background-color: var(--card-bg);
     gap: 12px; flex-shrink: 0;
 }
-
 .chat-input {
     flex-grow: 1;
     padding: 12px 16px;
@@ -333,7 +331,6 @@ html.light-theme .logo-light {
 }
 .upload-menu button:hover { background-color: var(--sidebar-link-hover); }
 .upload-menu button svg { stroke: var(--primary-text-color); }
-
 .send-btn {
     width: 48px; height: 48px; background-color: transparent;
     color: var(--primary-text-color); border: none; cursor: pointer;
@@ -362,10 +359,10 @@ html.light-theme .logo-light {
 .code-block-container {
     background-color: var(--input-bg);
     border-radius: 12px;
-    overflow: hidden;
     border: 1px solid var(--border-color);
-    max-width: 100%;
-    box-sizing: border-box;
+    overflow: hidden;
+    /* PERBAIKAN BARU: Kunci agar bisa menyusut */
+    min-width: 0;
 }
 
 .code-block-header {
