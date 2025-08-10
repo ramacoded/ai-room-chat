@@ -1,7 +1,7 @@
 # Coreon AI 🔮
 
 ![Lisensi MIT](https://img.shields.io/badge/License-MIT-blue.svg)
-![Framework](https://img.shields.io/badge/Framework-Vanilla%20JS-yellow.svg)
+![Framework](https://img.shields.io/badge/Framework-Node%20JS-green.svg)
 ![Platform](https://img.shields.io/badge/Platform-Vercel-black.svg)
 
 **Coreon AI** adalah aplikasi web chat canggih yang didukung oleh Google Gemini. Aplikasi ini dirancang untuk memberikan pengalaman percakapan yang dinamis, interaktif, dan multi-modal, memungkinkan pengguna tidak hanya berinteraksi melalui teks, tetapi juga dengan gambar dan file.
