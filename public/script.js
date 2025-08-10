@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variabel global untuk interval teks typing
     let typingInterval;
 
+ 
     // --- Elemen Utama ---
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
@@ -63,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 settingsPage.classList.add('open');
             });
         } else {
-            settingsPage.classList.add('open');
+  
+           settingsPage.classList.add('open');
         }
     });
     closeSettingsBtn.addEventListener('click', () => {
@@ -105,7 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = event.clientX;
             const y = event.clientY;
             const endRadius = Math.hypot(
-                Math.max(x, window.innerWidth - x),
+         
+               Math.max(x, window.innerWidth - x),
                 Math.max(y, window.innerHeight - y)
             );
 
@@ -113,17 +116,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyTheme(selectedTheme);
             });
 
-            transition.ready.then(() => {
+            transition.ready.then(() => 
+            {
                 document.documentElement.animate({
                     clipPath: [
                         `circle(0% at ${x}px ${y}px)`,
                         `circle(${endRadius}px at ${x}px ${y}px)`
-                    ]
+         
+                   ]
                 }, {
                     duration: 500,
                     easing: 'ease-in-out',
                     pseudoElement: '::view-transition-new(root)'
-                });
+         
+               });
             });
         } else {
             applyTheme(selectedTheme);
@@ -286,15 +292,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     const li = document.createElement('li');
                     li.classList.add('session-list-item');
                     const titleButton = document.createElement('button');
+       
                     titleButton.textContent = session.title;
                     titleButton.classList.add('session-title-button');
                     titleButton.dataset.sessionId = session.session_id;
                     titleButton.addEventListener('click', () => {
+                    
                         loadChatHistory(session.session_id, session.title);
                         sidebar.classList.remove('open');
                     });
                     const sessionActions = document.createElement('div');
                     sessionActions.classList.add('session-actions');
+        
                     li.appendChild(titleButton);
                     li.appendChild(sessionActions);
                     sessionsList.appendChild(li);
@@ -390,9 +399,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isSubmitting = true;
 
-        if (isFirstMessage) {
+        const wasFirstMessage = isFirstMessage; // Simpan status pesan pertama
+
+        if (wasFirstMessage) {
             if (welcomeMessage) welcomeMessage.classList.add('hide');
-            isFirstMessage = false;
             stopTypingAnimation();
         }
 
@@ -401,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (fileToSend) {
+            
             displaySentFile(fileToSend);
         }
 
@@ -424,10 +435,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             appendMessage('ai', data.text);
+
             if (data.sessionId && !currentSessionId) {
                 currentSessionId = data.sessionId;
             }
-            if(isFirstMessage) loadSessionsList();
+            
+            // --- LOGIKA BARU UNTUK MENANGANI JUDUL ---
+            if (wasFirstMessage) {
+                // Jika server mengirimkan judul baru, perbarui UI
+                if (data.newTitle) {
+                    currentChatTitle.textContent = data.newTitle;
+                }
+                // Muat ulang daftar sesi untuk menampilkan sesi baru dengan judulnya
+                loadSessionsList();
+                isFirstMessage = false; // Setel setelah semua logika pesan pertama selesai
+            }
+            
         } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
@@ -445,7 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content');
-        
         if (sender === 'user') {
             contentWrapper.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
         } else {
@@ -454,7 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
         messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
-
         if (sender === 'ai') {
             messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
@@ -477,7 +498,8 @@ document.addEventListener('DOMContentLoaded', () => {
             codeContainer.className = 'code-block-container';
 
             const header = document.createElement('div');
-            header.className = 'code-block-header';
+            header.className 
+            = 'code-block-header';
 
             const langLabel = document.createElement('span');
             langLabel.className = 'code-language';
@@ -486,6 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const copyBtn = document.createElement('button');
             copyBtn.textContent = 'Copy';
+      
             copyBtn.className = 'copy-btn';
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(codeElement.innerText).then(() => {
@@ -499,7 +522,6 @@ document.addEventListener('DOMContentLoaded', () => {
             preElement.parentNode.insertBefore(codeContainer, preElement);
             codeContainer.appendChild(header);
             codeContainer.appendChild(preElement);
-
             if (typeof Prism !== 'undefined') {
                 Prism.highlightElement(codeElement);
             }
@@ -510,22 +532,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // === PERUBAHAN FUNGSI TYPING INDICATOR DI SINI ===
     // ==========================================================
     function showTypingIndicator() {
-        if (document.getElementById('typing-indicator')) return; 
-
+        if (document.getElementById('typing-indicator')) return;
         const typingIndicator = document.createElement('div');
         typingIndicator.id = 'typing-indicator';
         typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
-        
         typingIndicator.innerHTML = `
             <div class="message-content">
                 <div class="typing-dots-container">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
-                </div>
+     
+                   </div>
                 <p class="typing-text"></p>
             </div>`;
-        
         chatBox.appendChild(typingIndicator);
 
         const typingTextElement = typingIndicator.querySelector('.typing-text');
@@ -535,17 +555,14 @@ document.addEventListener('DOMContentLoaded', () => {
             "Menyusun jawaban...",
             "Mencari sumber..."
         ];
-
         let currentIndex = Math.floor(Math.random() * possibleTexts.length);
         typingTextElement.textContent = possibleTexts[currentIndex];
 
         clearInterval(typingInterval);
-
         typingInterval = setInterval(() => {
             currentIndex = (currentIndex + 1) % possibleTexts.length;
             typingTextElement.textContent = possibleTexts[currentIndex];
         }, 3000);
-
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
@@ -635,17 +652,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!block.trim()) continue;
             if (block.startsWith('```') && block.endsWith('```')) {
                 const lines = block.split('\n');
+      
                 const lang = lines[0].substring(3).trim();
                 const code = lines.slice(1, -1).join('\n');
                 html += `<pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>`;
                 continue;
             }
             const isList = block.match(/^\s*([\*\-+]|\d+\.)\s/);
+     
             if (isList) {
                 let listHtml = '';
                 const lines = block.split('\n');
                 const listType = lines[0].match(/^\s*\d+\./) ? 'ol' : 'ul';
                 listHtml += `<${listType}>`;
+            
                 for (const line of lines) {
                     const itemContent = line.replace(/^\s*([\*\-+]|\d+\.)\s/, '');
                     listHtml += `<li>${processInlineMarkdown(itemContent)}</li>`;
