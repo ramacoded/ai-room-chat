@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraBtn = document.getElementById('camera-btn');
     const galleryBtn = document.getElementById('gallery-btn');
     const fileBtn = document.getElementById('file-btn');
-
     const settingsPage = document.getElementById('settings-page');
     const openSettingsBtn = document.getElementById('open-settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
@@ -42,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const langSetting = document.getElementById('setting-language');
     const exportSetting = document.getElementById('setting-export');
 
-    let selectedFile = null;
+    let selectedFiles = [];
     let isFirstMessage = true;
     let currentSessionId = null;
     let isSubmitting = false;
@@ -77,20 +76,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         doc.classList.add(themeToApply === 'light' ? 'light-theme' : 'dark-theme');
     };
-
     const updateThemeButtons = (selectedTheme) => {
         themeSwitcher.querySelectorAll('button').forEach(button => {
             button.classList.remove('active');
             if (button.dataset.theme === selectedTheme) button.classList.add('active');
         });
     };
-
     themeSwitcher.addEventListener('click', (event) => {
         const button = event.target.closest('button');
         if (!button) return;
-
         const selectedTheme = button.dataset.theme;
-
         if (document.startViewTransition) {
             const x = event.clientX;
             const y = event.clientY;
@@ -98,11 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
                Math.max(x, window.innerWidth - x),
                 Math.max(y, window.innerHeight - y)
             );
-
             const transition = document.startViewTransition(() => {
                 applyTheme(selectedTheme);
             });
-
             transition.ready.then(() => 
             {
                 document.documentElement.animate({
@@ -119,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             applyTheme(selectedTheme);
         }
-
         localStorage.setItem('app-theme', selectedTheme);
         updateThemeButtons(selectedTheme);
     });
@@ -135,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button.dataset.size === selectedSize) button.classList.add('active');
         });
     };
-
     textSizeSwitcher.addEventListener('click', (event) => {
         if (event.target.tagName === 'BUTTON') {
             const selectedSize = event.target.dataset.size;
@@ -169,10 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTextSize = localStorage.getItem('app-text-size') || 'normal';
     applyTextSize(savedTextSize);
     updateTextSizeButtons(savedTextSize);
-
+    
     let typingTimeout;
     let deletionTimeout;
-
     const startTypingAnimation = (message) => {
         let i = 0;
         let isTyping = true;
@@ -183,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
         newCursor.textContent = '|';
         welcomeMessage.textContent = '';
         welcomeMessage.appendChild(newCursor);
-
         const animateLoop = () => {
             if (isTyping) {
                 if (i < message.length) {
@@ -209,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         animateLoop();
     };
-
     const stopTypingAnimation = () => {
         clearTimeout(typingTimeout);
         clearTimeout(deletionTimeout);
@@ -219,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeMessage.innerHTML = '';
         }
     };
-
     const initialMessage = `${getGreeting()}, Namaku Coreon.`;
     if (welcomeMessage) {
         startTypingAnimation(initialMessage);
@@ -254,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         chatInput.focus();
     }
-
     async function loadSessionsList() {
         try {
             const response = await fetch('/api/chat', { method: 'GET' });
@@ -292,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionsList.innerHTML = `<li><button style="color:var(--error-color);">Error: Gagal memuat sesi.</button></li>`;
         }
     }
-
     async function loadChatHistory(sessionId, title) {
         try {
             const response = await fetch(`/api/chat?sessionId=${sessionId}`, { method: 'GET' });
@@ -306,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (history && history.length > 0) {
                 history.forEach(msg => {
-                    // Di sini kita pastikan menggunakan parser yang canggih
                     const content = (msg.role === 'model' || msg.role === 'ai') ? markdownToHtml(msg.text) : msg.text;
                     appendMessage(msg.role, content);
                 });
@@ -330,11 +314,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hour < 18) return "Selamat Sore";
         return "Selamat Malam";
     }
-
     chatInput.addEventListener('input', () => {
         chatInput.style.height = 'auto';
         chatInput.style.height = chatInput.scrollHeight + 'px';
     });
+    
     uploadBtn.addEventListener('click', () => {
         uploadMenu.classList.toggle('show');
     });
@@ -361,23 +345,71 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadMenu.classList.remove('show');
     });
     fileInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files.length > 0 ? e.target.files.item(0) : null;
-        if (file) {
-            selectedFile = file;
-            displayFilePreview(file);
+        const newFiles = Array.from(e.target.files);
+        if (selectedFiles.length + newFiles.length > 5) {
+            alert('Anda hanya dapat mengupload maksimal 5 media.');
+            fileInput.value = '';
+            return;
         }
+        selectedFiles.push(...newFiles);
+        displayFilePreview();
+        fileInput.value = '';
     });
+    function displayFilePreview() {
+        if (selectedFiles.length === 0) {
+            filePreviewContainer.style.display = 'none';
+            return;
+        }
+        filePreviewContainer.style.display = 'block';
+        filePreviewContainer.innerHTML = '<div class="multi-preview-area"></div>';
+        const previewArea = filePreviewContainer.querySelector('.multi-preview-area');
+
+        selectedFiles.forEach((file, index) => {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'preview-item';
+
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'preview-item-image';
+                previewItem.appendChild(img);
+            } else {
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'preview-item-file';
+                fileIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>`;
+                previewItem.appendChild(fileIcon);
+            }
+
+            const removeBtn = document.createElement('div');
+            removeBtn.className = 'preview-item-remove';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = () => removeFile(index);
+            previewItem.appendChild(removeBtn);
+
+            previewArea.appendChild(previewItem);
+        });
+    }
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        displayFilePreview();
+    }
+    function removeAllFilePreviews() {
+        selectedFiles = [];
+        fileInput.value = '';
+        filePreviewContainer.style.display = 'none';
+        filePreviewContainer.innerHTML = '';
+    }
+
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
         const userMessage = chatInput.value.trim();
-        const fileToSend = fileInput.files.length > 0 ? fileInput.files.item(0) : null;
+        const filesToSend = [...selectedFiles];
 
-        if (!userMessage && !fileToSend) return;
+        if (!userMessage && filesToSend.length === 0) return;
 
         isSubmitting = true;
-
         const wasFirstMessage = isFirstMessage;
 
         if (wasFirstMessage) {
@@ -385,22 +417,19 @@ document.addEventListener('DOMContentLoaded', () => {
             stopTypingAnimation();
         }
 
-        if (userMessage) {
-            appendMessage('user', userMessage);
-        }
-        
-        if (fileToSend) {
-            displaySentFile(fileToSend);
-        }
+        displaySentMedia(userMessage, filesToSend);
 
         chatInput.value = '';
         chatInput.style.height = 'auto';
-        removeFilePreview(); 
+        removeAllFilePreviews();
         showTypingIndicator();
+
         try {
             const formData = new FormData();
             formData.append('message', userMessage);
-            if (fileToSend) formData.append('file', fileToSend);
+            filesToSend.forEach(file => {
+                formData.append('files', file);
+            });
             if (currentSessionId) formData.append('sessionId', currentSessionId);
 
             const response = await fetch('/api/chat', { method: 'POST', body: formData });
@@ -419,12 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (wasFirstMessage) {
-                if (headerTitle) {
-                    headerTitle.classList.add('in-conversation');
-                }
-                if (data.newTitle) {
-                    currentChatTitle.textContent = data.newTitle;
-                }
+                if (headerTitle) headerTitle.classList.add('in-conversation');
+                if (data.newTitle) currentChatTitle.textContent = data.newTitle;
                 loadSessionsList();
                 isFirstMessage = false;
             }
@@ -432,12 +457,63 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
-            appendMessage('ai', `<p>Maaf, terjadi kesalahan saat memproses permintaanmu. Coba lagi nanti ya.<br><small>Error: ${error.message}</small></p>`);
+            appendMessage('ai', `<p>Maaf, terjadi kesalahan. Coba lagi nanti ya.<br><small>${error.message}</small></p>`);
         } finally {
             isSubmitting = false;
         }
     });
 
+    function displaySentMedia(text, files) {
+        const images = files.filter(f => f.type.startsWith('image/'));
+        const otherFiles = files.filter(f => !f.type.startsWith('image/'));
+        let lastElementAppended = null;
+
+        if (images.length > 0) {
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'message user-message';
+            
+            const grid = document.createElement('div');
+            grid.className = 'sent-media-grid';
+            images.forEach(imgFile => {
+                const item = document.createElement('div');
+                item.className = 'sent-media-item';
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(imgFile);
+                item.appendChild(img);
+                item.addEventListener('click', () => showImagePreview(imgFile));
+                grid.appendChild(item);
+            });
+            gridContainer.appendChild(grid);
+            chatBox.appendChild(gridContainer);
+            lastElementAppended = gridContainer;
+        }
+
+        if (otherFiles.length > 0) {
+            otherFiles.forEach(file => {
+                const fileMessageElement = document.createElement('div');
+                fileMessageElement.className = 'message user-message';
+                const fileItem = document.createElement('div');
+                fileItem.className = 'sent-file-item';
+                fileItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span>${file.name}</span>`;
+                fileMessageElement.appendChild(fileItem);
+                chatBox.appendChild(fileMessageElement);
+                lastElementAppended = fileMessageElement;
+            });
+        }
+        
+        if (text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message user-message';
+            messageElement.innerHTML = `<div class="message-content"><p>${text}</p></div>`;
+            chatBox.appendChild(messageElement);
+            lastElementAppended = messageElement;
+        }
+
+        if (lastElementAppended) {
+            lastElementAppended.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+    }
+    
     function appendMessage(sender, content) {
         if (!content) return;
         const messageElement = document.createElement('div');
@@ -454,14 +530,24 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
         if (sender === 'ai' || sender === 'model') {
-            messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            chatBox.scrollTop = chatBox.scrollHeight;
+            messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
         
         if (sender === 'ai' || sender === 'model') {
             enhanceCodeBlocks(messageElement);
         }
+    }
+
+    function showImagePreview(file) {
+        const overlay = document.createElement('div');
+        overlay.className = 'image-preview-overlay';
+        const previewImg = document.createElement('img');
+        previewImg.src = URL.createObjectURL(file);
+        overlay.appendChild(previewImg);
+        overlay.addEventListener('click', () => {
+            overlay.remove();
+        });
+        document.body.appendChild(overlay);
     }
 
     function enhanceCodeBlocks(container) {
@@ -545,74 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typingIndicator.remove();
         }
     }
-    
-    function displayFilePreview(file) {
-        filePreviewContainer.style.display = 'flex';
-        filePreviewContainer.innerHTML = '';
-        if (file.type.startsWith('image/')) {
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.classList.add('file-preview-image');
-            filePreviewContainer.appendChild(img);
-        } else {
-            const fileInfo = document.createElement('div');
-            fileInfo.classList.add('file-preview-info');
-            fileInfo.textContent = `File: ${file.name}`;
-            filePreviewContainer.appendChild(fileInfo);
-        }
-        const closeBtn = document.createElement('span');
-        closeBtn.classList.add('file-preview-close');
-        closeBtn.innerHTML = '&#x2716;';
-        closeBtn.onclick = removeFilePreview;
-        filePreviewContainer.appendChild(closeBtn);
-    }
-    
-    function removeFilePreview() {
-        selectedFile = null;
-        fileInput.value = '';
-        filePreviewContainer.style.display = 'none';
-        filePreviewContainer.innerHTML = '';
-    }
 
-    function displaySentFile(file) {
-        if (file.type.startsWith('image/')) {
-            const imageCard = document.createElement('div');
-            imageCard.classList.add('message', 'user-message', 'image-card');
-            imageCard.addEventListener('click', () => showImagePreview(file));
-            const image = document.createElement('img');
-            image.src = URL.createObjectURL(file);
-            imageCard.appendChild(image);
-            chatBox.appendChild(imageCard);
-        } else {
-            const fileCard = document.createElement('div');
-            fileCard.classList.add('message', 'user-message', 'document-card');
-            const fileExtension = file.name.split('.').pop().toLowerCase();
-            fileCard.classList.add(`file-type-${fileExtension}`);
-            const fileContent = document.createElement('div');
-            fileContent.classList.add('file-content');
-            const fileName = document.createElement('p');
-            fileName.textContent = `${file.name}`;
-            fileContent.appendChild(fileName);
-            fileCard.appendChild(fileContent);
-            chatBox.appendChild(fileCard);
-        }
-    }
-    
-    function showImagePreview(file) {
-        const previewOverlay = document.createElement('div');
-        previewOverlay.classList.add('image-preview-overlay');
-        const previewImage = document.createElement('img');
-        previewImage.src = URL.createObjectURL(file);
-        previewOverlay.appendChild(previewImage);
-        document.body.appendChild(previewOverlay);
-        previewOverlay.addEventListener('click', () => {
-            previewOverlay.remove();
-        });
-    }
-
-    // ==============================================================================
-    // PERBAIKAN: MENGGUNAKAN PARSER MARKDOWN YANG CANGGIH DARI SISI SERVER
-    // ==============================================================================
     function markdownToHtml(md) {
         if (!md) return '';
         const processInlineMarkdown = (text) => {
@@ -635,7 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = '';
         const lines = md.split('\n');
-        let inList = null; // Tipe list: 'ul' atau 'ol'
+        let inList = null;
         let inCodeBlock = false;
         let codeBlockContent = '';
         let codeBlockLang = '';
@@ -701,7 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 continue;
             }
             if (inBlockquote && !line.startsWith('>')) {
-                html += '</blockquote>\n';
+                html += 'blockquote\n';
                 inBlockquote = false;
             }
 
