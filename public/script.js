@@ -505,7 +505,7 @@ chatForm.addEventListener('submit', async (e) => {
                             // 2. Tambahkan teks yang masuk ke kontainer
                             fullResponseText += data.text;
                             textContentSpan.textContent += data.text; // Cukup tambahkan teks
-                            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
                         if (data.error) {
                             throw new Error(data.error);
@@ -520,7 +520,7 @@ chatForm.addEventListener('submit', async (e) => {
         // 4. Setelah stream benar-benar selesai, render markdown
         contentWrapper.innerHTML = markdownToHtml(fullResponseText);
         enhanceCodeBlocks(contentWrapper);
-        aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     } catch (error) {
         console.error('Error:', error);
@@ -605,7 +605,7 @@ function displaySentMedia(text, files) {
         chatBox.appendChild(messageElement);
 
         if (sender === 'ai' || sender === 'model') {
-            messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         if (sender === 'ai' || sender === 'model') {
@@ -838,142 +838,5 @@ function hideTypingIndicator() {
     loadSessionsList();
 });
 
-
-
-// File: public/script.js
-
-chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-
-    const userMessage = chatInput.value.trim();
-    const filesToSend = [...selectedFiles];
-
-    if (!userMessage && filesToSend.length === 0) return;
-
-    isSubmitting = true;
-    const wasFirstMessage = isFirstMessage;
-
-    if (wasFirstMessage) {
-        if (welcomeMessage) welcomeMessage.classList.add('hide');
-        stopTypingAnimation();
-    }
-
-    displaySentMedia(userMessage, filesToSend);
-
-    chatInput.value = '';
-    chatInput.style.height = 'auto';
-    removeAllFilePreviews();
-    showTypingIndicator();
-
-    try {
-        const formData = new FormData();
-        formData.append('message', userMessage);
-        filesToSend.forEach(file => {
-            formData.append('files', file);
-        });
-        if (currentSessionId) formData.append('sessionId', currentSessionId);
-
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            body: formData
-        });
-
-        hideTypingIndicator();
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
-        }
-
-        const newSessionId = response.headers.get('X-Session-Id');
-        const newTitle = response.headers.get('X-New-Title');
-
-        if (newSessionId && !currentSessionId) {
-            currentSessionId = newSessionId;
-        }
-        if (wasFirstMessage) {
-            if (headerTitle) headerTitle.classList.add('in-conversation');
-            if (newTitle) currentChatTitle.textContent = newTitle;
-            loadSessionsList();
-            isFirstMessage = false;
-        }
-
-        const aiMessageElement = appendMessage('ai', '', true);
-        const contentWrapper = aiMessageElement.querySelector('.message-content');
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let fullResponseText = '';
-
-        // --- PERUBAHAN DIMULAI DI SINI ---
-        let wordCounter = 0; // Counter untuk delay animasi
-
-        while (true) {
-            const {
-                value,
-                done
-            } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n\n');
-
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    const dataString = line.substring(6);
-                    if (dataString === '[DONE]') {
-                        break;
-                    }
-                    try {
-                        const data = JSON.parse(dataString);
-                        if (data.text) {
-                            fullResponseText += data.text;
-
-                            // Pecah teks baru menjadi kata-kata
-                            const words = data.text.split(/(\s+)/); // Memisahkan berdasarkan spasi dan tetap menyimpan spasinya
-
-                            words.forEach(word => {
-                                if (word.trim().length > 0) {
-                                    const span = document.createElement('span');
-                                    span.className = 'fade-in-word';
-                                    span.textContent = word;
-                                    // Beri jeda animasi berdasarkan urutan kata
-                                    span.style.animationDelay = `${wordCounter * 0.05}s`;
-                                    contentWrapper.appendChild(span);
-                                    wordCounter++;
-                                } else {
-                                     // Jika ini adalah spasi atau baris baru, tambahkan sebagai teks biasa
-                                     contentWrapper.appendChild(document.createTextNode(word));
-                                }
-                            });
-                            
-                            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                        }
-                        if (data.error) {
-                            throw new Error(data.error);
-                        }
-                    } catch (e) {
-                        // Abaikan JSON parse error, mungkin chunk tidak lengkap
-                    }
-                }
-            }
-        }
-        // --- AKHIR PERUBAHAN ---
-
-        // Setelah stream selesai, proses markdown untuk memformat block kode, list, dll.
-        contentWrapper.innerHTML = markdownToHtml(fullResponseText);
-        enhanceCodeBlocks(contentWrapper);
-        aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-
-
-    } catch (error) {
-        console.error('Error:', error);
-        hideTypingIndicator();
-        appendMessage('ai', `<p>Maaf, terjadi kesalahan. Coba lagi nanti ya.<br><small>${error.message}</small></p>`);
-    } finally {
-        isSubmitting = false;
-    }
-});
 
 
