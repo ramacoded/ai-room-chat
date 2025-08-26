@@ -407,168 +407,197 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.innerHTML = '';
     }
 
-        chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (isSubmitting) return;
+       
+chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
 
-        const userMessage = chatInput.value.trim();
-        const filesToSend = [...selectedFiles];
+    const userMessage = chatInput.value.trim();
+    const filesToSend = [...selectedFiles];
 
-        if (!userMessage && filesToSend.length === 0) return;
+    if (!userMessage && filesToSend.length === 0) return;
 
-        isSubmitting = true;
-        const wasFirstMessage = isFirstMessage;
+    isSubmitting = true;
+    const wasFirstMessage = isFirstMessage;
 
-        if (wasFirstMessage) {
-            if (welcomeMessage) welcomeMessage.classList.add('hide');
-            stopTypingAnimation();
+    if (wasFirstMessage) {
+        if (welcomeMessage) welcomeMessage.classList.add('hide');
+        stopTypingAnimation();
+    }
+
+    displaySentMedia(userMessage, filesToSend);
+
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    removeAllFilePreviews();
+    showTypingIndicator();
+
+    try {
+        const formData = new FormData();
+        formData.append('message', userMessage);
+        filesToSend.forEach(file => {
+            formData.append('files', file);
+        });
+        if (currentSessionId) formData.append('sessionId', currentSessionId);
+
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            body: formData
+        });
+
+        hideTypingIndicator();
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
         }
 
-        displaySentMedia(userMessage, filesToSend);
+        const newSessionId = response.headers.get('X-Session-Id');
+        const newTitle = response.headers.get('X-New-Title');
 
-        chatInput.value = '';
-        chatInput.style.height = 'auto';
-        removeAllFilePreviews();
-        showTypingIndicator();
+        if (newSessionId && !currentSessionId) {
+            currentSessionId = newSessionId;
+        }
+        if (wasFirstMessage) {
+            if (headerTitle) headerTitle.classList.add('in-conversation');
+            if (newTitle) currentChatTitle.textContent = newTitle;
+            loadSessionsList();
+            isFirstMessage = false;
+        }
 
-        // --- STREAMING LOGIC STARTS HERE ---
+        const aiMessageElement = appendMessage('ai', '', true);
+        const contentWrapper = aiMessageElement.querySelector('.message-content');
 
-        try {
-            const formData = new FormData();
-            formData.append('message', userMessage);
-            filesToSend.forEach(file => {
-                formData.append('files', file);
-            });
-            if (currentSessionId) formData.append('sessionId', currentSessionId);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponseText = '';
 
-            const response = await fetch('/api/chat', { method: 'POST', body: formData });
-            
-            hideTypingIndicator();
+        // --- PERUBAHAN DIMULAI DI SINI ---
+        let wordCounter = 0; // Counter untuk delay animasi
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
-            }
-            
-            // Dapatkan session ID dan title dari headers
-            const newSessionId = response.headers.get('X-Session-Id');
-            const newTitle = response.headers.get('X-New-Title');
+        while (true) {
+            const {
+                value,
+                done
+            } = await reader.read();
+            if (done) break;
 
-            if (newSessionId && !currentSessionId) {
-                currentSessionId = newSessionId;
-            }
-            if (wasFirstMessage) {
-                if (headerTitle) headerTitle.classList.add('in-conversation');
-                if (newTitle) currentChatTitle.textContent = newTitle;
-                loadSessionsList();
-                isFirstMessage = false;
-            }
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n\n');
 
-            // Buat elemen pesan AI yang akan diisi secara streaming
-            const aiMessageElement = appendMessage('ai', '', true); // Argumen ketiga untuk mengembalikan elemen
-            const contentWrapper = aiMessageElement.querySelector('.message-content');
-            
-            // Baca stream dari body respons
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullResponseText = '';
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const dataString = line.substring(6);
+                    if (dataString === '[DONE]') {
+                        break;
+                    }
+                    try {
+                        const data = JSON.parse(dataString);
+                        if (data.text) {
+                            fullResponseText += data.text;
 
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
+                            // Pecah teks baru menjadi kata-kata
+                            const words = data.text.split(/(\s+)/); // Memisahkan berdasarkan spasi dan tetap menyimpan spasinya
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n\n');
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const dataString = line.substring(6);
-                        if (dataString === '[DONE]') {
-                            break;
+                            words.forEach(word => {
+                                if (word.trim().length > 0) {
+                                    const span = document.createElement('span');
+                                    span.className = 'fade-in-word';
+                                    span.textContent = word;
+                                    // Beri jeda animasi berdasarkan urutan kata
+                                    span.style.animationDelay = `${wordCounter * 0.05}s`;
+                                    contentWrapper.appendChild(span);
+                                    wordCounter++;
+                                } else {
+                                     // Jika ini adalah spasi atau baris baru, tambahkan sebagai teks biasa
+                                     contentWrapper.appendChild(document.createTextNode(word));
+                                }
+                            });
+                            
+                            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
                         }
-                        try {
-                            const data = JSON.parse(dataString);
-                            if (data.text) {
-                                fullResponseText += data.text;
-                                // Perbarui UI dengan teks mentah untuk efek mengetik
-                                contentWrapper.innerText = fullResponseText;
-                                aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                            }
-                            if (data.error) {
-                                throw new Error(data.error);
-                            }
-                        } catch (e) {
-                             // Abaikan jika ada JSON yang tidak valid (mungkin chunk tidak lengkap)
+                        if (data.error) {
+                            throw new Error(data.error);
                         }
+                    } catch (e) {
+                        // Abaikan JSON parse error, mungkin chunk tidak lengkap
                     }
                 }
             }
-
-            // Setelah stream selesai, proses markdown menjadi HTML
-            contentWrapper.innerHTML = markdownToHtml(fullResponseText);
-            enhanceCodeBlocks(contentWrapper);
-            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-
-
-        } catch (error) {
-            console.error('Error:', error);
-            hideTypingIndicator();
-            appendMessage('ai', `<p>Maaf, terjadi kesalahan. Coba lagi nanti ya.<br><small>${error.message}</small></p>`);
-        } finally {
-            isSubmitting = false;
         }
-    });
+        // --- AKHIR PERUBAHAN ---
 
-    function displaySentMedia(text, files) {
-        const images = files.filter(f => f.type.startsWith('image/'));
-        const otherFiles = files.filter(f => !f.type.startsWith('image/'));
-        let lastElementAppended = null;
+        // Setelah stream selesai, proses markdown untuk memformat block kode, list, dll.
+        contentWrapper.innerHTML = markdownToHtml(fullResponseText);
+        enhanceCodeBlocks(contentWrapper);
+        aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
-        if (images.length > 0) {
-            const gridContainer = document.createElement('div');
-            gridContainer.className = 'message user-message';
-            
-            const grid = document.createElement('div');
-            grid.className = 'sent-media-grid';
-            images.forEach(imgFile => {
-                const item = document.createElement('div');
-                item.className = 'sent-media-item';
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(imgFile);
-                item.appendChild(img);
-                item.addEventListener('click', () => showImagePreview(imgFile));
-                grid.appendChild(item);
-            });
-            gridContainer.appendChild(grid);
-            chatBox.appendChild(gridContainer);
-            lastElementAppended = gridContainer;
-        }
 
-        if (otherFiles.length > 0) {
-            otherFiles.forEach(file => {
-                const fileMessageElement = document.createElement('div');
-                fileMessageElement.className = 'message user-message';
-                const fileItem = document.createElement('div');
-                fileItem.className = 'sent-file-item';
-                fileItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span>${file.name}</span>`;
-                fileMessageElement.appendChild(fileItem);
-                chatBox.appendChild(fileMessageElement);
-                lastElementAppended = fileMessageElement;
-            });
-        }
-        
-        if (text) {
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message user-message';
-            messageElement.innerHTML = `<div class="message-content"><p>${text}</p></div>`;
-            chatBox.appendChild(messageElement);
-            lastElementAppended = messageElement;
-        }
-
-        if (lastElementAppended) {
-            lastElementAppended.scrollIntoView({ behavior: "smooth", block: "end" });
-        }
+    } catch (error) {
+        console.error('Error:', error);
+        hideTypingIndicator();
+        appendMessage('ai', `<p>Maaf, terjadi kesalahan. Coba lagi nanti ya.<br><small>${error.message}</small></p>`);
+    } finally {
+        isSubmitting = false;
     }
+});
+
+
+   // File: public/script.js
+
+function displaySentMedia(text, files) {
+    const images = files.filter(f => f.type.startsWith('image/'));
+    const otherFiles = files.filter(f => !f.type.startsWith('image/'));
+    let lastElementAppended = null;
+
+    if (images.length > 0) {
+        const gridContainer = document.createElement('div');
+        gridContainer.className = 'message user-message';
+        
+        const grid = document.createElement('div');
+        grid.className = 'sent-media-grid';
+
+        images.forEach(imgFile => {
+            const item = document.createElement('div');
+            item.className = 'sent-media-item';
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(imgFile);
+            item.appendChild(img);
+            item.addEventListener('click', () => showImagePreview(imgFile));
+            grid.appendChild(item);
+        });
+        gridContainer.appendChild(grid);
+        chatBox.appendChild(gridContainer);
+        lastElementAppended = gridContainer;
+    }
+
+    if (otherFiles.length > 0) {
+        otherFiles.forEach(file => {
+            const fileMessageElement = document.createElement('div');
+            fileMessageElement.className = 'message user-message';
+            const fileItem = document.createElement('div');
+            fileItem.className = 'sent-file-item';
+            fileItem.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><span>${file.name}</span>`;
+            fileMessageElement.appendChild(fileItem);
+            chatBox.appendChild(fileMessageElement);
+            lastElementAppended = fileMessageElement;
+        });
+    }
+    
+    if (text) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message user-message';
+        messageElement.innerHTML = `<div class="message-content"><p>${text}</p></div>`;
+        chatBox.appendChild(messageElement);
+        lastElementAppended = messageElement;
+    }
+
+    if (lastElementAppended) {
+        // --- INI BAGIAN YANG DIUBAH ---
+        lastElementAppended.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+}
+
     
     function appendMessage(sender, content, returnElement = false) {
         if (!content && sender === 'ai' && !returnElement) return;
@@ -766,5 +795,143 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadSessionsList();
+});
+
+
+
+// File: public/script.js
+
+chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    const userMessage = chatInput.value.trim();
+    const filesToSend = [...selectedFiles];
+
+    if (!userMessage && filesToSend.length === 0) return;
+
+    isSubmitting = true;
+    const wasFirstMessage = isFirstMessage;
+
+    if (wasFirstMessage) {
+        if (welcomeMessage) welcomeMessage.classList.add('hide');
+        stopTypingAnimation();
+    }
+
+    displaySentMedia(userMessage, filesToSend);
+
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    removeAllFilePreviews();
+    showTypingIndicator();
+
+    try {
+        const formData = new FormData();
+        formData.append('message', userMessage);
+        filesToSend.forEach(file => {
+            formData.append('files', file);
+        });
+        if (currentSessionId) formData.append('sessionId', currentSessionId);
+
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            body: formData
+        });
+
+        hideTypingIndicator();
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
+        }
+
+        const newSessionId = response.headers.get('X-Session-Id');
+        const newTitle = response.headers.get('X-New-Title');
+
+        if (newSessionId && !currentSessionId) {
+            currentSessionId = newSessionId;
+        }
+        if (wasFirstMessage) {
+            if (headerTitle) headerTitle.classList.add('in-conversation');
+            if (newTitle) currentChatTitle.textContent = newTitle;
+            loadSessionsList();
+            isFirstMessage = false;
+        }
+
+        const aiMessageElement = appendMessage('ai', '', true);
+        const contentWrapper = aiMessageElement.querySelector('.message-content');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullResponseText = '';
+
+        // --- PERUBAHAN DIMULAI DI SINI ---
+        let wordCounter = 0; // Counter untuk delay animasi
+
+        while (true) {
+            const {
+                value,
+                done
+            } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n\n');
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const dataString = line.substring(6);
+                    if (dataString === '[DONE]') {
+                        break;
+                    }
+                    try {
+                        const data = JSON.parse(dataString);
+                        if (data.text) {
+                            fullResponseText += data.text;
+
+                            // Pecah teks baru menjadi kata-kata
+                            const words = data.text.split(/(\s+)/); // Memisahkan berdasarkan spasi dan tetap menyimpan spasinya
+
+                            words.forEach(word => {
+                                if (word.trim().length > 0) {
+                                    const span = document.createElement('span');
+                                    span.className = 'fade-in-word';
+                                    span.textContent = word;
+                                    // Beri jeda animasi berdasarkan urutan kata
+                                    span.style.animationDelay = `${wordCounter * 0.05}s`;
+                                    contentWrapper.appendChild(span);
+                                    wordCounter++;
+                                } else {
+                                     // Jika ini adalah spasi atau baris baru, tambahkan sebagai teks biasa
+                                     contentWrapper.appendChild(document.createTextNode(word));
+                                }
+                            });
+                            
+                            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                        }
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+                    } catch (e) {
+                        // Abaikan JSON parse error, mungkin chunk tidak lengkap
+                    }
+                }
+            }
+        }
+        // --- AKHIR PERUBAHAN ---
+
+        // Setelah stream selesai, proses markdown untuk memformat block kode, list, dll.
+        contentWrapper.innerHTML = markdownToHtml(fullResponseText);
+        enhanceCodeBlocks(contentWrapper);
+        aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+
+    } catch (error) {
+        console.error('Error:', error);
+        hideTypingIndicator();
+        appendMessage('ai', `<p>Maaf, terjadi kesalahan. Coba lagi nanti ya.<br><small>${error.message}</small></p>`);
+    } finally {
+        isSubmitting = false;
+    }
 });
 
