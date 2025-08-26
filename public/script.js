@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         filePreviewContainer.innerHTML = '';
     }
 
-    chatForm.addEventListener('submit', async (e) => {
+        chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -431,6 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
         removeAllFilePreviews();
         showTypingIndicator();
 
+        // --- STREAMING LOGIC STARTS HERE ---
+
         try {
             const formData = new FormData();
             formData.append('message', userMessage);
@@ -440,27 +442,74 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentSessionId) formData.append('sessionId', currentSessionId);
 
             const response = await fetch('/api/chat', { method: 'POST', body: formData });
+            
+            hideTypingIndicator();
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`Server response was not ok: ${response.status} - ${errorText}`);
             }
             
-            hideTypingIndicator();
-            const data = await response.json();
-            
-            appendMessage('ai', data.text);
+            // Dapatkan session ID dan title dari headers
+            const newSessionId = response.headers.get('X-Session-Id');
+            const newTitle = response.headers.get('X-New-Title');
 
-            if (data.sessionId && !currentSessionId) {
-                currentSessionId = data.sessionId;
+            if (newSessionId && !currentSessionId) {
+                currentSessionId = newSessionId;
             }
-            
             if (wasFirstMessage) {
                 if (headerTitle) headerTitle.classList.add('in-conversation');
-                if (data.newTitle) currentChatTitle.textContent = data.newTitle;
+                if (newTitle) currentChatTitle.textContent = newTitle;
                 loadSessionsList();
                 isFirstMessage = false;
             }
+
+            // Buat elemen pesan AI yang akan diisi secara streaming
+            const aiMessageElement = appendMessage('ai', '', true); // Argumen ketiga untuk mengembalikan elemen
+            const contentWrapper = aiMessageElement.querySelector('.message-content');
             
+            // Baca stream dari body respons
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullResponseText = '';
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataString = line.substring(6);
+                        if (dataString === '[DONE]') {
+                            break;
+                        }
+                        try {
+                            const data = JSON.parse(dataString);
+                            if (data.text) {
+                                fullResponseText += data.text;
+                                // Perbarui UI dengan teks mentah untuk efek mengetik
+                                contentWrapper.innerText = fullResponseText;
+                                aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                            }
+                            if (data.error) {
+                                throw new Error(data.error);
+                            }
+                        } catch (e) {
+                             // Abaikan jika ada JSON yang tidak valid (mungkin chunk tidak lengkap)
+                        }
+                    }
+                }
+            }
+
+            // Setelah stream selesai, proses markdown menjadi HTML
+            contentWrapper.innerHTML = markdownToHtml(fullResponseText);
+            enhanceCodeBlocks(contentWrapper);
+            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+
         } catch (error) {
             console.error('Error:', error);
             hideTypingIndicator();
@@ -521,13 +570,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function appendMessage(sender, content) {
-        if (!content) return;
+    function appendMessage(sender, content, returnElement = false) {
+        if (!content && sender === 'ai' && !returnElement) return;
+
         const messageElement = document.createElement('div');
         messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
         
         const contentWrapper = document.createElement('div');
         contentWrapper.classList.add('message-content');
+        
         if (sender === 'user') {
             contentWrapper.innerHTML = `<p>${content.replace(/\n/g, '<br>')}</p>`;
         } else {
@@ -536,12 +587,17 @@ document.addEventListener('DOMContentLoaded', () => {
     
         messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
+
         if (sender === 'ai' || sender === 'model') {
             messageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
         
         if (sender === 'ai' || sender === 'model') {
             enhanceCodeBlocks(messageElement);
+        }
+
+        if (returnElement) {
+            return messageElement;
         }
     }
 
@@ -711,3 +767,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadSessionsList();
 });
+
