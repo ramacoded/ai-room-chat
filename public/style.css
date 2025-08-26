@@ -578,21 +578,30 @@ color: var(--primary-text-color); cursor: pointer; margin-right: 16px; display: 
     line-height: 1.6;
     color: var(--code-text-color);
 }
-.fade-in-word {
-    opacity: 0;
-    /* Mulai dari bawah dan transparan */
-    transform: translateY(10px);
-    /* Terapkan animasi bernama fadeInUp */
-    animation: fadeInUp 0.4s ease-out forwards;
+/* File: public/style.css */
+
+/* HAPUS KODE INI JIKA ADA:
+.fade-in-word { ... }
+@keyframes fadeInUp { ... }
+*/
+
+/* TAMBAHKAN KODE BARU INI DI AKHIR FILE */
+.blinking-cursor {
+    font-weight: 500;
+    font-size: 1.1em;
+    color: var(--primary-text-color);
+    animation: blink 1s step-end infinite;
 }
 
-@keyframes fadeInUp {
-    to {
+@keyframes blink {
+    from, to {
+        opacity: 0;
+    }
+    50% {
         opacity: 1;
-        /* Selesai di posisi normal dan terlihat jelas */
-        transform: translateY(0);
     }
 }
+
 
 
 @media (max-width: 768px) {

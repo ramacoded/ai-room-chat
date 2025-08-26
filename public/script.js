@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     handleViewportHeight();
     window.addEventListener('resize', handleViewportHeight);
 
+    let typingAnimationTimeout;
     let typingInterval;
 
     const chatForm = document.getElementById('chat-form');
@@ -408,6 +409,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
        
+// File: public/script.js
+
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -465,15 +468,18 @@ chatForm.addEventListener('submit', async (e) => {
             isFirstMessage = false;
         }
 
+        // --- PERUBAHAN TOTAL LOGIKA STREAMING ---
+
+        // 1. Buat elemen pesan AI dengan kontainer teks dan kursor
         const aiMessageElement = appendMessage('ai', '', true);
         const contentWrapper = aiMessageElement.querySelector('.message-content');
+        contentWrapper.innerHTML = '<span class="ai-text-content"></span><span class="blinking-cursor">█</span>';
+        const textContentSpan = contentWrapper.querySelector('.ai-text-content');
+        const cursorSpan = contentWrapper.querySelector('.blinking-cursor');
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullResponseText = '';
-
-        // --- PERUBAHAN DIMULAI DI SINI ---
-        let wordCounter = 0; // Counter untuk delay animasi
 
         while (true) {
             const {
@@ -489,49 +495,32 @@ chatForm.addEventListener('submit', async (e) => {
                 if (line.startsWith('data: ')) {
                     const dataString = line.substring(6);
                     if (dataString === '[DONE]') {
+                        // 3. Jika selesai, hapus kursor dan format final
+                        cursorSpan.remove();
                         break;
                     }
                     try {
                         const data = JSON.parse(dataString);
                         if (data.text) {
+                            // 2. Tambahkan teks yang masuk ke kontainer
                             fullResponseText += data.text;
-
-                            // Pecah teks baru menjadi kata-kata
-                            const words = data.text.split(/(\s+)/); // Memisahkan berdasarkan spasi dan tetap menyimpan spasinya
-
-                            words.forEach(word => {
-                                if (word.trim().length > 0) {
-                                    const span = document.createElement('span');
-                                    span.className = 'fade-in-word';
-                                    span.textContent = word;
-                                    // Beri jeda animasi berdasarkan urutan kata
-                                    span.style.animationDelay = `${wordCounter * 0.05}s`;
-                                    contentWrapper.appendChild(span);
-                                    wordCounter++;
-                                } else {
-                                     // Jika ini adalah spasi atau baris baru, tambahkan sebagai teks biasa
-                                     contentWrapper.appendChild(document.createTextNode(word));
-                                }
-                            });
-                            
+                            textContentSpan.textContent += data.text; // Cukup tambahkan teks
                             aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
                         }
                         if (data.error) {
                             throw new Error(data.error);
                         }
                     } catch (e) {
-                        // Abaikan JSON parse error, mungkin chunk tidak lengkap
+                        // Abaikan error parsing JSON
                     }
                 }
             }
         }
-        // --- AKHIR PERUBAHAN ---
 
-        // Setelah stream selesai, proses markdown untuk memformat block kode, list, dll.
+        // 4. Setelah stream benar-benar selesai, render markdown
         contentWrapper.innerHTML = markdownToHtml(fullResponseText);
         enhanceCodeBlocks(contentWrapper);
         aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
-
 
     } catch (error) {
         console.error('Error:', error);
@@ -542,8 +531,6 @@ chatForm.addEventListener('submit', async (e) => {
     }
 });
 
-
-   // File: public/script.js
 
 function displaySentMedia(text, files) {
     const images = files.filter(f => f.type.startsWith('image/'));
@@ -682,47 +669,101 @@ function displaySentMedia(text, files) {
         });
     }
     
-    function showTypingIndicator() {
-        if (document.getElementById('typing-indicator')) return;
-        const typingIndicator = document.createElement('div');
-        typingIndicator.id = 'typing-indicator';
-        typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
-        typingIndicator.innerHTML = `
-            <div class="message-content">
-                <div class="typing-dots-container">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                   </div>
-                <p class="typing-text"></p>
-            </div>`;
-        chatBox.appendChild(typingIndicator);
+    function showTypingIndicator(files = []) {
+    if (document.getElementById('typing-indicator')) return;
+    
+    const typingIndicator = document.createElement('div');
+    typingIndicator.id = 'typing-indicator';
+    typingIndicator.classList.add('message', 'ai-message', 'typing-indicator');
+    typingIndicator.innerHTML = `
+        <div class="message-content">
+            <div class="typing-dots-container">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+            <p class="typing-text"></p>
+        </div>`;
+    chatBox.appendChild(typingIndicator);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-        const typingTextElement = typingIndicator.querySelector('.typing-text');
-        const possibleTexts = [
-            "Berpikir...",
-            "Mencari informasi...",
-            "Menyusun jawaban...",
-            "Mencari sumber..."
-        ];
-        let currentIndex = Math.floor(Math.random() * possibleTexts.length);
-        typingTextElement.textContent = possibleTexts[currentIndex];
+    const typingTextElement = typingIndicator.querySelector('.typing-text');
 
-        clearInterval(typingInterval);
-        typingInterval = setInterval(() => {
-            currentIndex = (currentIndex + 1) % possibleTexts.length;
-            typingTextElement.textContent = possibleTexts[currentIndex];
-        }, 3000);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    // Kumpulan frasa yang lebih realistis dan terstruktur
+    const phrases = {
+        start: ["Menganalisis permintaan...", "Memproses input Anda..."],
+        file: {
+            image: ["Memindai visual...", "Mendeteksi objek pada gambar...", "Membaca gambar..."],
+            other: ["Menganalisis konten file...", "Membaca dokumen terlampir..."]
+        },
+        thinking: ["Membuat kerangka jawaban...", "Menghubungkan informasi...", "Menyusun rencana respons..."],
+        generating: ["Merangkai kalimat...", "Menulis draf...", "Memformat kode...", "Menambahkan detail..."],
+        finalizing: ["Melakukan verifikasi akhir...", "Meninjau ulang jawaban..."]
+    };
 
-    function hideTypingIndicator() {
-        clearInterval(typingInterval);
-        const typingIndicator = document.getElementById('typing-indicator');
-        if (typingIndicator) {
-            typingIndicator.remove();
+    // Fungsi untuk memilih frasa acak dari sebuah array
+    const getRandomPhrase = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // Alur animasi yang lebih realistis
+    let sequenceStep = 0;
+    const runSequence = () => {
+        clearTimeout(typingAnimationTimeout);
+        let currentPhrase = '';
+        let nextStepDelay = 2000; // Jeda waktu default
+
+        switch (sequenceStep) {
+            case 0: // Tahap Awal
+                currentPhrase = getRandomPhrase(phrases.start);
+                break;
+
+            case 1: // Tahap Analisis File (jika ada)
+                if (files.length > 0) {
+                    const isImage = files.some(f => f.type.startsWith('image/'));
+                    currentPhrase = getRandomPhrase(isImage ? phrases.file.image : phrases.file.other);
+                    nextStepDelay = 2500; // Beri waktu lebih untuk "analisis file"
+                } else {
+                    // Lewati tahap ini jika tidak ada file
+                    sequenceStep++;
+                    runSequence();
+                    return;
+                }
+                break;
+
+            case 2: // Tahap Berpikir
+                currentPhrase = getRandomPhrase(phrases.thinking);
+                break;
+            
+            case 3: // Tahap Menghasilkan (akan berulang)
+                const generationPool = [...phrases.generating, ...phrases.finalizing];
+                typingTextElement.textContent = getRandomPhrase(generationPool);
+                
+                // Mulai interval yang berulang untuk tahap ini
+                clearInterval(typingInterval);
+                typingInterval = setInterval(() => {
+                    typingTextElement.textContent = getRandomPhrase(generationPool);
+                }, 3000);
+                return; // Hentikan sekuens setTimeout
         }
+
+        typingTextElement.textContent = currentPhrase;
+        sequenceStep++;
+        typingAnimationTimeout = setTimeout(runSequence, nextStepDelay);
+    };
+
+    runSequence(); // Mulai sekuens animasi
+}
+
+function hideTypingIndicator() {
+    // Hentikan semua timer animasi
+    clearTimeout(typingAnimationTimeout);
+    clearInterval(typingInterval);
+
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
     }
+}
+
 
     function markdownToHtml(md) {
         if (!md) return '';
@@ -934,4 +975,5 @@ chatForm.addEventListener('submit', async (e) => {
         isSubmitting = false;
     }
 });
+
 
