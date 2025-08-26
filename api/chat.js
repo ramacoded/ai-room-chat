@@ -218,7 +218,13 @@ module.exports = async (req, res) => {
             if (isNewSession && message) {
                  try {
                     const titleModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-                    const titlePrompt = `Buat judul yang sangat menarik untuk percakapan yang diawali dengan pesan ini lalu kirimkan judul saja tanpa embel embel apapun, maksimal 12 kata dan tanpa tanda kutip: "${message}"`;
+                    const titlePrompt = `​Analisis pesan pertama dari pengguna ini dan buatlah judul ringkas yang merangkum niat atau topik utamanya.
+​Aturan Ketat:
+1. ​Judul harus terdiri dari tepat 3 kata.
+​2. Jangan gunakan tanda kutip.
+3. ​Hanya berikan judulnya saja, tanpa penjelasan atau kalimat pembuka.
+​Contoh: Jika pesannya adalah "halo", judul yang tepat adalah "Sapaan Awal User".
+​Pesan Pengguna: "${message}"`;
                     const titleResult = await titleModel.generateContent(titlePrompt);
                     const generatedTitle = await titleResult.response.text();
                     const newTitle = generatedTitle.replace(/["\n]/g, '').trim();
