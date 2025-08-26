@@ -473,7 +473,7 @@ chatForm.addEventListener('submit', async (e) => {
         // 1. Buat elemen pesan AI dengan kontainer teks dan kursor
         const aiMessageElement = appendMessage('ai', '', true);
         const contentWrapper = aiMessageElement.querySelector('.message-content');
-        contentWrapper.innerHTML = '<span class="ai-text-content"></span><span class="blinking-cursor">█</span>';
+        contentWrapper.innerHTML = '<span class="ai-text-content"></span><span class="blinking-cursor">|</span>';
         const textContentSpan = contentWrapper.querySelector('.ai-text-content');
         const cursorSpan = contentWrapper.querySelector('.blinking-cursor');
 
