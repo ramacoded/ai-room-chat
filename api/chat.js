@@ -206,16 +206,15 @@ module.exports = async (req, res) => {
             userHistory = await getChatHistory(currentSessionId);
         }
 
-        // --- STREAMING LOGIC STARTS HERE ---
         try {
-            res.writeHead(200, {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            });
-
-            // Kirim session ID dan judul baru melalui headers
+            // --- PERBAIKAN DIMULAI DI SINI ---
+            // Atur semua header yang kita butuhkan SEBELUM mengirimnya.
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
             res.setHeader('X-Session-Id', currentSessionId);
+            
+            // Buat judul jika ini sesi baru, dan set header-nya
             if (isNewSession && message) {
                  try {
                     const titleModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -229,6 +228,11 @@ module.exports = async (req, res) => {
                     console.error("Gagal membuat judul:", titleError);
                 }
             }
+
+            // Setelah semua header di-set, BARU panggil writeHead.
+            res.writeHead(200);
+            // --- AKHIR PERBAIKAN ---
+
 
             const now = moment().tz('Asia/Jakarta');
             const timeOnly = now.format('HH:mm');
@@ -299,9 +303,16 @@ module.exports = async (req, res) => {
 
         } catch (error) {
             console.error('Error processing chat stream:', error);
-            res.write(`data: ${JSON.stringify({ error: 'Gagal mendapatkan respons dari AI.' })}\n\n`);
-            res.write('data: [DONE]\n\n');
-            res.end();
+            // Cek jika header belum terkirim sebelum mencoba menulis error
+            if (!res.headersSent) {
+               res.writeHead(500, { 'Content-Type': 'application/json' });
+               res.end(JSON.stringify({ error: 'Gagal memproses stream.' }));
+            } else {
+               // Jika stream sudah berjalan, kirim error melalui stream dan tutup koneksi
+               res.write(`data: ${JSON.stringify({ error: 'Gagal mendapatkan respons dari AI.' })}\n\n`);
+               res.write('data: [DONE]\n\n');
+               res.end();
+            }
         }
     });
 };
