@@ -505,7 +505,7 @@ chatForm.addEventListener('submit', async (e) => {
                             // 2. Tambahkan teks yang masuk ke kontainer
                             fullResponseText += data.text;
                             textContentSpan.textContent += data.text; // Cukup tambahkan teks
-                            aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                           /* aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });*/
                         }
                         if (data.error) {
                             throw new Error(data.error);
@@ -520,7 +520,7 @@ chatForm.addEventListener('submit', async (e) => {
         // 4. Setelah stream benar-benar selesai, render markdown
         contentWrapper.innerHTML = markdownToHtml(fullResponseText);
         enhanceCodeBlocks(contentWrapper);
-        aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        /*aiMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });*/
 
     } catch (error) {
         console.error('Error:', error);
