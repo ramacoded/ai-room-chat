@@ -604,9 +604,9 @@ function displaySentMedia(text, files) {
         messageElement.appendChild(contentWrapper);
         chatBox.appendChild(messageElement);
 
-        if (sender === 'ai' || sender === 'model') {
+        /*if (sender === 'ai' || sender === 'model') {
             messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        }*/
         
         if (sender === 'ai' || sender === 'model') {
             enhanceCodeBlocks(messageElement);
